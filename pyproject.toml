@@ -1,0 +1,6 @@
+[project]
+name = "support-operations-intelligence"
+version = "0.1.0"
+description = "Operational decision system for Support Operations analytics, workflow reasoning, intervention selection, and evidence-linked evaluation."
+requires-python = ">=3.12,<3.13"
+dependencies = []
