@@ -398,6 +398,20 @@ git status --short --branch
 
 The audit observed the four intended project artifacts, a valid repository-local Python 3.12.3 environment, the declared metadata contract with no build-system table, and the `.venv/` exclusion rule. Applicable foundation requirements were `SATISFIED`; package/source/test/build requirements were `NOT_APPLICABLE_YET`; no failure criterion was triggered; and the recommendation was `READY_TO_CLOSE`.
 
+Increment 001's implementation commit is the repository root commit. The command `git diff-tree --no-commit-id --name-only -r HEAD` omitted the file list because the commit has no parent. This is command behavior relevant to reconstruction, not a repository failure.
+
+The committed paths were verified using:
+
+```bash
+git diff-tree --root --no-commit-id --name-only -r 10ddecaf6de876f7c56224d8efe2b29a6d968fbd
+```
+
+`git show --check` passed for the implementation commit. Post-implementation-commit Git status was clean:
+
+```text
+## main
+```
+
 ## Artifacts
 
 Project artifacts intended for Git tracking, not yet committed:
@@ -411,6 +425,19 @@ Local generated artifact not intended for Git tracking:
 
 - `.venv/` — repository-local development environment.
 
-## Commit
+## Implementation Commit
 
-Not yet committed.
+`10ddecaf6de876f7c56224d8efe2b29a6d968fbd`
+
+Commit message:
+
+`chore: establish repository foundation`
+
+This commit contains the Increment 001 implementation artifacts:
+
+- `.gitignore`
+- `README.md`
+- `docs/increments/001-repository-foundation.md`
+- `pyproject.toml`
+
+This increment record was subsequently updated to retain the observed implementation commit identity. The documentation update itself is not treated as the implementation commit for Increment 001.
