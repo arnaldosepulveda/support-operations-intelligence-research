@@ -903,6 +903,104 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied merely be
 
 This observation provides progress toward dataset-wide raw field-population characterization and a lexical blankness/data-quality baseline. Semantic missingness interpretation, timestamp usability, temporal coverage, lifecycle semantics, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Timestamp Parseability Observation 007
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a dataset-wide lexical timestamp parseability scan was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+The observed fields were `requested_date`, `updated_date`, and `closed_date`.
+
+#### Exact Parse Rule and Method
+
+The scan applied Python `datetime.strptime` using exactly:
+
+    %Y/%m/%d %I:%M:%S %p
+
+No alternate format was tried. No trimming, normalization, repair, fallback parser, or coercion was applied to nonblank values.
+
+The scan used Python 3, Python standard-library `csv.reader`, and Python standard-library `datetime` with `encoding="ascii"` and `newline=""`. It streamed one logical CSV record at a time, retained only counters and capped failure-example lists, and did not retain rows or timestamp values.
+
+- `TIMESTAMP_PARSEABILITY_SCAN_COMPLETED`: `true`;
+- `LOGICAL_DATA_ROWS`: 7,474,403.
+
+#### Exact Results
+
+| Field | Blank | Whitespace-only | Parseable nonblank | Unparseable nonblank | All nonblank values parse | Failure examples |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| `requested_date` | 0 | 0 | 7,474,403 | 0 | `true` | `[]` |
+| `updated_date` | 77,829 | 0 | 7,396,574 | 0 | `true` | `[]` |
+| `closed_date` | 78,347 | 0 | 7,396,056 | 0 | `true` | `[]` |
+
+Accounting invariants:
+
+- `requested_date`: `0 + 0 + 7,474,403 + 0 = 7,474,403`;
+- `updated_date`: `77,829 + 0 + 7,396,574 + 0 = 7,474,403`;
+- `closed_date`: `78,347 + 0 + 7,396,056 + 0 = 7,474,403`.
+
+Zero unparseable values were observed for `requested_date`, `updated_date`, and `closed_date`. These favorable zero observations are retained as evidence.
+
+#### Prior Scan Cross-Check
+
+Result: `CONSISTENT_WITH_PRIOR_LEXICAL_BLANKNESS_SCAN`.
+
+The observed blank and nonblank counts for all three fields agree exactly with the previously committed lexical blankness evidence. This is not independent semantic validation.
+
+#### Permitted Interpretation
+
+Every observed nonblank raw value for `requested_date`, `updated_date`, and `closed_date` in this local artifact was parseable by `datetime.strptime` using the exact format `%Y/%m/%d %I:%M:%S %p`.
+
+This is **lexical parseability under the tested format**. It establishes technical parseability of the observed nonblank raw strings under that exact rule.
+
+#### Lexical Format and Source-Precision Boundary
+
+The lexical representation contains year, month, day, a 12-hour clock, minute, second, and AM/PM. Representation alone does **not** establish one-second source measurement precision, a source-system timestamp type, timezone, UTC versus local-time interpretation, DST treatment, clock accuracy, or event-time accuracy. Lexical representation precision is not automatically source-event measurement precision.
+
+#### Blank-Value Boundary
+
+Blank `updated_date` and `closed_date` values were observed. They are not interpreted as open, unresolved, not closed, censored, never updated, incomplete, invalid, or missing by error. The source meaning of blank timestamp fields remains unresolved.
+
+#### Temporal and Lifecycle Non-Claims
+
+This scan does **not** establish:
+
+- minimum timestamp;
+- maximum timestamp;
+- temporal range;
+- temporal ordering;
+- `requested_date <= updated_date`;
+- `requested_date <= closed_date`;
+- `updated_date <= closed_date`;
+- equality patterns;
+- duration;
+- request-to-closure elapsed time;
+- active work;
+- handling time;
+- queue time;
+- wait time;
+- censoring;
+- open-case semantics;
+- closed-case semantics;
+- lifecycle state;
+- timestamp timezone;
+- source precision;
+- source-system type;
+- canonical mapping.
+
+#### Canonical-Mapping and Increment 002 Boundary
+
+Parseability is insufficient for semantic mapping. This observation does not establish `requested_date -> Case.created_at`, `updated_date -> Case.updated_at`, or `closed_date -> Case.closed_at`. Increment 002 rejected generic universal `updated_at` and `closed_at` concepts; this observation does not reintroduce them.
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_TIMESTAMP_PARSEABILITY_SCAN`.
+
+No observed `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward timestamp lexical usability and consistency of the observed timestamp string format. Timestamp semantics, timezone, source precision, temporal coverage, temporal ordering, lifecycle interpretation, censoring analysis, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
