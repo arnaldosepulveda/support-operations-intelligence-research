@@ -687,6 +687,101 @@ This observation provides direct progress toward basic whole-file readability, d
 
 The bounded scan used streaming `csv.reader` iteration, processing one logical record at a time without full-file in-memory retention. A `Counter` accumulated field-width counts. At most ten structural width mismatches would have been retained; none were observed.
 
+### Raw-Identifier Quality Observation 005
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a bounded dataset-wide raw-field scan was completed for:
+
+- observed local artifact: `/data/repos/Public Datasets/calgary_311.csv`;
+- observed field: `service_request_id`.
+
+#### Scan Method
+
+The scan used:
+
+- Python 3;
+- standard-library `csv.reader`;
+- streaming iteration over one logical CSV record at a time;
+- a temporary SQLite database under `/tmp` to retain the exact distinct nonblank raw identifier strings;
+- batched identifiers rather than retaining all identifiers in Python memory.
+
+The temporary SQLite database was outside the repository and was removed successfully after the scan. It is a transient inspection mechanism, not a retained research artifact.
+
+#### Exact Observed Results
+
+- `IDENTITY_SCAN_COMPLETED`: `true`;
+- `LOGICAL_DATA_ROWS`: 7,474,403;
+- `EMPTY_IDENTIFIER_ROWS`: 0;
+- `WHITESPACE_ONLY_IDENTIFIER_ROWS`: 0;
+- `NONBLANK_IDENTIFIER_ROWS`: 7,474,403;
+- `DISTINCT_NONBLANK_IDENTIFIERS`: 7,474,403;
+- `DUPLICATE_NONBLANK_ROWS`: 0;
+- `ALL_ROWS_HAVE_USABLE_RAW_IDENTIFIER`: `true`;
+- `NONBLANK_IDENTIFIERS_ARE_UNIQUE`: `true`;
+- `OBSERVED_RAW_IDENTITY_CANDIDATE_CONDITION`: `true`.
+
+No blank, whitespace-only, or duplicate raw identifier was observed. These zero counts are retained as part of the evidence.
+
+#### Measurement Definitions
+
+- `EMPTY_IDENTIFIER_ROWS` means the raw CSV value was exactly `""`.
+- `WHITESPACE_ONLY_IDENTIFIER_ROWS` means the raw value was non-empty but `raw_id.strip() == ""`.
+- `NONBLANK_IDENTIFIER_ROWS` means the raw identifier was neither empty nor whitespace-only.
+- `DISTINCT_NONBLANK_IDENTIFIERS` means the number of distinct raw nonblank identifier strings under the exact SQLite `TEXT` comparison used by the scan.
+- `DUPLICATE_NONBLANK_ROWS` equals `NONBLANK_IDENTIFIER_ROWS - DISTINCT_NONBLANK_IDENTIFIERS`.
+
+Observed duplicate calculation:
+
+    7,474,403 - 7,474,403 = 0
+
+No case, punctuation, prefix, or whitespace normalization and no numeric conversion was applied to stored nonblank identifiers. This was an exact raw-string identity check.
+
+#### Permitted Empirical Interpretation
+
+Every observed logical data row in this local artifact had a nonblank raw `service_request_id`, and those raw identifier strings were unique within this artifact under the exact comparison used.
+
+This is an **empirical raw-field property**, not yet **semantic source-identity justification**. The result makes `service_request_id` a strong candidate for future evaluation as Calgary `source_case_id`; it does not establish that mapping.
+
+#### External Preparation Comparison
+
+The retained external/preparation context previously reported that `service_request_id` is unique. Result: `CORROBORATES_REPORTED_IDENTIFIER_UNIQUENESS`.
+
+The directly observed local scan corroborates that earlier report. This is not source-authoritative verification.
+
+#### Strict Source-Identity Boundary
+
+This scan does **not** establish:
+
+- that `service_request_id` is semantically the authoritative native identity of one Calgary service request;
+- that `service_request_id` should yet be mapped to `Case.source_case_id`;
+- identifier immutability;
+- absence of identifier reuse outside this observed artifact;
+- identity continuity across Calgary source versions;
+- completeness of the local artifact;
+- authoritative source provenance;
+- source version;
+- canonical `case_id` generation;
+- cross-source identity;
+- entity resolution;
+- canonical mapping validity;
+- row semantic correctness;
+- temporal semantics;
+- licence;
+- attribution.
+
+Uniqueness within this artifact is necessary empirical evidence for an identity candidate, but it is not sufficient semantic evidence for canonical identity.
+
+#### Increment 002 Pressure Test
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_RAW_IDENTIFIER_SCAN`.
+
+Increment 002 requires a future adapter to establish source-native identity semantics. This scan tested a necessary empirical property of the candidate field only. No observed `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied, and neither the Calgary Case mapping nor portability has been validated.
+
+#### Increment 003 Progress
+
+This observation provides direct progress toward identifier presence, raw-string uniqueness, and empirical suitability of `service_request_id` as an identity candidate. Semantic identity mapping, a source contract, missingness across other fields, timestamp usability, temporal coverage, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
