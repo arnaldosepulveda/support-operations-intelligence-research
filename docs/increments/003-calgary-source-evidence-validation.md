@@ -344,6 +344,127 @@ find "/data/repos/Public Datasets" \
   | sort
 ```
 
+### Header-Only Observation 002
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, exactly one CSV record, the header, was read from:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+This was the first CSV content inspection under Increment 003. No data row was read.
+
+#### Observed Header
+
+The observed header contained 15 fields in this order:
+
+1. `service_request_id`
+2. `requested_date`
+3. `updated_date`
+4. `closed_date`
+5. `status_description`
+6. `source`
+7. `service_name`
+8. `agency_responsible`
+9. `address`
+10. `comm_code`
+11. `comm_name`
+12. `location_type`
+13. `longitude`
+14. `latitude`
+15. `point`
+
+Duplicate header names: none observed.
+
+Empty or blank header names: none observed.
+
+#### Contract-Relevant Field Presence
+
+| Candidate field | Header-level classification |
+| --- | --- |
+| `service_request_id` | `PRESENT_IN_HEADER` |
+| `requested_date` | `PRESENT_IN_HEADER` |
+| `updated_date` | `PRESENT_IN_HEADER` |
+| `closed_date` | `PRESENT_IN_HEADER` |
+| `status_description` | `PRESENT_IN_HEADER` |
+| `service_name` | `PRESENT_IN_HEADER` |
+| `agency_responsible` | `PRESENT_IN_HEADER` |
+| `source` | `PRESENT_IN_HEADER` |
+| `address` | `PRESENT_IN_HEADER` |
+| `comm_code` | `PRESENT_IN_HEADER` |
+| `comm_name` | `PRESENT_IN_HEADER` |
+| `location_type` | `PRESENT_IN_HEADER` |
+| `longitude` | `PRESENT_IN_HEADER` |
+| `latitude` | `PRESENT_IN_HEADER` |
+| `point` | `PRESENT_IN_HEADER` |
+
+Possible-name matches: none required. Every preregistered candidate field name checked in this step appeared exactly in the observed header.
+
+Discrepancies from preregistered expected field names: none observed.
+
+#### Strict Semantic Boundary
+
+Header presence establishes field-name existence in this local artifact only. It does **not** establish:
+
+- data type;
+- populated values;
+- nullability;
+- uniqueness;
+- identifier validity;
+- timestamp parseability;
+- timestamp precision;
+- date range;
+- lifecycle semantics;
+- source-native semantic meaning;
+- canonical mapping validity;
+- dataset completeness;
+- authoritative provenance;
+- source version;
+- current licence;
+- attribution requirements.
+
+In particular:
+
+- `requested_date` appearing in the header does **not** establish `requested_date -> Case.created_at`;
+- `status_description` appearing in the header does **not** establish `status_description -> canonical or source_status mapping` without source-semantic justification;
+- `source` appearing in the header does **not** by itself establish its meaning as intake or origin information;
+- `closed_date` appearing in the header does **not** establish a universal canonical `Case.closed_at`;
+- `updated_date` appearing in the header does **not** establish a universal canonical `Case.updated_at`.
+
+#### Relationship to Increment 002
+
+The header observation is consistent with several previously externally reported candidate Calgary fields, but it does not validate their semantics. It does not reopen Increment 002, and no conflict requiring `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification was observed in this step. Calgary portability has not been validated.
+
+#### Reproducibility Observation
+
+The successful inspection used Python standard-library `csv.reader` with `encoding="ascii"` and `newline=""` and read exactly one record. `python` was unavailable in the shell used for this inspection, so the successful invocation used `python3`. This is an engineering and reproducibility observation, not a dataset characteristic, and it supports no inference about the repository-local `.venv`.
+
+#### Observed Now and Still Planned
+
+Observed now:
+
+- the exact header record;
+- the 15 field names and their order;
+- no duplicate header names;
+- no empty or blank header names;
+- exact header presence of all expected candidate names.
+
+Still planned or unverified:
+
+- data rows;
+- row count;
+- identifier uniqueness;
+- nullability and missingness;
+- timestamp parsing;
+- date coverage;
+- source semantics;
+- provenance;
+- licence;
+- hash;
+- canonical source-contract mappings.
+
+This observation provides partial progress toward schema/header structure and presence of contract-relevant candidate fields only. Data types, identifier behavior, lifecycle-evidence usability, timestamp parseability, temporal range, missingness, provenance, licence, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
