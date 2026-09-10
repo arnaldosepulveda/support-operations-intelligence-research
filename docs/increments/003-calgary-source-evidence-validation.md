@@ -211,11 +211,138 @@ Increment 003 may be marked Complete only when, at minimum:
 
 ## Observed Result
 
-- The Increment 003 planning record was created.
-- No dataset was inspected.
-- No empirical Calgary claim was established.
+### Filesystem-Level Observation 001
 
-Creating this document does not satisfy any empirical completion criterion. Increment 003 remains Planned.
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, the first empirical inspection under Increment 003 observed only local filesystem existence, directory membership, object type, and metadata. No CSV contents were inspected.
+
+#### Dataset Root
+
+Expected path:
+
+    /data/repos/Public Datasets
+
+Directly observed:
+
+- the path exists;
+- the object is a directory;
+- size: 4096 bytes;
+- blocks: 8;
+- inode: 3165140;
+- links: 2;
+- permissions: `0775` / `drwxrwxr-x`;
+- owner/group: `arnaldo-admin`;
+- access timestamp: `2026-09-10 02:29:27.735739523 -0300`;
+- modify/change timestamp: `2026-09-10 03:20:09.607744184 -0300`;
+- birth timestamp: `2026-09-10 02:29:27.735739523 -0300`.
+
+Filesystem timestamps are local filesystem metadata and are **not** evidence of dataset publication date, source update date, or authoritative retrieval date.
+
+Preregistered assumption result: `CONFIRMED_AT_FILESYSTEM_LEVEL`.
+
+#### Immediate Directory Membership
+
+The following immediate filenames were observed:
+
+- `bpi2013_incidents.xes.gz`
+- `bpi2014_incidents.csv`
+- `calgary_311.csv`
+- `calgary_wrs_2024.csv`
+- `incident_event_log.csv`
+- `incident_log.zip`
+- `nyc_311_archive.csv`
+- `nyc_311_recent.csv`
+- `support_ops.duckdb`
+
+These are filename observations only. No provenance, contents, completeness, relationships, or source authority can be inferred from the filenames alone.
+
+`calgary_wrs_2024.csv` is an additional Calgary-looking artifact, but it was not inspected.
+
+#### Expected Calgary Artifact
+
+Expected path:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+Directly observed:
+
+- the exact path exists;
+- the object is a regular file;
+- size: 1,978,541,467 bytes;
+- blocks: 3,864,352;
+- inode: 3165247;
+- links: 1;
+- permissions: `0664` / `-rw-rw-r--`;
+- owner/group: `arnaldo-admin`;
+- access timestamp: `2026-09-10 02:30:45.729316459 -0300`;
+- modify/change timestamp: `2026-09-10 02:39:02.993969076 -0300`;
+- birth timestamp: `2026-09-10 02:30:45.729316459 -0300`;
+- `file` utility classification: `CSV ASCII text`.
+
+Preregistered assumption result: `CONFIRMED_AT_FILESYSTEM_LEVEL`.
+
+No discrepancy was observed against either preregistered filesystem assumption: the expected dataset root and the expected Calgary candidate path both exist at their stated locations.
+
+#### Strict Claim Boundary
+
+This observation does **not** establish:
+
+- authoritative Calgary provenance;
+- dataset correctness;
+- completeness;
+- row count;
+- schema;
+- source version;
+- `service_request_id` presence;
+- `service_request_id` uniqueness;
+- lifecycle-field presence;
+- lifecycle semantics;
+- timestamp parseability;
+- date coverage;
+- dataset publication time;
+- current licence;
+- attribution requirements;
+- canonical Case mapping validity.
+
+No CSV contents or header were inspected. No row count, schema analysis, hash computation, or dataset profiling was performed.
+
+This observation provides partial progress toward local artifact identification and filesystem/file identity evidence only. It does not establish source identity or authoritative provenance, and it does not satisfy any other empirical completion criterion. Increment 003 remains Planned.
+
+#### Reproducibility
+
+The bounded observation used the following command forms:
+
+```sh
+if [ -e "/data/repos/Public Datasets" ]; then
+    echo "DATASET_ROOT_EXISTS"
+else
+    echo "DATASET_ROOT_MISSING"
+fi
+
+if [ -d "/data/repos/Public Datasets" ]; then
+    echo "DATASET_ROOT_IS_DIRECTORY"
+else
+    echo "DATASET_ROOT_NOT_DIRECTORY"
+fi
+
+stat -- "/data/repos/Public Datasets"
+
+if [ -e "/data/repos/Public Datasets/calgary_311.csv" ]; then
+    echo "CALGARY_ARTIFACT_EXISTS"
+else
+    echo "CALGARY_ARTIFACT_MISSING"
+fi
+
+stat -- "/data/repos/Public Datasets/calgary_311.csv"
+file -- "/data/repos/Public Datasets/calgary_311.csv"
+
+find "/data/repos/Public Datasets" \
+  -maxdepth 1 \
+  -mindepth 1 \
+  -printf '%f\n' \
+  | sort
+```
 
 ## Artifacts
 
