@@ -600,6 +600,93 @@ No further `next(reader)` call occurred. This observation supports no inference 
 
 This observation provides partial progress toward basic readability and row-width consistency for the first observed data row only. Whole-file readability, row count, identifier behavior, missingness, timestamp usability, temporal coverage, provenance, licence, hash, and canonical source mappings remain unverified. Increment 003 remains Planned.
 
+### Whole-File Structural Observation 004
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a bounded whole-file structural scan was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+The scan used `python3` and Python standard-library `csv.reader` with `encoding="ascii"` and `newline=""`. It streamed one logical CSV record at a time and did not retain the entire dataset in memory.
+
+#### Observed Structural Results
+
+- `WHOLE_FILE_SCAN_COMPLETED`: `true`;
+- `HEADER_FIELD_COUNT`: 15;
+- `LOGICAL_DATA_ROW_COUNT`: 7,474,403;
+- `FIELD_COUNT_DISTRIBUTION`: `{15: 7,474,403}`;
+- `ALL_DATA_ROWS_MATCH_HEADER_WIDTH`: `true`;
+- `RETAINED_WIDTH_MISMATCHES`: none.
+
+The local artifact contained 7,474,403 logical CSV data rows under this `csv.reader` scan. Logical CSV records are not assumed to be equivalent to physical text lines.
+
+#### Whole-File Parseability Result
+
+The observed local artifact was successfully iterated from header through EOF using the specified parser, encoding, and newline settings. This establishes whole-file parseability of this observed local artifact under this specific parser configuration. It does **not** establish semantic correctness of every record.
+
+#### External Preparation Comparison
+
+- previously retained external/preparation count: 7,474,403 rows;
+- observed local logical data-row count: 7,474,403;
+- exact numerical difference: 0;
+- classification: `MATCHES_REPORTED_ROW_COUNT`.
+
+This match corroborates the earlier reported count. A matching count does **not** prove authoritative provenance, dataset completeness, source-version identity, correctness of the artifact, or equivalence to the current authoritative Calgary source.
+
+#### Structural Width Consistency
+
+All 7,474,403 parsed data rows had exactly 15 fields. No structural width mismatch was observed. This establishes structural width consistency under this `csv.reader` scan. It does **not** establish:
+
+- field semantics;
+- valid values;
+- data types;
+- non-null values;
+- semantic validity;
+- referential validity;
+- canonical mapping correctness.
+
+#### Strict Non-Claims
+
+This scan does **not** establish:
+
+- authoritative completeness;
+- authoritative row count;
+- `service_request_id` uniqueness;
+- `service_request_id` nullability;
+- identifier validity;
+- per-column missingness;
+- data types;
+- timestamp parseability;
+- timestamp precision;
+- temporal range;
+- lifecycle semantics;
+- status vocabulary;
+- source or intake vocabulary;
+- classification vocabulary;
+- agency semantics;
+- coordinate validity;
+- geometry validity;
+- canonical mappings;
+- authoritative provenance;
+- source version;
+- current licence;
+- attribution requirements.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_STRUCTURAL_SCAN`.
+
+No structural observation from this scan conflicts with the accepted canonical Case contract. No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied, and Calgary portability has not been validated.
+
+#### Completion-Criteria Progress
+
+This observation provides direct progress toward basic whole-file readability, direct local logical row-count observation, and structural row-width verification. Identifier behavior, missingness and data quality, timestamp and date coverage, source semantics, provenance, licence, file hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
+#### Reproducibility
+
+The bounded scan used streaming `csv.reader` iteration, processing one logical record at a time without full-file in-memory retention. A `Counter` accumulated field-width counts. At most ten structural width mismatches would have been retained; none were observed.
+
 ## Artifacts
 
 Planned increment record:
