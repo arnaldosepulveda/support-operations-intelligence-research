@@ -1111,6 +1111,158 @@ This scan does **not** establish:
 
 This observation provides progress toward temporal coverage characterization at the raw-field level and observed timestamp extrema. Temporal ordering, lifecycle interpretation, censoring, analytical observation-window definition, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Pairwise Temporal Relationship Observation 009
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a dataset-wide pairwise temporal relationship scan was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+The scan compared `requested_date` with `updated_date`, `requested_date` with `closed_date`, and `updated_date` with `closed_date`. Comparisons used naive parsed `datetime` values only, under the exact format:
+
+    %Y/%m/%d %I:%M:%S %p
+
+#### Scan Method
+
+The scan used:
+
+- Python 3;
+- Python standard-library `csv.reader`;
+- Python standard-library `datetime.strptime`;
+- `encoding="ascii"`;
+- `newline=""`;
+- streaming iteration over one logical CSV record at a time;
+- retention of only counters and at most ten `LEFT_GT_RIGHT` examples per pair.
+
+It did not retain all rows or parsed timestamps. Retained examples were not enriched with identifiers, status, `service_name`, source, agency, or location.
+
+- `TEMPORAL_RELATION_SCAN_COMPLETED`: `true`;
+- `LOGICAL_DATA_ROWS`: 7,474,403.
+
+#### Measurement Model
+
+For each pair, every logical row was assigned to exactly one category:
+
+- `BOTH_BLANK`;
+- `LEFT_BLANK_ONLY`;
+- `RIGHT_BLANK_ONLY`;
+- `LEFT_LT_RIGHT`;
+- `LEFT_EQ_RIGHT`;
+- `LEFT_GT_RIGHT`.
+
+For each pair, `BOTH_NONBLANK = LEFT_LT_RIGHT + LEFT_EQ_RIGHT + LEFT_GT_RIGHT`. `LEFT_GT_RIGHT` is an observed comparison category, not an ordering violation.
+
+#### Exact Pairwise Results
+
+| Pair | Both blank | Left blank only | Right blank only | Both nonblank | Left < right | Left = right | Left > right |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `requested_date` vs `updated_date` | 0 | 0 | 77,829 | 7,396,574 | 6,769,218 | 626,425 | 931 |
+| `requested_date` vs `closed_date` | 0 | 0 | 78,347 | 7,396,056 | 6,605,371 | 789,758 | 927 |
+| `updated_date` vs `closed_date` | 31 | 77,798 | 78,316 | 7,318,258 | 146,846 | 5,954,904 | 1,216,508 |
+
+All pairwise accounting invariants passed. For every pair:
+
+    BOTH_BLANK
+    + LEFT_BLANK_ONLY
+    + RIGHT_BLANK_ONLY
+    + LEFT_LT_RIGHT
+    + LEFT_EQ_RIGHT
+    + LEFT_GT_RIGHT
+    = 7,474,403
+
+#### Retained `requested_date` Versus `updated_date` Examples
+
+The scan retained these ten `LEFT_GT_RIGHT` examples, containing only the logical data-row number and the two raw timestamps:
+
+| Logical data row | Left raw | Right raw |
+| ---: | --- | --- |
+| 21019 | `'2019/09/06 01:19:07 PM'` | `'2019/09/06 12:19:13 PM'` |
+| 53623 | `'2019/11/12 10:33:24 AM'` | `'2019/11/12 09:33:24 AM'` |
+| 53625 | `'2019/11/12 10:33:51 AM'` | `'2019/11/12 09:33:51 AM'` |
+| 53627 | `'2019/11/12 10:34:37 AM'` | `'2019/11/12 09:34:36 AM'` |
+| 53633 | `'2019/11/12 10:39:00 AM'` | `'2019/11/12 09:38:58 AM'` |
+| 53636 | `'2019/11/12 10:39:23 AM'` | `'2019/11/12 09:39:22 AM'` |
+| 53638 | `'2019/11/12 10:39:54 AM'` | `'2019/11/12 09:39:53 AM'` |
+| 53648 | `'2019/11/12 10:40:32 AM'` | `'2019/11/12 09:40:31 AM'` |
+| 53649 | `'2019/11/12 10:40:49 AM'` | `'2019/11/12 09:40:50 AM'` |
+| 53652 | `'2019/11/12 10:41:34 AM'` | `'2019/11/12 09:41:33 AM'` |
+
+The ten retained `LEFT_GT_RIGHT` examples for `requested_date` versus `closed_date` were the same ten logical-row/raw-timestamp triples. No reason for this observation is inferred.
+
+#### Retained `updated_date` Versus `closed_date` Examples
+
+The scan retained these ten `LEFT_GT_RIGHT` examples, containing only the logical data-row number and the two raw timestamps:
+
+| Logical data row | Left raw | Right raw |
+| ---: | --- | --- |
+| 12 | `'2020/09/04 12:00:00 AM'` | `'2020/07/02 12:00:00 AM'` |
+| 13 | `'2020/01/30 12:00:00 AM'` | `'2017/06/12 12:00:00 AM'` |
+| 20 | `'2012/07/19 07:50:54 PM'` | `'2012/07/19 07:32:41 PM'` |
+| 26 | `'2012/07/30 02:06:40 PM'` | `'2012/07/20 11:29:49 PM'` |
+| 30 | `'2020/09/04 12:00:00 AM'` | `'2020/08/20 12:00:00 AM'` |
+| 32 | `'2020/09/04 12:00:00 AM'` | `'2020/09/02 12:00:00 AM'` |
+| 34 | `'2020/11/04 12:00:00 AM'` | `'2020/10/29 12:00:00 AM'` |
+| 37 | `'2020/11/20 12:00:00 AM'` | `'2020/10/26 12:00:00 AM'` |
+| 59 | `'2020/09/04 12:00:00 AM'` | `'2020/08/24 12:00:00 AM'` |
+| 61 | `'2024/05/18 12:00:00 AM'` | `'2021/02/23 12:00:00 AM'` |
+
+#### Prior Evidence Consistency
+
+Result: `CONSISTENT_WITH_PRIOR_TIMESTAMP_POPULATION_EVIDENCE`.
+
+For every pair, `BOTH_BLANK + LEFT_BLANK_ONLY` reproduced the previously committed left-field blank count, and `BOTH_BLANK + RIGHT_BLANK_ONLY` reproduced the previously committed right-field blank count. This is accounting consistency only.
+
+#### Permitted Interpretation
+
+Result: `OBSERVED PAIRWISE TEMPORAL RELATIONSHIPS`.
+
+For rows where each timestamp pair was jointly nonblank and parseable, the recorded counts describe whether the left naive parsed value was less than, equal to, or greater than the right naive parsed value. None of these relationships is characterized normatively.
+
+Among the 7,318,258 rows where `updated_date` and `closed_date` were both nonblank and parseable, 146,846 had `updated_date < closed_date`, 5,954,904 had `updated_date = closed_date`, and 1,216,508 had `updated_date > closed_date`. This pattern is not explained. The 1,216,508 rows are not classified as invalid, erroneous, inconsistent, violations, anomalies, or bad data. Possible explanations require source semantics and are not inferred here.
+
+#### Expectation and Ordering Boundary
+
+Field names alone do not establish an expected lifecycle ordering. This scan does **not** establish that `requested_date` must precede `updated_date`, `requested_date` must precede `closed_date`, or `updated_date` must precede `closed_date`. `LEFT_GT_RIGHT` remains an empirical relation category only.
+
+#### Duration, Blank-Value, Timezone, and Precision Boundaries
+
+Timestamps were not subtracted. This observation does not calculate or establish elapsed time, duration, request-to-closure duration, case age, active work, handling time, queue time, waiting time, or temporal distance between retained examples.
+
+Rows not jointly nonblank were accounted for explicitly. They are not interpreted as open, unresolved, censored, incomplete, or invalid.
+
+Comparisons used naive `datetime` values. This observation does not establish timezone, UTC or Calgary-local-time interpretation, DST behavior, source measurement precision, clock accuracy, or event-time accuracy.
+
+#### Canonical-Mapping and Increment 002 Boundary
+
+Pairwise temporal relationships do not provide sufficient source-semantic evidence for `requested_date -> Case.created_at`, `updated_date -> Case.updated_at`, or `closed_date -> Case.closed_at`. Those mappings are not established, and Increment 002's universal-field boundary remains unchanged.
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_TEMPORAL_RELATION_SCAN`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied based solely on these timestamp relationships. Portability remains unvalidated.
+
+#### Strict Non-Claims and Increment Progress
+
+This scan does **not** establish:
+
+- source lifecycle semantics;
+- expected lifecycle ordering;
+- ordering violations;
+- data-quality invalidity;
+- temporal validity;
+- durations, resolution time, or request-to-closure elapsed duration;
+- active work, handling time, queue time, or waiting time;
+- censoring or open/closed semantics;
+- analytical eligibility;
+- timezone or source precision;
+- canonical mappings;
+- authoritative completeness or authoritative provenance;
+- source version;
+- licence;
+- attribution.
+
+This observation provides progress toward row-level temporal relationship characterization and timestamp evidence-quality characterization. Lifecycle semantics, expected ordering, duration eligibility, censoring, analytical observation-window definition, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
