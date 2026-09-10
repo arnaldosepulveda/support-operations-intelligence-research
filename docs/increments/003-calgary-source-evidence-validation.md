@@ -782,6 +782,127 @@ Increment 002 requires a future adapter to establish source-native identity sema
 
 This observation provides direct progress toward identifier presence, raw-string uniqueness, and empirical suitability of `service_request_id` as an identity candidate. Semantic identity mapping, a source contract, missingness across other fields, timestamp usability, temporal coverage, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Lexical Blankness Observation 006
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a dataset-wide lexical blankness profile was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+For this observation:
+
+- `EMPTY` means `raw_value == ""`;
+- `WHITESPACE_ONLY` means `raw_value != ""` and `raw_value.strip() == ""`;
+- `NONBLANK` means neither `EMPTY` nor `WHITESPACE_ONLY`.
+
+This is lexical blankness measurement, not semantic missingness.
+
+#### Scan Method and Invariant
+
+The scan used Python 3 and Python standard-library `csv.reader` with `encoding="ascii"` and `newline=""`. It streamed one logical CSV record at a time, retained only per-field counters, and did not retain rows or raw values.
+
+- `LEXICAL_BLANKNESS_SCAN_COMPLETED`: `true`;
+- `LOGICAL_DATA_ROWS`: 7,474,403;
+- `HEADER_FIELD_COUNT`: 15.
+
+Every field satisfied `EMPTY + WHITESPACE_ONLY + NONBLANK = 7,474,403`.
+
+#### Exact Per-Field Results
+
+| Field | Empty | Empty % | Whitespace-only | Whitespace-only % | Nonblank | Nonblank % |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `service_request_id` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `requested_date` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `updated_date` | 77,829 | 1.041274 | 0 | 0.000000 | 7,396,574 | 98.958726 |
+| `closed_date` | 78,347 | 1.048204 | 0 | 0.000000 | 7,396,056 | 98.951796 |
+| `status_description` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `source` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `service_name` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `agency_responsible` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `address` | 7,474,403 | 100.000000 | 0 | 0.000000 | 0 | 0.000000 |
+| `comm_code` | 429,787 | 5.750118 | 0 | 0.000000 | 7,044,616 | 94.249882 |
+| `comm_name` | 429,787 | 5.750118 | 0 | 0.000000 | 7,044,616 | 94.249882 |
+| `location_type` | 0 | 0.000000 | 0 | 0.000000 | 7,474,403 | 100.000000 |
+| `longitude` | 430,664 | 5.761851 | 0 | 0.000000 | 7,043,739 | 94.238149 |
+| `latitude` | 430,664 | 5.761851 | 0 | 0.000000 | 7,043,739 | 94.238149 |
+| `point` | 430,664 | 5.761851 | 0 | 0.000000 | 7,043,739 | 94.238149 |
+
+No non-empty whitespace-only value was observed in any of the 15 fields under the scan definition. This does not establish semantic cleanliness.
+
+#### `service_request_id` Cross-Check
+
+Result: `CONSISTENT_WITH_PRIOR_IDENTIFIER_SCAN`.
+
+`service_request_id` again had 0 raw empty-string values and 0 non-empty whitespace-only values. This is not new source-identity semantic evidence.
+
+#### Direct Field-Population Observations
+
+- `address` was the empty string in all 7,474,403 observed rows;
+- `requested_date` was nonblank in all observed rows;
+- `status_description` was nonblank in all observed rows;
+- `source` was nonblank in all observed rows;
+- `service_name` was nonblank in all observed rows;
+- `agency_responsible` was nonblank in all observed rows;
+- `location_type` was nonblank in all observed rows.
+
+`comm_code` and `comm_name` had identical aggregate lexical blankness counts. `longitude`, `latitude`, and `point` also had identical aggregate lexical blankness counts. Equal aggregate counts do **not** establish that the same records are jointly blank or populated; no row-wise relationship or correlation was inspected.
+
+#### Lexical Blankness Versus Semantic Missingness
+
+Lexical blankness does not establish semantic missingness. A raw blank could mean value unavailable, concept not applicable, concept absent, suppressed, unknown, not populated, or another source-defined condition. A nonblank value may still be semantically unavailable, invalid, a placeholder, stale, malformed, or inappropriate for an intended analysis. No such meaning is assigned without source evidence.
+
+#### Address Boundary
+
+The `address` field is lexically empty in every observed row of this local artifact. This does **not** establish that Calgary has no address information, that address is absent from the authoritative source, that the field is unusable in every source version, that address data was intentionally removed or privacy-suppressed, that address is conceptually absent, or that the extract is defective. Those are competing explanations requiring further evidence.
+
+#### Timestamp-Field Population Boundary
+
+Observed population evidence only:
+
+- `requested_date`: 100.000000% nonblank;
+- `updated_date`: 98.958726% nonblank;
+- `closed_date`: 98.951796% nonblank.
+
+These observations do **not** establish parseability, timestamp type, precision, timezone, lifecycle meaning, temporal ordering, validity, censoring, open-case state, `created_at` mapping, or closure semantics.
+
+#### Strict Non-Claims
+
+This scan does **not** establish:
+
+- semantic missingness;
+- Calgary source-system nullability rules;
+- source-system required-field rules;
+- schema types;
+- timestamp parseability;
+- timestamp precision;
+- temporal range;
+- lifecycle semantics;
+- status semantics;
+- source or intake semantics;
+- classification semantics;
+- agency semantics;
+- spatial validity;
+- identifier semantics;
+- canonical mappings;
+- completeness;
+- authoritative provenance;
+- source version;
+- licence;
+- attribution.
+
+A field with 100% nonblank raw strings may still contain semantically invalid or unavailable values. A field with blank raw strings may still be valid for records where the concept does not apply.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_LEXICAL_BLANKNESS_SCAN`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied merely because optional source fields contain raw blanks. This scan does not establish `requested_date -> Case.created_at`, `status_description -> Case.source_status`, `source -> intake/origin`, `closed_date -> Case.closed_at`, or `updated_date -> Case.updated_at`. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward dataset-wide raw field-population characterization and a lexical blankness/data-quality baseline. Semantic missingness interpretation, timestamp usability, temporal coverage, lifecycle semantics, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
