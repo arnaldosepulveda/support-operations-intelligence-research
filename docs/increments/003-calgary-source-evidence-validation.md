@@ -1001,6 +1001,116 @@ No observed `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied.
 
 This observation provides progress toward timestamp lexical usability and consistency of the observed timestamp string format. Timestamp semantics, timezone, source precision, temporal coverage, temporal ordering, lifecycle interpretation, censoring analysis, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Temporal Extrema Observation 008
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, a dataset-wide temporal-extrema scan was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+The observed fields were `requested_date`, `updated_date`, and `closed_date`.
+
+#### Exact Parse Rule and Method
+
+The scan used:
+
+- Python 3;
+- Python standard-library `csv.reader`;
+- Python standard-library `datetime.strptime`;
+- `encoding="ascii"`;
+- `newline=""`;
+- streaming iteration over one logical CSV record at a time;
+- retention of only counters plus the current minimum and maximum values.
+
+It did not retain all rows or timestamp values. The exact parse format was:
+
+    %Y/%m/%d %I:%M:%S %p
+
+Parsed values were naive `datetime` values used only for within-field extrema comparison. No timezone was assigned.
+
+- `TEMPORAL_EXTREMA_SCAN_COMPLETED`: `true`;
+- `LOGICAL_DATA_ROWS`: 7,474,403.
+
+#### Exact Results
+
+| Field | Blank | Parseable nonblank | Minimum raw | Minimum parsed | Maximum raw | Maximum parsed |
+| --- | ---: | ---: | --- | --- | --- | --- |
+| `requested_date` | 0 | 7,474,403 | `'2010/01/25 12:00:00 AM'` | `2010-01-25 00:00:00` | `'2026/09/08 12:00:00 AM'` | `2026-09-08 00:00:00` |
+| `updated_date` | 77,829 | 7,396,574 | `'2012/01/01 02:11:34 AM'` | `2012-01-01 02:11:34` | `'2026/09/08 12:00:00 AM'` | `2026-09-08 00:00:00` |
+| `closed_date` | 78,347 | 7,396,056 | `'2010/02/17 12:00:00 AM'` | `2010-02-17 00:00:00` | `'2026/09/09 12:00:00 AM'` | `2026-09-09 00:00:00` |
+
+Accounting invariants:
+
+- `requested_date`: `0 + 7,474,403 = 7,474,403`;
+- `updated_date`: `77,829 + 7,396,574 = 7,474,403`;
+- `closed_date`: `78,347 + 7,396,056 = 7,474,403`.
+
+#### Prior Evidence Consistency
+
+Result: `CONSISTENT_WITH_PRIOR_TIMESTAMP_PARSEABILITY_SCAN`.
+
+The blank and parseable-nonblank counts agree exactly with the already committed timestamp-parseability scan. This is count consistency only, not independent semantic validation.
+
+#### External Preparation Comparison
+
+Result: `CORROBORATES_REPORTED_REQUESTED_DATE_EXTREMA`.
+
+The observed `requested_date` calendar extrema, `2010-01-25` and `2026-09-08`, exactly match the dates retained in the earlier external/preparation context. This is corroboration only. It does not establish authoritative provenance, an authoritative observation period, artifact completeness, or equivalence to a current authoritative source. The external report was not compared with `updated_date` or `closed_date`.
+
+#### Permitted Interpretation
+
+Result: `OBSERVED PARSED TEMPORAL EXTREMA`.
+
+Among the observed parseable nonblank raw values in this local artifact, the recorded minimum and maximum values are the observed parsed extrema for each respective field under the tested format. They are not established as lifecycle boundaries, case observation boundaries, or authoritative dataset boundaries.
+
+#### Observation-Window Boundary
+
+The `requested_date` minimum and maximum are observed extrema of that raw field in this local artifact. They do **not** establish the authoritative Calgary observation window, the complete service-request history, the valid analytical cohort window, or the appropriate metric observation boundary. Those require source and analytical-contract evidence.
+
+#### Cross-Field, Ordering, and Duration Boundaries
+
+The extrema of one timestamp field were not compared with those of another, and no inference is made from differences among the three fields. The scan did not inspect or establish `requested_date <= updated_date`, `requested_date <= closed_date`, or `updated_date <= closed_date`, did not count temporal-order violations, and did not establish lifecycle consistency.
+
+No extrema or field values were subtracted. The scan did not calculate elapsed days, elapsed hours, dataset span, request-to-closure time, handling time, active work, queue time, or waiting time.
+
+#### Blank-Value Boundary
+
+Blank `updated_date` and `closed_date` values remain semantically uninterpreted. They are not classified as open, unresolved, censored, never updated, incomplete, or invalid.
+
+#### Timezone and Precision Boundary
+
+The parsed values are naive `datetime` values. This observation does not establish timezone, UTC or Calgary-local-time interpretation, DST behavior, one-second source precision, clock accuracy, or event-time accuracy.
+
+#### Canonical-Mapping and Increment 002 Boundary
+
+Observed extrema provide no additional semantic justification for `requested_date -> Case.created_at`, `updated_date -> Case.updated_at`, or `closed_date -> Case.closed_at`. Those mappings are not established, and Increment 002's universal-field boundaries remain unchanged.
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_TEMPORAL_EXTREMA_SCAN`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. Portability remains unvalidated.
+
+#### Strict Non-Claims and Increment Progress
+
+This scan does **not** establish:
+
+- an authoritative observation window;
+- lifecycle semantics;
+- cross-field ordering;
+- duration or request-to-closure elapsed duration;
+- active work, handling time, queue time, or waiting time;
+- censoring or open/closed semantics;
+- midnight prevalence;
+- timezone or source precision;
+- canonical mappings;
+- artifact completeness;
+- authoritative provenance;
+- source version;
+- licence;
+- attribution.
+
+This observation provides progress toward temporal coverage characterization at the raw-field level and observed timestamp extrema. Temporal ordering, lifecycle interpretation, censoring, analytical observation-window definition, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
