@@ -465,6 +465,141 @@ Still planned or unverified:
 
 This observation provides partial progress toward schema/header structure and presence of contract-relevant candidate fields only. Data types, identifier behavior, lifecycle-evidence usability, timestamp parseability, temporal range, missingness, provenance, licence, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### First-Data-Row Observation 003
+
+**Evidence classification:** Engineering observation
+
+On 2026-09-10, exactly two CSV records were read during this bounded inspection of:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+Those records were:
+
+1. the header;
+2. exactly the first data row.
+
+No additional record was read.
+
+#### Parse and Field-Count Observation
+
+- header field count: 15;
+- first data-row field count: 15;
+- field counts match: `true`.
+
+The first data row was successfully returned by Python standard-library `csv.reader` using `encoding="ascii"` and `newline=""`. This establishes successful parsing of that one record only; it does **not** establish whole-file parseability.
+
+#### Ordered Raw First-Row Values
+
+The following are raw strings, recorded in header order:
+
+1. `service_request_id`: `'18-01017964'`
+2. `requested_date`: `'2018/10/17 12:00:00 AM'`
+3. `updated_date`: `'2020/06/24 12:00:00 AM'`
+4. `closed_date`: `'2020/06/24 12:00:00 AM'`
+5. `status_description`: `'Closed'`
+6. `source`: `'Phone'`
+7. `service_name`: `'Roads - Traffic Signal Timing Inquiry'`
+8. `agency_responsible`: `'TRAN - Roads'`
+9. `address`: `''`
+10. `comm_code`: `'SHN'`
+11. `comm_name`: `'SHAWNESSY'`
+12. `location_type`: `'Community Centrepoint'`
+13. `longitude`: `'-114.0737568214987'`
+14. `latitude`: `'50.90330332947782'`
+15. `point`: `'POINT (-114.073756821499 50.903303329478)'`
+
+#### Empty and Non-Empty Values in This Row
+
+Empty string in this one row:
+
+- `address`.
+
+Non-empty strings in this one row:
+
+- `service_request_id`;
+- `requested_date`;
+- `updated_date`;
+- `closed_date`;
+- `status_description`;
+- `source`;
+- `service_name`;
+- `agency_responsible`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+A non-empty value in this row does **not** establish that the column is universally populated. An empty value in this row does **not** establish general missingness.
+
+#### Lexical-Form Boundary
+
+Several raw strings have date-like, numeric-like, spatial, or categorical-looking lexical forms. They are not classified at this stage as timestamps, dates, integers, floats, coordinates, geometry, enums, a status taxonomy, or an intake taxonomy.
+
+Examples:
+
+- `'2018/10/17 12:00:00 AM'`: raw string only at this stage;
+- `'-114.0737568214987'`: raw string only at this stage;
+- `'POINT (-114.073756821499 50.903303329478)'`: raw string only at this stage;
+- `'Closed'`: raw string only at this stage;
+- `'Phone'`: raw string only at this stage.
+
+Appearance alone does not establish a semantic type.
+
+#### Semantic Non-Claims
+
+This one-row observation does **not** establish:
+
+- dataset-wide data types;
+- population;
+- nullability;
+- missingness rates;
+- uniqueness;
+- identifier validity;
+- timestamp parseability;
+- timestamp precision;
+- temporal range;
+- status vocabulary;
+- source or intake vocabulary;
+- classification vocabulary;
+- agency behavior;
+- spatial validity;
+- dataset completeness;
+- source semantics;
+- canonical mappings;
+- authoritative provenance;
+- source version;
+- current licence;
+- attribution requirements.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_THIS_SINGLE_ROW`.
+
+This observation is not classified as `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT`, and the row does not validate portability. Specifically:
+
+- `requested_date` is not yet established as `Case.created_at`;
+- `status_description` is not yet established as `source_status`;
+- `source` is not yet semantically established as intake or origin;
+- `closed_date` does not establish universal `Case.closed_at`;
+- `updated_date` does not establish universal `Case.updated_at`.
+
+#### Reproducibility
+
+The actual method used `python3` and Python standard-library `csv.reader` with `encoding="ascii"` and `newline=""`. The two reads were exactly:
+
+```python
+header = next(reader)
+first_row = next(reader)
+```
+
+No further `next(reader)` call occurred. This observation supports no inference about the repository-local `.venv`.
+
+#### Increment Progress Boundary
+
+This observation provides partial progress toward basic readability and row-width consistency for the first observed data row only. Whole-file readability, row count, identifier behavior, missingness, timestamp usability, temporal coverage, provenance, licence, hash, and canonical source mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
