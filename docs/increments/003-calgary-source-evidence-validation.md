@@ -1330,6 +1330,159 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The hash
 
 This observation provides progress toward local artifact identification, reproducibility, and evidence binding. Authoritative provenance, authenticity, source-version verification, licence, attribution, source semantics, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Current Official Source Metadata Observation 011
+
+**Evidence classification:** `EXTERNAL EVIDENCE: CURRENT OFFICIAL SOURCE METADATA`
+
+On 2026-09-11, the following official endpoints were inspected:
+
+- metadata: `https://data.calgary.ca/api/views/iahh-g8bj`;
+- aggregate count: `https://data.calgary.ca/resource/iahh-g8bj.json?$select=count(*)`.
+
+These observations do not establish provenance of the local CSV.
+
+#### Official Dataset Identity
+
+- `METADATA_REQUEST_COMPLETED`: `true`;
+- `METADATA_HTTP_STATUS`: 200;
+- `OFFICIAL_DATASET_ID`: `iahh-g8bj`;
+- `OFFICIAL_DATASET_NAME`: `311 Service Requests`;
+- `OWNER_DISPLAY_NAME`: `Calgary Open Data`;
+- `ATTRIBUTION_METADATA`: `The City of Calgary`.
+
+Result: `OFFICIAL_DATASET_IDENTITY_CONFIRMED`.
+
+The current official `data.calgary.ca` metadata endpoint identifies dataset `iahh-g8bj` as "311 Service Requests". This does not establish local-artifact provenance.
+
+#### Exact Returned Description
+
+The returned description was:
+
+> Public Service Requests submitted via 311 from 2012 to present.
+>
+> For more information on 311 Calgary, or to submit a request, visit http://www.calgary.ca/CFOD/CSC/Pages/311.aspx
+
+No interpretation of this description is applied here.
+
+#### Version-Like Metadata
+
+The endpoint returned:
+
+- `createdAt`: `1560369658`;
+- `publicationDate`: `1560371400`;
+- `rowsUpdatedAt`: `1789059650`;
+- `metadataUpdatedAt`: `None`;
+- `viewLastModified`: `1789059641`.
+
+These values are retained exactly as returned and are not converted to calendar timestamps.
+
+Result: `NO_IMMUTABLE_SOURCE_VERSION_IDENTIFIER_ESTABLISHED`.
+
+Update and publication metadata is not equivalent to an immutable source snapshot identifier. None of these values is classified as an immutable source version.
+
+#### Official Field Names
+
+- `OFFICIAL_COLUMN_COUNT`: 19.
+
+Ordered official `fieldName` values:
+
+1. `service_request_id`
+2. `requested_date`
+3. `updated_date`
+4. `closed_date`
+5. `status_description`
+6. `source`
+7. `service_name`
+8. `agency_responsible`
+9. `address`
+10. `comm_code`
+11. `comm_name`
+12. `location_type`
+13. `longitude`
+14. `latitude`
+15. `point`
+16. `:@computed_region_4b54_tmc4`
+17. `:@computed_region_4a3i_ccfj`
+18. `:@computed_region_kxmf_bzkv`
+19. `:@computed_region_p8tp_5dkv`
+
+Result: `OFFICIAL_FIELD_NAMES_DIFFER_FROM_COMMITTED_LOCAL_HEADER`.
+
+The first 15 official `fieldName` values match the previously committed 15-field local header exactly and in the same order. The current official metadata additionally exposes four computed-region fields. No explanation for the difference is established. In particular, this observation does not establish local truncation, a schema defect, source export behavior, a version change, computed-field suppression, or acquisition options.
+
+#### Current Official Row Count
+
+- `OFFICIAL_COUNT_QUERY_COMPLETED`: `true`;
+- `OFFICIAL_COUNT_HTTP_STATUS`: 200;
+- `CURRENT_OFFICIAL_ROW_COUNT`: 7,476,281;
+- `PREVIOUSLY_COMMITTED_LOCAL_ROW_COUNT`: 7,474,403;
+- `EXACT_DIFFERENCE`: +1,878.
+
+Calculation:
+
+    7,476,281 - 7,474,403 = 1,878
+
+Result: `CURRENT_OFFICIAL_COUNT_DIFFERS_FROM_LOCAL_OBSERVED_COUNT`.
+
+No cause is inferred. The difference does not by itself establish local incompleteness, stale local data, acquisition error, source corruption, source update behavior, or a version mismatch. Those are candidate explanations, not observed conclusions.
+
+#### Current Official Source Alignment
+
+Result: `CURRENT OFFICIAL SOURCE ALIGNMENT`.
+
+The current official source aligns with the local observations on dataset identity and the first 15 field names and their order. It differs from the local artifact on the current official total row count and on the current official metadata exposing four additional computed-region fields. This is not `LOCAL_ARTIFACT_PROVENANCE_CONFIRMED`.
+
+#### Official Description and Local Temporal Evidence Discrepancy
+
+Result: `OFFICIAL_DESCRIPTION_LOCAL_TEMPORAL_EVIDENCE_DISCREPANCY`.
+
+The current official metadata description says "from 2012 to present", while the previously committed local artifact contains `requested_date` values as early as `2010-01-25`.
+
+No cause is assigned. This observation does not conclude that the local data is wrong, the official description is wrong, records were backfilled, legacy records were migrated, historical definitions changed, the local file came from another dataset, or the metadata is stale. The discrepancy remains preserved for later source-semantic and provenance investigation.
+
+#### Remote-Digest and Local-Provenance Boundaries
+
+Result: `NO_OFFICIAL_REMOTE_DIGEST_ESTABLISHED`.
+
+The official metadata inspected did not establish a cryptographic digest that could be compared with the committed local SHA-256 `9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f`. Remote and local byte equivalence is not established.
+
+Local-artifact provenance remains unconfirmed. Matching the dataset ID, dataset name, and first 15 fields does not bind the exact local byte artifact to an authoritative remote snapshot. The project still lacks retained acquisition evidence establishing:
+
+- the exact acquisition URL;
+- acquisition time;
+- HTTP acquisition metadata;
+- an immutable remote snapshot or version;
+- a remote content digest corresponding to the local artifact.
+
+No unavailable acquisition history is inferred.
+
+#### Licence and Attribution Boundary
+
+The metadata values observed were:
+
+- `attribution`: `The City of Calgary`;
+- `attributionLink`: `None`;
+- `rights`: `['read']`.
+
+Results:
+
+- `LICENCE_NOT_VERIFIED`;
+- `ATTRIBUTION_REQUIREMENTS_NOT_DETERMINED`.
+
+The `rights=['read']` value is endpoint metadata and is not treated as the governing data licence. Licence analysis remains a separate step.
+
+#### Canonical-Mapping and Increment 002 Boundary
+
+Official field names and dataset identity alone are insufficient semantic evidence for `service_request_id -> Case.source_case_id`, `requested_date -> Case.created_at`, `status_description -> Case.source_status`, or `source -> intake/origin`. Those mappings are not established.
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_OFFICIAL_SOURCE_METADATA_CHECK`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The description/local-date discrepancy requires later investigation but does not currently falsify the canonical Case contract. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward authoritative source identity, current source metadata comparison, current schema comparison, current row-count comparison, and provenance-gap characterization. Local-artifact provenance, immutable source-version binding, licence verification, attribution requirements, source field semantics, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
