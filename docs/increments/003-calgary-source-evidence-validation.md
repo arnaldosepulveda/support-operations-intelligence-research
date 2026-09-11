@@ -1782,6 +1782,198 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The curr
 
 This observation provides progress toward source-native semantic characterization, temporal-field semantic characterization, and future source-contract justification. Canonical source mapping, temporal precision, timezone semantics, reopening semantics, final-closure semantics, analytical duration eligibility, and provenance remain unresolved. Increment 003 remains Planned.
 
+### Timestamp Clock-Time Representation Observation 014
+
+**Evidence classification:** `ENGINEERING OBSERVATION: TIMESTAMP CLOCK-TIME REPRESENTATION`
+
+On 2026-09-11, a bounded empirical scan was completed for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+Fields inspected only:
+
+- `requested_date`;
+- `updated_date`;
+- `closed_date`.
+
+Exact parse format:
+
+    %Y/%m/%d %I:%M:%S %p
+
+Logical data rows: 7,474,403.
+
+#### Method
+
+The scan used:
+
+- Python 3;
+- Python standard-library `csv.reader` / `DictReader`;
+- Python standard-library `datetime.strptime`;
+- `encoding="ascii"`;
+- `newline=""`;
+- streaming iteration row by row;
+- no pandas;
+- no database;
+- no persistent temporary files;
+- no timestamp subtraction;
+- no cross-field ordering comparison.
+
+#### Classification Model
+
+For each field, every logical data row was classified into exactly one primary category:
+
+- `BLANK`;
+- `PARSEABLE_EXACT_MIDNIGHT`;
+- `PARSEABLE_NON_MIDNIGHT`;
+- `UNPARSEABLE`.
+
+Exact midnight means the parsed value satisfied:
+
+    hour == 0
+    minute == 0
+    second == 0
+
+Parseable non-midnight values were additionally divided into:
+
+- `NON_MIDNIGHT_SECOND_ZERO`;
+- `NON_MIDNIGHT_SECOND_NONZERO`.
+
+This secondary split describes representation only. `SECOND_ZERO` does not establish minute-level precision, and `SECOND_NONZERO` does not establish second-level precision.
+
+#### `requested_date` Results
+
+- `FIELD`: `requested_date`;
+- `BLANK`: 0;
+- `PARSEABLE`: 7,474,403;
+- `PARSEABLE_EXACT_MIDNIGHT`: 3,603,999;
+- `PARSEABLE_NON_MIDNIGHT`: 3,870,404;
+- `UNPARSEABLE`: 0;
+- `NON_MIDNIGHT_SECOND_ZERO`: 64,194;
+- `NON_MIDNIGHT_SECOND_NONZERO`: 3,806,210;
+- `MIDNIGHT_PERCENT_OF_PARSEABLE`: 48.217884%.
+
+#### `updated_date` Results
+
+- `FIELD`: `updated_date`;
+- `BLANK`: 77,829;
+- `PARSEABLE`: 7,396,574;
+- `PARSEABLE_EXACT_MIDNIGHT`: 3,603,787;
+- `PARSEABLE_NON_MIDNIGHT`: 3,792,787;
+- `UNPARSEABLE`: 0;
+- `NON_MIDNIGHT_SECOND_ZERO`: 63,453;
+- `NON_MIDNIGHT_SECOND_NONZERO`: 3,729,334;
+- `MIDNIGHT_PERCENT_OF_PARSEABLE`: 48.722381%.
+
+#### `closed_date` Results
+
+- `FIELD`: `closed_date`;
+- `BLANK`: 78,347;
+- `PARSEABLE`: 7,396,056;
+- `PARSEABLE_EXACT_MIDNIGHT`: 3,528,193;
+- `PARSEABLE_NON_MIDNIGHT`: 3,867,863;
+- `UNPARSEABLE`: 0;
+- `NON_MIDNIGHT_SECOND_ZERO`: 65,943;
+- `NON_MIDNIGHT_SECOND_NONZERO`: 3,801,920;
+- `MIDNIGHT_PERCENT_OF_PARSEABLE`: 47.703709%.
+
+#### Primary Accounting
+
+For every field:
+
+    BLANK
+    + PARSEABLE_EXACT_MIDNIGHT
+    + PARSEABLE_NON_MIDNIGHT
+    + UNPARSEABLE
+    = 7,474,403
+
+All primary accounting checks passed.
+
+#### Secondary Accounting
+
+For every field:
+
+    NON_MIDNIGHT_SECOND_ZERO
+    + NON_MIDNIGHT_SECOND_NONZERO
+    = PARSEABLE_NON_MIDNIGHT
+
+All secondary accounting checks passed.
+
+#### Prior-Evidence Consistency
+
+Result: `CONSISTENT_WITH_PRIOR_TIMESTAMP_PARSEABILITY_EVIDENCE`.
+
+The scan reproduced the previously committed blank counts:
+
+- `requested_date`: 0;
+- `updated_date`: 77,829;
+- `closed_date`: 78,347.
+
+It also reproduced the previously committed unparseable counts under the same exact format:
+
+- `requested_date`: 0;
+- `updated_date`: 0;
+- `closed_date`: 0.
+
+This is accounting consistency only, not independent source validation.
+
+#### Permitted Interpretation
+
+Result: `OBSERVED TIMESTAMP CLOCK-TIME REPRESENTATION`.
+
+For the inspected local artifact and exact parse format, the scan establishes how many parseable values are represented exactly at `00:00:00` versus another clock time. It also establishes whether non-midnight representations have `second == 0` or `second != 0`.
+
+All three fields have substantial populations represented exactly at `00:00:00`, approximately 48% of parseable values. No cause is assigned to this pattern.
+
+#### Precision Boundary
+
+Result: `SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED`.
+
+Exact-midnight values do not establish date-only source values, default timestamps, imputed timestamps, rounded timestamps, truncated timestamps, synthetic timestamps, or low-quality timestamps. Non-midnight values with nonzero seconds do not establish one-second source measurement precision. Observed representation is not measurement precision.
+
+Current official field metadata exposes data type `calendar_date` and format `{'view': 'date_ymd_time'}`, but those metadata properties likewise do not establish actual measurement precision.
+
+#### Timezone Boundary
+
+Result: `TIMEZONE_SEMANTICS_UNRESOLVED`.
+
+This observation does not establish UTC, Calgary local time, Mountain Time, MST, MDT, DST behavior, or offset semantics.
+
+#### Source-Semantic Boundary
+
+Midnight prevalence does not establish submission-date precision for `requested_date`, qualifying update semantics for `updated_date`, or closure semantics for `closed_date`. This representation evidence does not resolve:
+
+- `REQUESTED_DATE_CREATION_TIME_EQUIVALENCE_UNRESOLVED`;
+- `UPDATED_DATE_RECORD_VS_LIFECYCLE_MEANING_UNRESOLVED`;
+- `CLOSED_DATE_LIFECYCLE_SEMANTICS_INCOMPLETE`;
+- `REOPENING_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`;
+- `FINAL_CLOSURE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`.
+
+These remain separate semantic questions.
+
+#### Analytical-Eligibility Boundary
+
+This scan does not establish eligibility for resolution time, request-to-closure elapsed duration, active work time, handling time, queue time, waiting time, censoring analysis, SLA analysis, or temporal ordering rules. No timestamps were subtracted.
+
+#### Canonical-Mapping Boundary
+
+Clock-time representation is insufficient evidence to establish:
+
+- `requested_date -> Case.created_at`;
+- `updated_date -> any universal Case timestamp`;
+- `closed_date -> universal Case.closed_at`.
+
+No canonical timestamp mapping is established.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_CLOCK_TIME_REPRESENTATION_SCAN`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The representation evidence does not contradict Increment 002. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward timestamp evidence-quality characterization, temporal representation characterization, and future analytical-contract design. Source temporal precision, timezone semantics, duration eligibility, censoring semantics, canonical timestamp mappings, and final-closure semantics remain unresolved. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
