@@ -1483,6 +1483,148 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The desc
 
 This observation provides progress toward authoritative source identity, current source metadata comparison, current schema comparison, current row-count comparison, and provenance-gap characterization. Local-artifact provenance, immutable source-version binding, licence verification, attribution requirements, source field semantics, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Current Official Licence Terms Observation 012
+
+**Evidence classification:** `EXTERNAL EVIDENCE: CURRENT OFFICIAL LICENCE TERMS`
+
+On 2026-09-11, a read-only inspection of current official City of Calgary sources was completed. No local CSV content or dataset record was inspected, and no dataset was downloaded.
+
+#### Official Sources Inspected
+
+All four requests completed with HTTP status 200:
+
+1. `https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa/`
+   - final URL: `https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa/`;
+   - content type: `text/html; charset=utf-8`.
+2. `https://www.calgary.ca/research/open-data/getting-started.html`
+   - final URL: `https://www.calgary.ca/research/open-data/getting-started.html`;
+   - content type: `text/html;charset=utf-8`.
+3. `https://data.calgary.ca/d/iahh-g8bj`
+   - final URL: `https://data.calgary.ca/Services-and-Amenities/311-Service-Requests/iahh-g8bj`;
+   - content type: `text/html; charset=utf-8`.
+4. `https://data.calgary.ca/d/Open-Data-Terms/u45n-7awa`
+   - final URL: `https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa`;
+   - content type: `text/html; charset=utf-8`.
+
+The alternate terms URL resolved to the official Open Calgary Terms page. These are current official-source observations, not historical licence evidence for the local CSV.
+
+#### Open Data and Terms Relationship
+
+Result: `CURRENT_OPEN_DATA_TERMS_RELATIONSHIP_CONFIRMED`.
+
+The official Open Data getting-started page describes Open Data as available to use, reuse, and redistribute. It states that datasets may be used for any purpose subject to the Open Calgary Terms of Use. This result is limited to that current source wording.
+
+#### Current Licence Identity
+
+- `LICENCE_TITLE`: `Open Government Licence - City of Calgary`;
+- `LICENCE_VERSION`: `2.1`;
+- `INFORMATION_PROVIDER`: `The City of Calgary`.
+
+Result: `CURRENT_OFFICIAL_LICENCE_IDENTITY_CONFIRMED`.
+
+This identity does not establish that version 2.1 governed acquisition of the local CSV.
+
+#### Current Permitted Use
+
+Subject to its terms, the current licence grants:
+
+- worldwide use;
+- royalty-free use;
+- perpetual use;
+- non-exclusive use;
+- commercial use;
+- copying;
+- modification;
+- publication;
+- translation;
+- adaptation;
+- distribution;
+- other lawful use;
+- use in any medium, mode, or format.
+
+Result: `CURRENT_LICENCE_PERMITS_REUSE_SUBJECT_TO_TERMS`.
+
+The current licence is not characterized here as public domain, unrestricted, or condition-free. The qualification `subject to terms` is material.
+
+#### Attribution Requirement
+
+The current licence requires acknowledgement of the source. An attribution statement specified by the Information Provider takes precedence, and, where possible, a link to the licence is called for. When no specific attribution statement is supplied, or when information from several Information Providers makes multiple attributions impractical, the licence supplies this fallback statement:
+
+> “Contains information licensed under the Open Government Licence – City of Calgary.”
+
+Result: `DATASET_SPECIFIC_ATTRIBUTION_STATEMENT_UNRESOLVED`.
+
+The current `iahh-g8bj` dataset exposes `The City of Calgary` as attribution/data-provider metadata. The inspected evidence does not establish that this metadata value is the specific attribution statement contemplated by the licence. The metadata value and the licence-defined specific-attribution concept remain distinct.
+
+#### Current Dataset-to-Terms Linkage
+
+Result: `DATASET_CURRENTLY_LINKED_TO_OPEN_CALGARY_TERMS`.
+
+The current `iahh-g8bj` dataset page reports `License: See Terms of Use` and links to the official Open Calgary terms. This is current linkage only and does not establish historical linkage when the local artifact was acquired.
+
+#### Material Conditions and Exclusions
+
+The current licence states:
+
+- an attribution requirement;
+- automatic termination of granted rights upon non-compliance;
+- exclusion of personal information;
+- exclusion of inaccessible information or records;
+- exclusion where third-party rights prevent licensing;
+- exclusion of provider names, crests, logos, and official symbols;
+- exclusion of information subject to other intellectual-property rights.
+
+This observation does not determine whether any exclusion applies to the local CSV.
+
+#### Non-Endorsement, Warranty, and Liability
+
+The current terms state:
+
+- no right is granted to imply official status or endorsement;
+- information is licensed as-is;
+- representations and warranties are excluded to the extent permitted by law;
+- liability is disclaimed for errors, omissions, and specified loss, injury, or damage.
+
+These are source observations, not a conclusion that the project has no legal risk.
+
+#### Governing Law
+
+The current terms specify Alberta law and applicable Canadian law. They state that proceedings related to the licence may be brought only in Alberta courts. No legal interpretation is applied.
+
+#### Versioning Clause
+
+- `CURRENT_LICENCE_VERSION`: `2.1`.
+
+The current terms state that the Information Provider may change the terms and issue new versions. They state that the governing version is the licence terms in force as of the date the information was accessed.
+
+Result: `HISTORICAL_LOCAL_ARTIFACT_LICENCE_VERSION_NOT_ESTABLISHED`.
+
+The acquisition date of `/data/repos/Public Datasets/calgary_311.csv` has not been verified. Therefore, this observation does not establish that version 2.1 governed acquisition of the local artifact, that the local SHA-256 `9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f` is licence-bound to version 2.1, or that the local artifact's historical licence version is known.
+
+#### Current Versus Historical Licence Boundary
+
+`CURRENT OFFICIAL LICENCE EVIDENCE` is distinct from `HISTORICAL LICENCE BINDING FOR THE EXACT LOCAL ARTIFACT`.
+
+The current official Calgary sources identify the current licence and current dataset-to-terms linkage. They do not establish `LOCAL_ARTIFACT_LICENCE_PROVENANCE_CONFIRMED`, the local artifact's acquisition date, or which licence version governed its acquisition. The local SHA-256 is not described as having been acquired under version 2.1.
+
+#### Legal-Interpretation Boundary
+
+This is source verification, not legal advice.
+
+This observation does not conclude that the project is legally compliant, that every local field is covered by the licence, that the local artifact is definitively licensed under version 2.1, that there is no legal risk, or that the licence applies without qualification.
+
+#### Canonical-Mapping and Increment 002 Boundary
+
+Licence evidence establishes no source-field mapping.
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_LICENCE_CHECK`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward current licence verification, current dataset-to-terms linkage, current attribution-requirement verification, and historical licence-binding gap characterization. The historical local-artifact licence version, acquisition provenance, dataset-specific attribution statement, source semantics, and canonical mappings remain unresolved. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
