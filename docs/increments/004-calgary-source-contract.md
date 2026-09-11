@@ -252,6 +252,186 @@ Do not label a design choice as an external fact.
 
 What future evidence would require revisiting this decision?
 
+## Decision Records
+
+## Decision Question 1 - Case Admission
+
+### Decision Question
+
+Does a Calgary 311 service request satisfy all Increment 002 Case
+admission conditions?
+
+### Canonical Requirement
+
+A canonical Case represents one independently identifiable, source-native
+unit of operational work or operational matter whose identity and meaning
+exist independently of individual events or observations and for which an
+operational disposition or outcome can meaningfully be considered.
+
+The five required admission conditions are:
+
+- source-native entity;
+- operational-work semantics;
+- independent meaning;
+- bounded identity;
+- disposition semantics.
+
+Qualification is semantic. Identity alone is insufficient for Case
+qualification.
+
+### Calgary Evidence
+
+Increment 003 retained the following evidence relevant to admission:
+
+- the current official dataset identity is `311 Service Requests`;
+- the current official description identifies public service requests
+  submitted through 311;
+- current official field metadata describes `service_request_id` as the
+  unique identifier for an individual request;
+- current official field metadata describes the type of service requested,
+  the department responsible for the request, the current status of the
+  request, the most recent date the request was updated, and the date the
+  request was closed;
+- the local artifact contains 7,474,403 observed logical data rows;
+- every observed row has a nonblank raw `service_request_id`;
+- the artifact contains 7,474,403 distinct raw identifiers under the exact
+  comparison used by Increment 003;
+- every observed row has a nonblank raw `status_description`;
+- `updated_date` is nonblank in 7,396,574 observed rows and `closed_date` is
+  nonblank in 7,396,056 observed rows.
+
+These are the retained Increment 003 observations and external evidence.
+They do not establish new empirical results or canonical field mappings.
+
+### Competing Interpretations
+
+**Interpretation A:** The source object is an independently meaningful
+service request that constitutes an operational work item.
+
+**Interpretation B:** The local row is merely an observation or snapshot
+record about service-related activity and does not represent the operational
+work item itself.
+
+### Decision
+
+`ADMIT_CASE`
+
+The Calgary 311 service-request entity satisfies the bounded Increment 002
+Case-admission definition based on the retained evidence.
+
+This decision does not state that every local row is independently verified
+as an authoritative historical source entity and does not establish
+cross-source portability.
+
+### Justification
+
+**Source-native entity: `SUPPORTED`.** The official dataset and field
+semantics identify an individual service request as the source object. The
+local one-row-per-distinct-nonblank-identifier evidence is consistent with
+that object boundary, although uniqueness alone would not be sufficient.
+
+**Operational-work semantics: `SUPPORTED`.** The retained evidence describes
+public service requests submitted through 311, the service requested, the
+department responsible, current request status, request updates, and request
+closure. Together these semantics establish an operational request handled as
+a unit of operational work or matter without implying assignment, queue, or
+handling semantics.
+
+**Independent meaning: `SUPPORTED`.** The request itself is the source object.
+Submission, service type, organizational responsibility, status, updating,
+and closure are attributes or conditions of that request rather than the
+request being reducible to any one timestamp, event, or observation. CaseEvent
+evidence is not required for admission.
+
+**Bounded identity: `SUPPORTED`.** The official semantics identify a unique
+identifier for an individual request, and the local evidence observes a
+nonblank distinct raw identifier for every row. This establishes a bounded
+source-native request identity for admission without deciding the canonical
+source identity mapping.
+
+**Disposition semantics: `SUPPORTED`.** The official semantics establish that
+a current status, updating, and closure can meaningfully apply to the request.
+Complete lifecycle reconstruction, monotonic progression, reopening rules,
+and final-resolution semantics are not required for admission.
+
+All five required conditions are supported. Missing optional canonical fields
+do not defeat admission; they restrict later mapping or analytical eligibility
+where applicable.
+
+### Counterevidence / Limitation
+
+The strongest counterargument is that the local row could be interpreted as
+merely a current snapshot or observation record about service-related
+activity rather than an independently meaningful operational-work entity.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_SURVIVE_CURRENT_EVIDENCE`
+
+The official evidence identifies the referent as an individual service
+request and describes submission, requested service, organizational
+responsibility, current status, updating, and closure as properties or
+conditions of that request. Even if the row is a snapshot representation, the
+represented entity is the operational request rather than an isolated event
+or anonymous observation.
+
+Admission does not resolve:
+
+- local acquisition provenance;
+- immutable authoritative version binding;
+- identifier immutability across all source history;
+- identifier reuse outside the observed artifact;
+- `source_case_id` mapping;
+- `source_system`;
+- `requested_date -> created_at`;
+- `status_description -> source_status`;
+- `canonical_status`;
+- reopening behavior;
+- final closure semantics;
+- final-resolution equivalence;
+- temporal precision;
+- timezone;
+- duration eligibility;
+- workflow decomposition.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    Engineering observations retained in Increment 003
+    External evidence retained in Increment 003
+
+`ADMIT_CASE` is a source-contract design choice supported by retained evidence;
+it is not itself external evidence.
+
+### Falsification Condition
+
+`ADMIT_CASE` must be revisited if credible future evidence shows that:
+
+- the source row represents an event, observation, communication, or aggregate
+  rather than an individual service request;
+- `service_request_id` identifies a record representation rather than the
+  underlying individual request;
+- the request does not have independent operational meaning;
+- the request is not actually treated as a unit of operational work or matter;
+- operational disposition or outcome cannot meaningfully apply to the request;
+- later source evidence materially contradicts the official semantics relied
+  upon here.
+
+Future evidence that merely adds optional fields does not require revisiting
+admission.
+
+`INCREMENT_002_ADMISSION_FALSIFICATION: none`
+
+Successful application of the Increment 002 admission definition to Calgary
+does not validate cross-source portability.
+
+Decision Questions 2 through 13 remain undecided. No canonical field mapping,
+`source_system` value, `UNAVAILABLE` reason, analytical eligibility rule, or
+portability conclusion is introduced by this decision.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
