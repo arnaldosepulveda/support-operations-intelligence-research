@@ -1263,6 +1263,73 @@ This scan does **not** establish:
 
 This observation provides progress toward row-level temporal relationship characterization and timestamp evidence-quality characterization. Lifecycle semantics, expected ordering, duration eligibility, censoring, analytical observation-window definition, provenance, source version, licence, hash, and canonical mappings remain unverified. Increment 003 remains Planned.
 
+### Local-Artifact SHA-256 Observation 010
+
+**Evidence classification:** `ENGINEERING OBSERVATION: LOCAL ARTIFACT IDENTITY`
+
+On 2026-09-10, a SHA-256 digest was computed successfully for the observed local artifact:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+Observed artifact identity values:
+
+- byte size: 1,978,541,467 bytes;
+- SHA-256: `9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f`;
+- hash command completed successfully: `true`;
+- path returned by `sha256sum`: `/data/repos/Public Datasets/calgary_311.csv`.
+
+#### Permitted Interpretation
+
+At the time of inspection, the observed local artifact at `/data/repos/Public Datasets/calgary_311.csv` had byte size 1,978,541,467 and SHA-256 digest `9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f`.
+
+The digest identifies the exact observed local byte content. It may be used prospectively to identify the artifact to which later repository evidence refers.
+
+#### Retroactivity Boundary
+
+The SHA-256 was established after the earlier Increment 003 inspections. Therefore:
+
+- the hash can prospectively identify this local artifact;
+- it does **not** prove that earlier observations were cryptographically bound to this digest at the time they were collected;
+- it does **not** retroactively establish source provenance.
+
+#### Cryptographic Identity Boundary
+
+Artifact byte identity is distinct from artifact authenticity, source provenance, and semantic correctness. A cryptographic digest identifies bytes; it does not prove what those bytes mean or where they came from.
+
+The SHA-256 does **not** establish:
+
+- that the file originated from the City of Calgary;
+- authoritative provenance;
+- authenticity;
+- completeness;
+- correctness;
+- currentness;
+- source ownership;
+- source publication date;
+- source version semantics;
+- equivalence to the current authoritative source;
+- licence;
+- attribution;
+- semantic validity;
+- field correctness;
+- canonical mappings.
+
+#### Prior File-Size Consistency
+
+Result: `CONSISTENT_WITH_PRIOR_FILESYSTEM_SIZE_OBSERVATION`.
+
+The earlier filesystem observation and the hash inspection each observed a size of 1,978,541,467 bytes. This is consistency of the observed local file size only. It does not prove that the file was unchanged between observations. The earlier observation did not include a cryptographic digest, so byte identity across the two observation times was not established.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_ARTIFACT_IDENTITY_HASH`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The hash provides no semantic evidence about the canonical Case contract. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward local artifact identification, reproducibility, and evidence binding. Authoritative provenance, authenticity, source-version verification, licence, attribution, source semantics, and canonical mappings remain unverified. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
