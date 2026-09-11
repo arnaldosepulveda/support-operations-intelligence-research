@@ -636,6 +636,193 @@ unavailable canonical concepts, and source-native evidence outside the
 minimal Case also remains undecided. No analytical eligibility rule is
 introduced.
 
+## Decision Question 3 - Source Case Identity
+
+### Decision Question
+
+Can Calgary `service_request_id` be justified as canonical `source_case_id`
+within the committed `source_system = city_of_calgary_311` namespace?
+
+### Canonical Requirement
+
+Increment 002 defines `source_case_id` as:
+
+    Native source identifier within the source_system namespace.
+
+The authoritative source-native identity is:
+
+    (source_system, source_case_id)
+
+The relevant identity invariants are:
+
+- `(source_system, source_case_id)` is authoritative source-native identity;
+- the tuple must be unique;
+- one qualifying source-native work item maps to exactly one canonical Case,
+  and one canonical Case maps to exactly one qualifying source-native work
+  item;
+- repeated ingestion of the same tuple must resolve to the same Case;
+- native identifiers may collide across different `source_system` namespaces
+  without causing canonical identity collisions;
+- cross-source relationships do not merge Case identity;
+- entity resolution and higher-level grouping remain separate concerns.
+
+### Calgary Evidence
+
+Current official Calgary metadata describes `service_request_id` as:
+
+> The unique identifier for an individual request.
+
+Increment 003 retained these local observations:
+
+- logical data rows: 7,474,403;
+- empty or whitespace-only raw `service_request_id` values: 0;
+- distinct raw `service_request_id` values: 7,474,403;
+- duplicate raw `service_request_id` rows: 0.
+
+The committed predecessor decisions are:
+
+- Decision Question 1: `ADMIT_CASE`;
+- Decision Question 2: `source_system = city_of_calgary_311`.
+
+These are retained evidence and predecessor design decisions. No new
+empirical result is introduced here.
+
+### Competing Interpretations
+
+**Interpretation A — `ACCEPT_MAPPING`.** `service_request_id` identifies the
+admitted individual Calgary request within the `city_of_calgary_311`
+namespace. Review classification: `STRONGEST`.
+
+**Interpretation B — `DEFER_MAPPING`.** Current evidence is suggestive, but
+uncertainty about historical immutability, non-reuse, or continuity is treated
+as too strong to accept the mapping yet. Review classification: `PLAUSIBLE`.
+
+**Interpretation C — `REJECT_MAPPING`.** `service_request_id` identifies only
+a record representation or does not reliably distinguish individual Calgary
+requests. Review classification: `UNSUPPORTED`.
+
+### Decision
+
+`ACCEPT_MAPPING`
+
+    service_request_id -> source_case_id
+
+`AUTHORITATIVE_SOURCE_IDENTITY`:
+
+    (city_of_calgary_311, service_request_id)
+
+This notation defines the source-contract identity rule. It does not claim
+that ingestion logic, idempotent processing, database keys, or canonical
+`case_id` generation have been implemented.
+
+### Justification
+
+**SOURCE_NATIVE_IDENTITY_SEMANTICS: `SUPPORTED`.** Official Calgary metadata
+states that `service_request_id` is the unique identifier for an individual
+request.
+
+**NONBLANK_OBSERVED_POPULATION: `SUPPORTED`.** All 7,474,403 retained local
+rows contain a nonblank raw identifier.
+
+**OBSERVED_LOCAL_UNIQUENESS: `SUPPORTED`.** The retained artifact contains
+7,474,403 distinct raw identifiers and zero duplicate raw identifiers under
+exact-string comparison.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** `ADMIT_CASE` established that the
+individual Calgary service request is the operational entity, and official
+metadata describes `service_request_id` as identifying that individual
+request.
+
+**NAMESPACE_COMPATIBILITY: `SUPPORTED`.** `city_of_calgary_311` identifies the
+request source domain, while `service_request_id` identifies the individual
+request within it.
+
+**REPEAT_INGESTION_COMPATIBILITY: `SUPPORTED_AS_CONTRACT_REQUIREMENT`.** The
+mapping is semantically compatible with the Increment 002 requirement that
+repeated occurrences of the same authoritative source identity resolve to the
+same Case.
+
+Repeat ingestion has not been empirically tested.
+
+### Counterevidence / Limitation
+
+The strongest counterargument is that current official semantics and local
+uniqueness do not prove identifier immutability, historical non-reuse, or
+continuity across every past or future Calgary source version.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_MAPPING`
+
+The current evidence is sufficient for this bounded source contract because
+the official source semantics identify an individual request and the local
+evidence corroborates complete nonblank population and uniqueness.
+
+The following remain unresolved and must not be promoted into observed facts:
+
+- identifier immutability across all Calgary history;
+- historical non-reuse;
+- continuity across every future source migration;
+- exact local-artifact provenance;
+- immutable remote-version binding;
+- implemented repeat-ingestion behavior.
+
+`SOURCE_CASE_ID_MAPPING` asks which source-native identifier this contract
+uses for the admitted request. `PROVENANCE_CONFIDENCE` asks whether the
+complete historical acquisition chain of the local artifact is established.
+Unresolved provenance neither proves nor automatically defeats the mapping.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+
+The official description of `service_request_id` is external evidence. The
+mapping `service_request_id -> source_case_id` is a design choice supported by
+that evidence; the mapping itself is not external evidence or a research
+conclusion.
+
+### Falsification Condition
+
+This mapping must be revisited if credible future evidence shows that:
+
+- `service_request_id` identifies a record representation rather than the
+  individual request;
+- `service_request_id` is reused for distinct Calgary requests inside the
+  `city_of_calgary_311` namespace;
+- distinct requests collide on the same identifier inside the namespace;
+- a source migration materially changes identifier semantics;
+- one request legitimately receives multiple unrelated `service_request_id`
+  values without a stable identity relation;
+- `service_request_id` is not stable enough to satisfy repeat-ingestion
+  identity.
+
+Ordinary new identifiers, new rows, refreshed exports, changed artifact
+hashes, and routine metadata updates do not automatically falsify the mapping.
+
+The source identifier is preserved lexically. This decision does not choose
+or infer UUID or integer representation, a database primary-key type,
+normalization, case folding, trimming, surrogate generation, or parsing
+beyond preservation of the source value. Exact physical representation
+remains deferred.
+
+`INCREMENT_002_SOURCE_CASE_ID_FALSIFICATION: none`
+
+Successful Calgary identity mapping does not validate cross-source
+portability.
+
+Decision Question 4 remains undecided: this decision does not establish
+`requested_date -> created_at`. The treatment of
+`status_description -> source_status`, `canonical_status`, submission-channel
+representation, service type, responsible department, `updated_date`,
+`closed_date`, unavailable canonical concepts, and material source-native
+evidence outside the minimal Case also remains undecided. No analytical
+eligibility rule is introduced.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
