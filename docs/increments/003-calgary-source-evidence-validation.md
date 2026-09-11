@@ -1625,6 +1625,163 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. Portabil
 
 This observation provides progress toward current licence verification, current dataset-to-terms linkage, current attribution-requirement verification, and historical licence-binding gap characterization. The historical local-artifact licence version, acquisition provenance, dataset-specific attribution statement, source semantics, and canonical mappings remain unresolved. Increment 003 remains Planned.
 
+### Current Official Field Metadata Observation 013
+
+**Evidence classification:** `EXTERNAL EVIDENCE: CURRENT OFFICIAL FIELD METADATA`
+
+On 2026-09-11, current official column metadata was inspected at:
+
+    https://data.calgary.ca/api/views/iahh-g8bj
+
+Observed request and dataset identity:
+
+- `HTTP_STATUS`: 200;
+- `DATASET_ID`: `iahh-g8bj`;
+- `DATASET_NAME`: `311 Service Requests`.
+
+This is current source-native metadata only. It does not establish historical metadata equivalence with the local artifact.
+
+#### `service_request_id`
+
+- `fieldName`: `service_request_id`;
+- display name: `service_request_id`;
+- data type: `text`;
+- description: `The unique identifier for an individual request.`;
+- format: `{}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+The current official source describes `service_request_id` as the unique identifier for an individual request. This does not establish `service_request_id -> Case.source_case_id`; that mapping remains a separate source-contract decision.
+
+#### `requested_date`
+
+- `fieldName`: `requested_date`;
+- display name: `requested_date`;
+- data type: `calendar_date`;
+- description: `The date the request was submitted.`;
+- format: `{'view': 'date_ymd_time'}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`;
+- semantic classification: `REQUESTED_DATE_SOURCE_MEANING_EXPLICIT`.
+
+The bounded source meaning is that `requested_date` represents the date the request was submitted. The current metadata does not establish whether it is identical to source-native record creation time, underlying issue onset, first customer contact, ingestion time, or observation time. It also does not establish timezone or actual source measurement precision.
+
+Results:
+
+- `REQUESTED_DATE_CREATION_TIME_EQUIVALENCE_UNRESOLVED`;
+- `TIMEZONE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`;
+- `SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED_FROM_METADATA`.
+
+Submission date is an explicit source meaning and may make the field a stronger candidate for a later source-contract decision, but this observation does not establish `requested_date -> Case.created_at`.
+
+#### `updated_date`
+
+- `fieldName`: `updated_date`;
+- display name: `updated_date`;
+- data type: `calendar_date`;
+- description: `The most recent date the request was updated.`;
+- format: `{'view': 'date_ymd_time'}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+Result: `UPDATED_DATE_RECORD_VS_LIFECYCLE_MEANING_UNRESOLVED`.
+
+The description establishes that `updated_date` is the most recent date the request was updated, but it does not establish what kinds of updates qualify. The current metadata does not distinguish record modifications, lifecycle transitions, status changes, assignment changes, administrative edits, automated changes, or some combination of these. Previously observed `updated_date > closed_date` relationships are not used to resolve this semantic gap. No universal `Case.updated_at` concept is established.
+
+#### `closed_date`
+
+- `fieldName`: `closed_date`;
+- display name: `closed_date`;
+- data type: `calendar_date`;
+- description: `The date the request was closed.`;
+- format: `{'view': 'date_ymd_time'}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+Result: `CLOSED_DATE_LIFECYCLE_SEMANTICS_INCOMPLETE`.
+
+The metadata establishes a source concept called request closure. It does not establish first, latest, or final closure; whether closure can be reversed; reopening behavior; whether closed means resolved or completed; or whether cancellation or abandonment is represented as closure. This observation does not establish `closed_date -> universal Case.closed_at` or duration eligibility.
+
+#### `status_description`
+
+- `fieldName`: `status_description`;
+- display name: `status_description`;
+- data type: `text`;
+- description: `The current status of the request (e.g. open, closed).`;
+- format: `{}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+The current source describes `status_description` as the current status of the request. This observation does not enumerate values or establish monotonic state progression, terminal-state semantics, reopening rules, a canonical status vocabulary, or `status_description -> Case.source_status`.
+
+#### `source`
+
+- `fieldName`: `source`;
+- display name: `source`;
+- data type: `text`;
+- description: `The channel used to submit the request.`;
+- format: `{}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+The current official source defines `source` as the channel used to submit the request. The source metadata does not establish this field as `source_system`, ingestion source, or provenance source. The evidence may later support a source-contract decision involving an intake or submission-channel concept, but no canonical intake/origin mapping is created here.
+
+#### `service_name`
+
+- `fieldName`: `service_name`;
+- display name: `service_name`;
+- data type: `text`;
+- description: `The type of service requested.`;
+- format: `{}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+This observation does not establish a universal category, category hierarchy, taxonomy depth, or canonical classification.
+
+#### `agency_responsible`
+
+- `fieldName`: `agency_responsible`;
+- display name: `agency_responsible`;
+- data type: `text`;
+- description: `The department responsible for this request.`;
+- format: `{}`;
+- classification: `OFFICIAL_DESCRIPTION_PRESENT`.
+
+The source identifies a responsible-department concept. This does not establish equivalence with `owning_group`, assignment group, resolver group, support team, current assignee, or a canonical responsibility concept.
+
+#### Temporal Semantic Gaps
+
+Results:
+
+- `TIMEZONE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`;
+- `SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED_FROM_METADATA`;
+- `REOPENING_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`;
+- `FINAL_CLOSURE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`.
+
+The `calendar_date` data type and `date_ymd_time` display format do not establish actual source measurement precision. Displayed seconds are not treated as proof of one-second precision. A separate empirical date and midnight-precision investigation remains necessary.
+
+#### Source Semantics Versus Canonical Model
+
+`SOURCE-NATIVE SEMANTIC EVIDENCE` is distinct from `CANONICAL MAPPING DESIGN`.
+
+This observation establishes what Calgary currently says these fields mean. It does not establish:
+
+- `service_request_id -> Case.source_case_id`;
+- `requested_date -> Case.created_at`;
+- `status_description -> Case.source_status`;
+- `source -> canonical intake/origin`;
+- `agency_responsible -> owning_group`;
+- `service_name -> canonical classification`.
+
+Any eventual mapping requires a separate source-contract decision justified against Increment 002 and the analytical questions.
+
+#### Analytical-Eligibility Boundary
+
+Current official field metadata alone does not establish that any field is valid for resolution time, request-to-closure elapsed duration, active work time, handling time, queue time, waiting time, or censoring analysis. `The date the request was closed.` is source-semantic evidence, but it is insufficient by itself to establish a final-resolution metric.
+
+#### Increment 002 Boundary
+
+Result: `NO_INCREMENT_002_CONFLICT_OBSERVED_IN_OFFICIAL_FIELD_METADATA_CHECK`.
+
+No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The current field semantics fit within Increment 002's existing boundary that source-specific concepts need not become universal Case fields. Portability remains unvalidated.
+
+#### Increment 003 Progress
+
+This observation provides progress toward source-native semantic characterization, temporal-field semantic characterization, and future source-contract justification. Canonical source mapping, temporal precision, timezone semantics, reopening semantics, final-closure semantics, analytical duration eligibility, and provenance remain unresolved. Increment 003 remains Planned.
+
 ## Artifacts
 
 Planned increment record:
