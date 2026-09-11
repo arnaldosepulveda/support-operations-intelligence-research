@@ -1,7 +1,8 @@
 # Increment 003 - Calgary Source Evidence Validation
 
-**Status:** Planned
+**Status:** Complete
 **Opened:** 2026-09-10
+**Completed:** 2026-09-11
 
 ## Objective
 
@@ -1973,6 +1974,148 @@ No `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` classification is applied. The repr
 #### Increment 003 Progress
 
 This observation provides progress toward timestamp evidence-quality characterization, temporal representation characterization, and future analytical-contract design. Source temporal precision, timezone semantics, duration eligibility, censoring semantics, canonical timestamp mappings, and final-closure semantics remain unresolved. Increment 003 remains Planned.
+
+## Completion Review
+
+`FINAL_COMPLETION_DETERMINATION`: `READY_TO_CLOSE_INCREMENT_003`.
+
+Increment 003 established a repository-validated evidence baseline for the local Calgary 311 artifact sufficient to proceed to separate source-contract and analytical-contract work. The increment does not establish canonical mappings, analytical eligibility, or portability.
+
+### Completion-Criteria Results
+
+All 15 original completion criteria were reviewed without weakening or rewriting them:
+
+1. `SATISFIED`
+2. `SATISFIED`
+3. `SATISFIED`
+4. `SATISFIED`
+5. `SATISFIED_WITH_EXPLICIT_BOUNDARY`
+6. `SATISFIED_WITH_EXPLICIT_BOUNDARY`
+7. `SATISFIED_WITH_EXPLICIT_BOUNDARY`
+8. `SATISFIED_WITH_EXPLICIT_BOUNDARY`
+9. `BLOCKED_BY_UNAVAILABLE_EVIDENCE`
+10. `SATISFIED_WITH_EXPLICIT_BOUNDARY`
+11. `SATISFIED`
+12. `SATISFIED`
+13. `SATISFIED`
+14. `SATISFIED`
+15. `SATISFIED`
+
+`NOT_SATISFIED_CRITERIA`: none.
+
+### Criterion 9: Provenance Boundary
+
+Provenance investigation is `BLOCKED_BY_UNAVAILABLE_EVIDENCE`.
+
+The unavailable evidence includes:
+
+- exact acquisition URL;
+- acquisition time;
+- HTTP acquisition metadata;
+- immutable authoritative snapshot or version binding;
+- authoritative remote digest corresponding to the retained local bytes.
+
+This unresolved provenance result is compatible with Increment 003 closure because the increment investigated and bounded the available evidence rather than requiring fabricated acquisition lineage. This is not `LOCAL_ARTIFACT_PROVENANCE_CONFIRMED`.
+
+### Closure-Compatible Unresolved Results
+
+Closure does not resolve:
+
+- immutable source-version binding;
+- historical licence version for the exact local artifact;
+- dataset-specific attribution statement;
+- source temporal precision;
+- timezone semantics;
+- `requested_date` creation-time equivalence;
+- `updated_date` record-versus-lifecycle meaning;
+- reopening semantics;
+- first, latest, or final closure semantics;
+- final-resolution equivalence;
+- censoring semantics;
+- duration eligibility;
+- analytical observation-window definition;
+- canonical source mappings.
+
+These are retained limitations or later design questions, not omissions to hide.
+
+### Failure-Criterion Review
+
+- Expected file absent: `NOT_TRIGGERED`.
+- Expected path wrong: `NOT_TRIGGERED`.
+- Local file incomplete or corrupt: `UNRESOLVED`.
+- File not reproducibly readable: `NOT_TRIGGERED`.
+- Schema differs from preparation context: `NOT_TRIGGERED`.
+- Identifier missing, null, or non-unique: `NOT_TRIGGERED`.
+- Lifecycle fields differ from expected presence: `NOT_TRIGGERED`.
+- Timestamps malformed or semantically unclear: `TRIGGERED` for semantic uncertainty only; the malformed-value condition was not observed.
+- Temporal coverage materially differs from the prepared range: `NOT_TRIGGERED`.
+- Provenance cannot be established: `TRIGGERED`.
+- Licence or attribution cannot be verified: `TRIGGERED` only for historical local binding and dataset-specific attribution; current official licence evidence was verified.
+- Transformed derivative lacks adequate lineage: `UNRESOLVED`.
+- Prepared evidence cannot be reproduced: `NOT_TRIGGERED`.
+
+The triggered negative conditions are retained findings and limitations under the increment's evidence-validation purpose and do not block closure. They are not rewritten as successful positive findings.
+
+### Claim Boundary at Closure
+
+Completion of Increment 003 does not mean:
+
+- local artifact provenance is confirmed;
+- authoritative completeness is confirmed;
+- an immutable source snapshot is bound to the local artifact;
+- the local artifact is proven to have been acquired under licence 2.1;
+- dataset-specific attribution wording is resolved;
+- temporal precision is established;
+- timezone is established;
+- `updated_date` is a lifecycle-transition timestamp;
+- `closed_date` is final resolution;
+- reopening semantics are known;
+- request-to-closure duration is analytically valid;
+- active work, handling, queue, or waiting time is observable;
+- censoring semantics are established;
+- canonical Case mappings are established;
+- Calgary supports workflow decomposition;
+- Increment 002 portability is validated;
+- production capability is established.
+
+### Increment 002 Result
+
+`INCREMENT_002_FALSIFICATION_RESULT`: none.
+
+Increment 003 justified no `WEAKEN`, `REFINE`, `EXTEND`, or `REJECT` outcome. Portability remains unvalidated.
+
+### Next-Step Boundary
+
+The evidence baseline is closed. Later work must remain separate.
+
+A future source-contract increment may address:
+
+- Calgary admission decision;
+- source identity mapping;
+- source-native-to-canonical mapping;
+- treatment of submission channel;
+- treatment of responsible department;
+- treatment of source status;
+- timestamp mapping decisions.
+
+A future analytical-contract increment may address:
+
+- analytical population;
+- observation window;
+- closure eligibility;
+- censoring treatment;
+- precision treatment;
+- duration definition;
+- denominators;
+- inclusion and exclusion;
+- summary statistics;
+- supported and unsupported claims.
+
+Neither later increment is created here.
+
+### Reproducibility Boundary
+
+The increment retains sufficient commands, settings, counts, hashes, and bounded observations for later reproduction attempts. Independent reproduction remains separate from this closure decision.
 
 ## Artifacts
 
