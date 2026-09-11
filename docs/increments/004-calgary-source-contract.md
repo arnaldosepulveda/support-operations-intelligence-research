@@ -432,6 +432,210 @@ Decision Questions 2 through 13 remain undecided. No canonical field mapping,
 `source_system` value, `UNAVAILABLE` reason, analytical eligibility rule, or
 portability conclusion is introduced by this decision.
 
+## Decision Question 2 - Source-System Namespace
+
+### Decision Question
+
+What stable canonical `source_system` namespace should identify the Calgary
+311 source represented by this source contract?
+
+### Canonical Requirement
+
+Increment 002 defines:
+
+`source_system`:
+
+    Identity namespace for the originating source or system.
+
+`source_case_id`:
+
+    Native source identifier within the source_system namespace.
+
+The authoritative source-native identity is:
+
+    (source_system, source_case_id)
+
+The tuple must be unique. Repeated ingestion of the same
+`(source_system, source_case_id)` must resolve to the same canonical Case, and
+native identifiers from different source systems may collide without causing
+canonical identity collisions.
+
+Increment 002 does not require `source_system` to be an official source field,
+a publication dataset identifier, a local artifact identifier, or a known
+backend-product name.
+
+### Calgary Evidence
+
+Increment 003 retained the following relevant evidence:
+
+- the current official dataset identity is `311 Service Requests`;
+- the retained attribution metadata is `The City of Calgary`;
+- the current official description identifies public service requests
+  submitted through 311;
+- the current published dataset identifier is `iahh-g8bj`;
+- Calgary's native field named `source` means the channel used to submit the
+  request;
+- the local CSV has its own artifact path, byte size, and SHA-256 identity;
+- Calgary's underlying production application, database, vendor, and backend
+  were not established.
+
+The retained evidence therefore supports a City of Calgary 311
+service-request source domain while preserving the distinction between that
+domain, its publication dataset, its local artifact, and its submission
+channel.
+
+### Competing Interpretations
+
+**Candidate A: `city_of_calgary_311` — `ACCEPTABLE`.** It identifies the
+jurisdiction and 311 domain clearly, remains independent of artifacts and
+publication versions, and does not assert a backend product. It could be too
+broad if later evidence establishes multiple independent Calgary 311 identity
+domains.
+
+**Candidate B: `calgary_311` — `WEAKER`.** It is concise and backend-neutral,
+but it is less globally explicit because it omits the City of Calgary source
+boundary.
+
+**Candidate C: `calgary_311_service_requests` — `ACCEPTABLE`.** It explicitly
+names the admitted request domain, but it is less globally precise than
+Candidate A and binds the namespace more closely to the current object-domain
+description.
+
+**Candidate D: `calgary_open_data_311_service_requests` — `REJECT`.** It binds
+identity to the publication and distribution layer rather than the evidenced
+operational request source domain.
+
+**Candidate E: `iahh-g8bj` — `REJECT`.** It is useful current published dataset
+identity, but it is opaque and is not justified as the operational source
+identity namespace.
+
+**Candidate F: `calgary_open_data_iahh_g8bj` — `REJECT`.** It makes the
+publication dataset identity more reconstructable but still conflates
+publication provenance with canonical operational source identity.
+
+Candidates A, B, and C identify the evidenced Calgary 311 operational request
+domain. Candidates D, E, and F instead bind identity to the publication or
+distribution layer.
+
+### Decision
+
+`ACCEPT_MAPPING`
+
+`source_system`:
+
+    city_of_calgary_311
+
+The canonical `source_system` field for this Calgary source contract is
+assigned the project-defined namespace literal `city_of_calgary_311`.
+
+This is a canonical identity-namespace design choice. It is not an observed
+Calgary source field value.
+
+### Justification
+
+**STABILITY.** `city_of_calgary_311` survives ordinary dataset refreshes,
+exports, and local snapshots.
+
+**GLOBAL_CLARITY.** It identifies the City of Calgary and the 311 domain
+explicitly enough to distinguish this source boundary from unrelated 311
+systems.
+
+**SEMANTIC_HONESTY.** It does not claim knowledge of Calgary's underlying CRM,
+database, vendor, or operational software.
+
+**SOURCE_NATIVE_ALIGNMENT.** It corresponds to the retained City of Calgary
+311 service-request domain.
+
+**ARTIFACT_INDEPENDENCE.** It does not depend on the CSV path, SHA-256, byte
+size, row count, or any specific local copy.
+
+**VERSION_INDEPENDENCE.** It does not require renaming for ordinary source or
+publication updates.
+
+**CHANNEL_SEPARATION.** It remains distinct from Calgary's native `source`
+field, which represents the submission channel.
+
+**RECONSTRUCTABILITY.** A later reviewer can reconstruct the namespace from
+the retained City of Calgary, 311, and service-request evidence together with
+the stated identity-namespace design rule.
+
+`iahh-g8bj` and Calgary Open Data identifiers remain useful publication
+identifiers, but the retained evidence does not justify using them as the
+canonical operational identity namespace.
+
+### Counterevidence / Limitation
+
+The strongest counterargument is that `city_of_calgary_311` may be too broad
+if City of Calgary 311 actually contains multiple independent operational
+systems or identifier domains.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+The limitation remains a revision risk, but the retained evidence supports
+one admitted Calgary 311 service-request domain for this source contract and
+does not establish multiple underlying identity domains.
+
+The decision also preserves these limitations:
+
+- the underlying production application remains unknown;
+- multiple hidden identity domains have not been ruled out across all source
+  history;
+- local artifact provenance remains unresolved;
+- the current published dataset identifier does not prove operational-system
+  identity.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+
+`city_of_calgary_311` is neither external evidence nor an engineering
+observation or research conclusion. It is the project-defined canonical
+identity namespace selected from the retained evidence.
+
+### Falsification Condition
+
+This namespace decision must be revisited if credible future evidence shows
+that:
+
+- multiple independent Calgary 311 identifier domains exist;
+- native identifiers collide across independently meaningful Calgary 311
+  systems;
+- the published dataset combines operational sources that should not share
+  one identity namespace;
+- authoritative evidence contradicts the current source boundary;
+- materially different source systems currently collapsed together must be
+  distinguished.
+
+New rows, metadata updates, a refreshed CSV, a new local artifact hash, and
+ordinary publication refreshes do not by themselves falsify this namespace.
+
+The four identity concepts remain distinct:
+
+- canonical `source_system`: `city_of_calgary_311`;
+- native Calgary `source`: submission channel;
+- local CSV identity: artifact identity only;
+- `iahh-g8bj`: current published dataset identity.
+
+`INCREMENT_002_SOURCE_SYSTEM_FALSIFICATION: none`
+
+Choosing a Calgary-specific namespace does not validate cross-source
+portability.
+
+Decision Question 3 remains undecided: this decision does not establish
+`service_request_id -> source_case_id`. The treatment of `created_at`,
+`source_status`, `canonical_status`, submission-channel representation,
+service type, responsible department, `updated_date`, `closed_date`,
+unavailable canonical concepts, and source-native evidence outside the
+minimal Case also remains undecided. No analytical eligibility rule is
+introduced.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
