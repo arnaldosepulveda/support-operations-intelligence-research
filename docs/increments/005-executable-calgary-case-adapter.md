@@ -713,6 +713,195 @@ The `FROZEN_DATACLASS` selection is a Design choice.
 This documentation decision produces no new Engineering observation,
 External evidence, Research result, or Research conclusion.
 
+## Calgary Source Identity Admissibility Decision
+
+### Decision Question
+
+What minimum conditions must the already-parsed Calgary
+`service_request_id` value satisfy before the adapter may construct a
+`CaseId` and proceed toward Case emission?
+
+### Boundary
+
+This decision applies only to the raw adapter input field:
+
+    service_request_id
+
+for:
+
+    source_system:
+        city_of_calgary_311
+
+It does not redefine `CaseId` itself and does not define identity policy for
+every future source.
+
+### Decision
+
+    CALGARY_SOURCE_CASE_ID_ADMISSIBILITY:
+        REQUIRE_PRESENT_NONBLANK_STRING
+
+A raw Calgary record may contribute a valid `source_case_id` only when:
+
+1. `service_request_id` is present;
+2. its value is not `None`;
+3. its value is a Python `str`;
+4. its value is not the empty string `""`;
+5. its value is not composed entirely of whitespace.
+
+When all five conditions hold, the exact lexical string is preserved
+unchanged.
+
+### Invalid-Input Conditions
+
+The distinct invalid-input conditions are:
+
+`MISSING_SOURCE_CASE_ID`
+
+: `service_request_id` is absent from the raw record boundary.
+
+`NULL_SOURCE_CASE_ID`
+
+: `service_request_id` is present with value `None`.
+
+`NON_STRING_SOURCE_CASE_ID`
+
+: `service_request_id` exists but is not a `str`.
+
+`EMPTY_SOURCE_CASE_ID`
+
+: `service_request_id == ""`.
+
+`WHITESPACE_ONLY_SOURCE_CASE_ID`
+
+: `service_request_id` contains only whitespace characters.
+
+These names are Design vocabulary for the Increment 005 validation decision.
+They do not select an `Enum`, exception class, error dataclass, result object,
+return tuple, or error-code serialization.
+
+### Validation and Normalization Boundary
+
+Validation may inspect the source string to determine whether it contains any
+non-whitespace character. Normalization is not authorized.
+
+For example:
+
+    " 001AbC-09 "
+
+is nonblank and therefore may be admissible. If accepted, it remains exactly:
+
+    " 001AbC-09 "
+
+It must not become:
+
+    "001AbC-09"
+
+This decision does not authorize `strip()`, `lstrip()`, `rstrip()`, case
+folding, lowercasing, uppercasing, numeric conversion, UUID conversion,
+Unicode normalization, delimiter parsing, or rewriting. If implementation
+later uses `isspace()` or another predicate to detect whitespace-only input,
+that predicate must not alter the stored value.
+
+### Non-String Rejection Rationale
+
+The Calgary source contract maps a source-native textual identifier.
+Converting an integer, float, UUID object, or another Python value to `str`
+would introduce a lexical representation that was not supplied at the
+adapter boundary. Increment 005 therefore rejects non-string raw identity
+values rather than coercing them.
+
+This is a Calgary adapter Design choice, not a universal claim that all source
+systems use textual identifiers.
+
+### Relation to Increment 003 Evidence
+
+The retained Calgary artifact had:
+
+    service_request_id empty count:
+        0
+
+    service_request_id whitespace-only count:
+        0
+
+Increment 003 records these retained-file counts as an Engineering
+observation. They do not make validation unnecessary. The adapter identity
+rule derives from the Case and source-contract requirement for defensible
+source identity, not from an assumption that the retained artifact or future
+Calgary data will always have the same quality. This decision does not claim
+that production Calgary data can never contain invalid identity.
+
+### Representation and Admission
+
+`CaseId` represents an identity value after the adapter has determined that
+the raw identity is admissible. Raw identity admissibility determines whether
+the adapter is permitted to construct that `CaseId`.
+
+Python technically permits:
+
+```python
+CaseId("city_of_calgary_311", "")
+```
+
+That representational capability does not establish that the Calgary adapter
+may emit such an identity. The domain container intentionally remains simpler
+than the adapter boundary.
+
+### Rejection Transport
+
+When identity is inadmissible, the future adapter might use an explicit
+rejection result, a typed error object, an exception, or another bounded
+mechanism. This decision does not select among them.
+
+    IDENTITY_REJECTION_TRANSPORT:
+        NOT_DEFINED
+
+Increment 005 first establishes what constitutes inadmissible identity. The
+mechanism for returning or preserving the rejection must be decided
+separately.
+
+### Planned Test Implications
+
+Future implementation tests must cover:
+
+- valid exact string `"12345"`: accepted and preserved lexically unchanged;
+- valid padded nonblank string `" 001AbC-09 "`: accepted and preserved
+  lexically unchanged;
+- missing field: rejected before `CaseId` creation;
+- `None`: rejected before `CaseId` creation;
+- non-string value: rejected without coercion;
+- empty string: rejected;
+- whitespace-only string: rejected.
+
+These are planned test requirements, not observed test results.
+
+### Revision and Falsification Conditions
+
+This decision must be revisited if evidence establishes, for example, that:
+
+- Calgary legitimately uses empty or whitespace-only service identifiers;
+- Calgary source identity is not faithfully represented as text;
+- an authoritative source contract requires normalization before identity
+  comparison;
+- the adapter boundary changes so identity is already validated by a stronger
+  upstream contract;
+- the Increment 002 or Increment 004 identity assumptions are revised.
+
+None of these conditions is currently claimed to hold.
+
+### Claim Classification
+
+    CALGARY_SOURCE_CASE_ID_ADMISSIBILITY:
+        Design choice
+
+    rejection-condition vocabulary:
+        Design choice
+
+    Increment 003 observed identity completeness:
+        Engineering observation
+
+This documentation change produces no new External evidence, Engineering
+observation from execution, or Research conclusion.
+
 ## Source-Native Preservation Boundary
 
 The adapter must not relabel:
