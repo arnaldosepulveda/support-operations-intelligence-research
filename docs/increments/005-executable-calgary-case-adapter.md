@@ -846,18 +846,12 @@ That representational capability does not establish that the Calgary adapter
 may emit such an identity. The domain container intentionally remains simpler
 than the adapter boundary.
 
-### Rejection Transport
+### Rejection Transport Relationship
 
-When identity is inadmissible, the future adapter might use an explicit
-rejection result, a typed error object, an exception, or another bounded
-mechanism. This decision does not select among them.
-
-    IDENTITY_REJECTION_TRANSPORT:
-        NOT_DEFINED
-
-Increment 005 first establishes what constitutes inadmissible identity. The
-mechanism for returning or preserving the rejection must be decided
-separately.
+This admissibility decision establishes what constitutes inadmissible
+identity. The mechanism for communicating acceptance or rejection is selected
+separately in the Identity Rejection Transport Decision below; that transport
+selection does not alter the admissibility semantics or rejection vocabulary.
 
 ### Planned Test Implications
 
@@ -901,6 +895,297 @@ None of these conditions is currently claimed to hold.
 
 This documentation change produces no new External evidence, Engineering
 observation from execution, or Research conclusion.
+
+## Identity Rejection Transport Decision
+
+### Decision Question
+
+How should the Increment 005 adapter represent the expected outcome that a
+raw Calgary source identity is inadmissible, while keeping expected source
+data rejection distinct from unexpected software failure?
+
+### Requirements
+
+The rejection transport must:
+
+1. preserve the exact rejection reason;
+2. make acceptance versus rejection explicit;
+3. prevent an inadmissible identity from being mistaken for a valid `CaseId`;
+4. avoid exceptions for an expected source-data outcome;
+5. avoid sentinel ambiguity such as `None` or `False`;
+6. avoid loosely structured tuple or dictionary conventions;
+7. use only the Python standard library;
+8. remain easy to test;
+9. remain usable for later batch ingestion in which rejected records may need
+   to be retained or counted;
+10. introduce no persistence, serialization, logging, or external API policy.
+
+### Candidate Transports
+
+#### A. Return `None`
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+`None` loses the specific rejection reason and conflates multiple failure
+conditions.
+
+#### B. Return `bool`
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A boolean indicates only pass or fail and loses both the reason and the
+accepted identity.
+
+#### C. Return a Tuple
+
+Example:
+
+```python
+(CaseId | None, reason | None)
+```
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A tuple permits ambiguous or internally inconsistent combinations and relies
+on positional convention.
+
+#### D. Return a Dictionary
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A dictionary is weakly structured and allows malformed combinations without
+a current need for generic serialization.
+
+#### E. Raise an Ordinary Exception
+
+Examples include `ValueError` or another ordinary exception for expected
+invalid identity.
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+Inadmissible source identity is an expected domain outcome, not necessarily an
+exceptional software failure. Exception transport would complicate later
+batch processing and failure retention.
+
+#### F. Explicit Typed Result Variants
+
+Result:
+
+    ACCEPT_FOR_INCREMENT_005
+
+### Decision
+
+    IDENTITY_REJECTION_TRANSPORT:
+        EXPLICIT_RESULT_VARIANTS
+
+The planned result model has two mutually exclusive outcomes:
+
+`ACCEPTED`
+
+: contains a `CaseId`.
+
+`REJECTED`
+
+: contains an `IdentityRejectionReason`.
+
+No result may simultaneously represent both acceptance and rejection.
+
+### Rejection-Reason Representation
+
+    IDENTITY_REJECTION_REASON_CONTAINER:
+        ENUM
+
+Planned standard-library representation:
+
+```python
+from enum import Enum
+
+
+class IdentityRejectionReason(Enum):
+    MISSING_SOURCE_CASE_ID = "MISSING_SOURCE_CASE_ID"
+    NULL_SOURCE_CASE_ID = "NULL_SOURCE_CASE_ID"
+    NON_STRING_SOURCE_CASE_ID = "NON_STRING_SOURCE_CASE_ID"
+    EMPTY_SOURCE_CASE_ID = "EMPTY_SOURCE_CASE_ID"
+    WHITESPACE_ONLY_SOURCE_CASE_ID = "WHITESPACE_ONLY_SOURCE_CASE_ID"
+```
+
+This is planned structure only and is not implemented by this documentation
+decision. The enum values correspond exactly to the already committed
+rejection vocabulary; no new reason is added.
+
+### Result Variants
+
+Planned standard-library shapes:
+
+```python
+@dataclass(frozen=True)
+class AcceptedIdentity:
+    case_id: CaseId
+
+
+@dataclass(frozen=True)
+class RejectedIdentity:
+    reason: IdentityRejectionReason
+
+
+IdentityAdmissionResult = AcceptedIdentity | RejectedIdentity
+```
+
+These classes and alias are planned implementation only and are not created by
+this documentation decision.
+
+### Mutual-Exclusivity Invariant
+
+`AcceptedIdentity` always contains a `CaseId`.
+
+`RejectedIdentity` never contains a `CaseId`; it contains only an
+`IdentityRejectionReason`.
+
+An inadmissible raw source identity therefore cannot accidentally carry a
+physical canonical Case identifier. This is a structural property of the
+result variants rather than a runtime convention such as `case_id = None`.
+
+### Expected Rejection and Software Failure
+
+Expected domain rejection includes:
+
+- missing `source_case_id`;
+- null `source_case_id`;
+- non-string `source_case_id`;
+- empty `source_case_id`;
+- whitespace-only `source_case_id`.
+
+Its transport is:
+
+    RejectedIdentity
+
+Unexpected software or system failures might later include a programming
+defect, impossible internal state, or infrastructure failure. Their transport
+is:
+
+    NOT_DEFINED_BY_THIS_DECISION
+
+This decision does not design general exception handling and does not claim
+that all future adapter failures become `RejectedIdentity`.
+
+### Rejected-Input Retention Boundaries
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+`RejectedIdentity` does not contain the rejected raw identity value. Whether
+rejected source values should be retained belongs to later ingestion,
+provenance, or evidence design. This transport preserves only why admission
+failed; it does not silently add `raw_value`, `raw_record`, `source_payload`,
+`metadata`, `timestamp`, or logging-context fields.
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+This transport decision establishes no dead-letter storage, rejection table,
+audit persistence, log format, provenance storage, or database schema.
+
+### Relationship to `CaseId`
+
+`CaseId` represents an already-admissible identity and remains
+validation-free. `AcceptedIdentity` communicates that admission succeeded and
+carries that `CaseId`. `RejectedIdentity` communicates that admission failed
+and carries only a reason. `IdentityRejectionReason` identifies which
+committed admissibility condition failed.
+
+### Callable API Boundary
+
+This decision does not select an adapter function name, adapter class name,
+raw-record Python type, `Mapping` versus `dict` boundary, validation-helper
+name, Case representation, full adapter result, or source-native evidence
+result structure.
+
+    IDENTITY_ADMISSION_API:
+        NOT_DEFINED
+
+The result transport can be decided independently of the callable API.
+
+### Planned Test Implications
+
+Future implementation tests must establish:
+
+1. a valid admissible identity produces `AcceptedIdentity`;
+2. `AcceptedIdentity` contains the exact expected `CaseId`;
+3. missing identity produces `RejectedIdentity` with
+   `MISSING_SOURCE_CASE_ID`;
+4. `None` produces `RejectedIdentity` with `NULL_SOURCE_CASE_ID`;
+5. a non-string produces `RejectedIdentity` with
+   `NON_STRING_SOURCE_CASE_ID`;
+6. an empty string produces `RejectedIdentity` with
+   `EMPTY_SOURCE_CASE_ID`;
+7. a whitespace-only string produces `RejectedIdentity` with
+   `WHITESPACE_ONLY_SOURCE_CASE_ID`;
+8. a padded nonblank identity produces `AcceptedIdentity` with the exact
+   lexical value preserved;
+9. `RejectedIdentity` exposes no `case_id` field;
+10. each accepted or rejected result is immutable under the selected frozen
+    dataclass representation.
+
+These are planned tests only; no execution result is claimed.
+
+### Failure Conditions
+
+The transport design is violated if implementation:
+
+- returns `None` for rejection;
+- returns only boolean success or failure;
+- loses the rejection reason;
+- coerces rejection reasons into arbitrary strings outside the committed
+  vocabulary;
+- constructs `CaseId` before admissibility succeeds;
+- includes `CaseId` in a rejected outcome;
+- uses expected rejection as an exception-only control path;
+- adds normalization;
+- adds unapproved rejection reasons;
+- silently stores raw rejected values or full records as part of this
+  transport.
+
+### Revision Conditions
+
+This design must be revisited if later requirements establish:
+
+- a framework-specific result abstraction worth adopting;
+- external API serialization requirements;
+- cross-language interchange requirements;
+- persistence or audit requirements needing richer rejection evidence;
+- performance evidence showing object-per-result transport is materially
+  unsuitable;
+- a revised adapter architecture in which identity admission is guaranteed
+  upstream.
+
+None of these conditions is currently claimed to hold.
+
+### Claim Classification
+
+    EXPLICIT_RESULT_VARIANTS:
+        Design choice
+
+    IdentityRejectionReason enum:
+        Design choice
+
+    AcceptedIdentity / RejectedIdentity:
+        Design choices
+
+    Existing rejection vocabulary:
+        previously committed Design choice
+
+This documentation step produces no new Engineering observation, External
+evidence, Research result, or Research conclusion.
 
 ## Source-Native Preservation Boundary
 
