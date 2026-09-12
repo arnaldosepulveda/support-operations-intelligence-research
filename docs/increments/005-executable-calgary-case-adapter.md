@@ -1112,6 +1112,137 @@ conformance, Calgary dataset validity, full reproducibility, package
 installation, production readiness, portability, analytical correctness, or a
 research conclusion.
 
+## Implementation Record 002 - CaseId Representation
+
+### Objective
+
+Realize the committed `STRUCTURED_SOURCE_IDENTITY` physical representation
+using the committed frozen-dataclass Python container.
+
+### Files
+
+    src/support_operations_intelligence/identity.py
+    tests/test_case_id.py
+
+### Design Implemented
+
+```python
+@dataclass(frozen=True)
+class CaseId:
+    source_system: str
+    source_case_id: str
+```
+
+Third-party dependencies introduced:
+
+    none
+
+Raw input validation:
+
+    not implemented
+
+Calgary adapter:
+
+    not implemented
+
+The implementation contains only the two committed fields and default frozen
+dataclass behavior. It introduces no normalization, parsing, validation,
+factory, serialization, persistence, source-system assignment, source-record
+extraction, or adapter behavior.
+
+### Expected Pre-Implementation Failure
+
+Executed before `identity.py` existed:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed discovery result:
+
+    tests reported: 1 failed test module
+    errors: 1
+    result: FAILED (errors=1)
+
+Error type:
+
+    ModuleNotFoundError
+
+Reason:
+
+    No module named 'support_operations_intelligence.identity'
+
+This expected pre-implementation failure is an Engineering observation. The
+CaseId-focused test could not pass before the identity module existed. This is
+test-first evidence, not a product defect.
+
+### Focused Post-Implementation Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed result:
+
+    tests run: 6
+    failures: 0
+    errors: 0
+    result: OK
+
+### Full-Suite Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed result:
+
+    tests run: 7
+    failures: 0
+    errors: 0
+    result: OK
+
+The existing package-boundary smoke test remained passing.
+
+### Direct Representation Verification
+
+The direct repository-local Python verification observed:
+
+    is_dataclass = True
+    fields = ['source_system', 'source_case_id']
+    a_equals_b = True
+    a_equals_c = False
+    preserved_source_case_id = ' 001AbC-09 '
+
+The mutation test also observed that ordinary assignment to a field raises
+`dataclasses.FrozenInstanceError`.
+
+These results establish that the implemented `CaseId` conforms to the
+currently tested representation properties under the repository-local Python
+execution boundary.
+
+### Validation and Claim Boundary
+
+`CaseId` represents an already-valid identity value. This step does not
+implement or test raw-record validation, `None`, missing mapping keys, blank or
+whitespace-only identifiers, adapter rejection, exception policy,
+source-system assignment, `service_request_id` extraction, Calgary records,
+source mappings, or evidence states.
+
+The `CaseId` implementation is a Design implementation of prior Design
+choices. The expected red test, focused green test execution, full-suite test
+execution, and direct verification are Engineering observations.
+
+This step produces no External evidence, analytical result, Calgary semantic
+validation, portability evidence, or research conclusion. It does not
+establish adapter correctness, source-record validation correctness, Calgary
+identity validity, dataset validation, cross-source portability, persistence
+correctness, or production readiness.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
