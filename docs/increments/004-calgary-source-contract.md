@@ -1016,6 +1016,233 @@ responsible department, `updated_date`, `closed_date`, unavailable canonical
 concepts, and material source-native evidence outside the minimal Case also
 remains undecided.
 
+## Decision Question 5 - Source Status
+
+### Decision Question
+
+Can Calgary `status_description` be justified as canonical `source_status`?
+
+### Canonical Requirement
+
+Increment 002 defines `source_status` as the Case-level lifecycle status
+expressed in the originating source's native vocabulary.
+
+It may be:
+
+- `OBSERVED` directly from Case or snapshot evidence;
+- `DERIVED` deterministically from richer source evidence at a defined
+  observation boundary.
+
+`source_status` retains source-native lifecycle semantics. It does not require
+canonical normalization, does not imply monotonic lifecycle progression, and
+does not replace event history. It does not require known reopening behavior
+and does not imply terminality or final resolution.
+
+`canonical_status` is an optional normalized lifecycle interpretation that
+requires separate justification.
+
+### Calgary Evidence
+
+Increment 003 retained the following official field evidence:
+
+- field: `status_description`;
+- type: `text`;
+- description: "The current status of the request (e.g. open, closed)."
+
+Increment 003 also retained the following local population evidence:
+
+- logical data rows: 7,474,403;
+- blank `status_description` values: 0;
+- whitespace-only `status_description` values: 0.
+
+No distinct-value inspection was performed for this decision.
+
+Increment 003 did not establish:
+
+- the complete status vocabulary;
+- transition rules;
+- lifecycle monotonicity;
+- reopening behavior;
+- terminal-state semantics;
+- final-resolution equivalence;
+- canonical normalization rules.
+
+### Competing Interpretations
+
+**Interpretation A — `ACCEPT_MAPPING`.** Preserve
+`status_description -> source_status` as the admitted request's source-native
+current-status representation. Review classification: `STRONGEST`.
+
+**Interpretation B — `DEFER_MAPPING`.** Current-status semantics are
+promising, but unresolved observation timing or historical binding might
+justify deferral. Review classification: `PLAUSIBLE`.
+
+**Interpretation C — `REJECT_MAPPING`.** Treat `status_description` as not
+actually representing a source-native request-status concept. Review
+classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    ACCEPT_MAPPING: STRONGEST
+    DEFER_MAPPING: PLAUSIBLE
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`ACCEPT_MAPPING`
+
+    status_description -> source_status
+
+The Calgary source-native current-status value represented in
+`status_description` is preserved as `source_status` for the admitted Case.
+
+This mapping does not mean:
+
+- `canonical_status`;
+- historical status sequence;
+- most recent transition event;
+- terminal status;
+- final disposition;
+- final resolution;
+- proof that a closure-like status cannot later reopen.
+
+### Justification
+
+**SOURCE_NATIVE_STATUS_SEMANTICS: `SUPPORTED`.** Calgary explicitly defines
+`status_description` as the current status of the request.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes the already admitted
+Calgary service request.
+
+**NATIVE_VOCABULARY_PRESERVATION: `SUPPORTED`.** The source-native text can
+be retained without normalization or canonical interpretation.
+
+**OBSERVATION_BOUNDARY_COMPATIBILITY: `SUPPORTED`.** The value can be
+represented honestly as the source-native current status contained in the
+retained artifact state. The exact acquisition time and immutable
+authoritative snapshot binding remain unresolved. No observation timestamp is
+inferred.
+
+**LIFECYCLE_NEUTRALITY: `SUPPORTED`.** The mapping requires no claim about
+transition history, monotonicity, terminality, reopening, closure semantics,
+or final resolution.
+
+### Counterevidence / Limitation
+
+The strongest argument for acceptance is that `source_status` exists to
+preserve native status semantics, and Calgary explicitly identifies
+`status_description` as the admitted request's current status.
+
+The strongest argument against acceptance is that the retained artifact lacks
+an exact acquisition timestamp and immutable authoritative snapshot binding,
+while only current-state rather than historical-state semantics are
+documented.
+
+`COUNTERARGUMENT`: Without an exact acquisition or observation time, the
+contract cannot precisely place the current-status value on a historical
+timeline.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_MAPPING`
+
+The retained artifact supplies a bounded evidence state sufficient to
+preserve the source-native current-status value. The mapping does not claim an
+exact observation instant, a latest transition event, complete status
+history, or historical finality.
+
+### Current-Status Boundary
+
+**SOURCE_STATUS.** Calgary's source-native current-status representation.
+
+**CANONICAL_STATUS.** A future optional normalized interpretation.
+
+**LIFECYCLE_HISTORY.** A sequence of prior statuses or transitions, not
+established here.
+
+**FINAL_DISPOSITION_OR_RESOLUTION.** A stronger semantic conclusion not
+established by `source_status`.
+
+A source-native value such as "Closed" must not be interpreted here as proof
+of irreversible final resolution or impossibility of reopening.
+
+### Representation Boundary
+
+The source-native lexical status value is preserved.
+
+This decision does not choose:
+
+- enum implementation;
+- casing normalization;
+- synonym collapsing;
+- canonical equivalents;
+- ordinal ordering;
+- database representation beyond preserving source text.
+
+Exact implementation remains deferred.
+
+### Canonical-Status Boundary
+
+Decision Question 6 remains completely undecided. This decision does not
+define a canonical vocabulary or introduce any `canonical_status`
+normalization. Official example values do not establish a normalization
+policy.
+
+### Analytical Boundary
+
+`ACCEPT_MAPPING` establishes nothing about:
+
+- closure eligibility;
+- final resolution;
+- censoring;
+- duration validity;
+- SLA eligibility;
+- reopen rates;
+- transition counts;
+- state residence time;
+- workflow decomposition.
+
+One current-status snapshot does not establish lifecycle history.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+
+The official description of `status_description` is External evidence. The
+mapping `status_description -> source_status` is the Design choice. The
+mapping is not classified as an external fact or research conclusion.
+
+### Falsification / Revision Condition
+
+This mapping must be revisited if credible future evidence shows that:
+
+- `status_description` is display text rather than authoritative
+  source-native request status;
+- the field mixes status with unrelated descriptive content;
+- its semantics vary materially across records or source versions;
+- another field is the authoritative source-native status;
+- a source migration materially changes `status_description` semantics.
+
+Discovery of additional native status values, ordinary new rows, routine
+refreshes, and changed CSV hashes do not automatically falsify the mapping.
+
+`INCREMENT_002_SOURCE_STATUS_FALSIFICATION: none`
+
+Successful Calgary `source_status` mapping does not validate cross-source
+portability.
+
+Decision Question 6 remains undecided: this decision does not establish
+`canonical_status`. Submission-channel representation, `service_name`
+representation, `agency_responsible` representation, `updated_date`
+treatment, `closed_date` treatment, unavailable canonical concepts, and
+material source-native evidence outside the minimal Case also remain
+undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
