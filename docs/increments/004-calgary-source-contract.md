@@ -1243,6 +1243,230 @@ treatment, `closed_date` treatment, unavailable canonical concepts, and
 material source-native evidence outside the minimal Case also remain
 undecided.
 
+## Decision Question 6 - Canonical Status
+
+### Decision Question
+
+Does the currently retained Calgary evidence justify populating
+`canonical_status` from `source_status`?
+
+### Canonical Requirement
+
+Increment 002 defines `canonical_status` as an optional normalized lifecycle
+interpretation.
+
+`canonical_status` is optional and separate from `source_status`. It may exist
+only when a defensible mapping exists. Any normalization must be deterministic,
+documented, reproducible, and testable. `source_status` must remain preserved,
+and unsupported equivalence must not be forced. The canonical vocabulary and
+implementation remain deferred unless separately justified.
+
+`canonical_status` is not required for every source and does not automatically
+mean a binary open-or-closed model, terminality, final resolution, absence of
+reopening, workflow completion, or analytical eligibility.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `status_description`;
+- type: `text`;
+- description: "The current status of the request (e.g. open, closed)."
+
+Decision Question 5 established:
+
+    status_description -> source_status
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank `status_description` values: 0;
+- whitespace-only `status_description` values: 0.
+
+No distinct-value inspection was performed for this decision.
+
+The retained evidence does not establish:
+
+- the complete native status vocabulary;
+- value frequencies;
+- a transition graph;
+- lifecycle ordering;
+- terminality;
+- reopening behavior;
+- reversibility;
+- final-resolution equivalence;
+- native-to-canonical normalization rules.
+
+### Competing Interpretations
+
+**Interpretation A — `ACCEPT_MAPPING`.** Define and populate
+`canonical_status` now. Review classification: `UNSUPPORTED`.
+
+**Interpretation B — `DEFER_MAPPING`.** Preserve `source_status` and postpone
+canonical normalization until sufficient vocabulary, semantic, cross-source,
+or concrete-use evidence exists. Review classification: `STRONGEST`.
+
+**Interpretation C — `CANONICAL_CONCEPT_UNAVAILABLE`.** Under the current
+Calgary contract, conclude that `canonical_status` cannot presently be
+populated. Review classification: `PLAUSIBLE`.
+
+**Interpretation D — `REJECT_MAPPING`.** Conclude that Calgary source statuses
+should not be normalized. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: STRONGEST
+    CANONICAL_CONCEPT_UNAVAILABLE: PLAUSIBLE
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`DEFER_MAPPING`
+
+No `canonical_status` mapping is established at this stage. No canonical
+status vocabulary is defined, and no native-to-canonical status mapping is
+introduced.
+
+The normalization decision remains open pending stronger vocabulary,
+semantic, cross-source, or concrete-use evidence. This decision does not mark
+`canonical_status` unavailable and does not assign an unavailability reason.
+
+### Justification
+
+**NORMALIZATION_NEED: `NOT_ESTABLISHED`.** No committed current use case
+requires canonical normalization.
+
+**VOCABULARY_COVERAGE: `INSUFFICIENT`.** No complete Calgary native status
+vocabulary has been inspected or retained.
+
+**SEMANTIC_EQUIVALENCE: `INDETERMINATE`.** Example values such as open and
+closed do not establish safe or complete canonical equivalents.
+
+**REVERSIBILITY_NEUTRALITY: `INDETERMINATE`.** Without authoritative
+lifecycle semantics, a normalized state cannot be shown to avoid unsupported
+terminality or no-reopen implications.
+
+**CROSS_SOURCE_NORMALIZATION_BASIS: `NOT_ESTABLISHED`.** No retained
+cross-source status comparison currently justifies a shared normalized
+vocabulary.
+
+The existence of useful `source_status` does not itself justify
+`canonical_status`.
+
+### Counterevidence / Limitation
+
+The strongest argument for acceptance is that a broad normalized status model
+could simplify later comparison while retaining `source_status` unchanged.
+
+The strongest argument against acceptance is that only example source values
+are known; the complete native vocabulary, lifecycle semantics, terminality,
+reopening behavior, normalization need, and cross-source basis are absent.
+
+`COUNTERARGUMENT`: A deliberately broad, non-terminal canonical grouping
+could provide immediate comparison value while retaining native
+`source_status`.
+
+`COUNTERARGUMENT_RESULT: LEAVES_DECISION_INDETERMINATE`
+
+That possibility does not supply the missing vocabulary, lifecycle semantics,
+or cross-source justification required for a defensible, deterministic, and
+reproducible normalization.
+
+### Open / Closed Boundary
+
+"open" and "closed" are official examples, not a demonstrated complete
+native vocabulary. No canonical mapping is inferred from either example.
+
+This decision does not infer that any future closure-like canonical value
+would mean terminal, irreversible, resolved, finally disposed, analytically
+complete, or unable to reopen.
+
+### Source-Status Preservation Boundary
+
+The accepted source-native mapping remains unchanged:
+
+    status_description -> source_status
+
+Any future `canonical_status` must coexist with `source_status`.
+`canonical_status` must never erase, overwrite, or substitute for the
+source-native value.
+
+### Deferred Versus Unavailable Boundary
+
+`DEFER_MAPPING` means the normalization decision remains open because the
+evidence required for a defensible mapping has not yet been established.
+
+`CANONICAL_CONCEPT_UNAVAILABLE` would be the stronger bounded conclusion that
+`canonical_status` cannot presently be populated under the contract. That
+stronger conclusion is not selected here. No `UNAVAILABLE` reason is assigned.
+
+### Analytical Boundary
+
+Decision Question 6 establishes nothing about:
+
+- closure eligibility;
+- final resolution;
+- censoring;
+- duration validity;
+- SLA eligibility;
+- reopen rates;
+- transition counts;
+- state residence;
+- workflow decomposition.
+
+Canonical normalization and analytical eligibility remain separate.
+
+### Portability Boundary
+
+Deferring `canonical_status` does not validate or falsify cross-source
+portability. A future shared canonical status vocabulary would require actual
+cross-source evidence.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The source field definition is External evidence. The `DEFER_MAPPING` result
+is the Design choice. Neither the deferral nor any hypothetical canonical
+vocabulary is presented as external fact or a research conclusion.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence provides:
+
+- the complete native Calgary status vocabulary;
+- authoritative semantics for each native status;
+- transition semantics;
+- reopening or reversibility semantics;
+- evidence from a second operational source requiring normalized comparison;
+- a concrete analytical or product requirement for normalization;
+- evidence that a deterministic many-to-one mapping preserves all relevant
+  lifecycle distinctions.
+
+Ordinary new rows, refreshed exports, changed CSV hashes, and discovery that
+additional `source_status` values exist do not by themselves establish a
+normalization policy.
+
+`INCREMENT_002_CANONICAL_STATUS_FALSIFICATION: none`
+
+The current inability to normalize Calgary status does not falsify an
+optional `canonical_status` concept.
+
+Decision Question 7 remains undecided: this decision does not establish
+submission-channel representation. `service_name` representation,
+`agency_responsible` representation, `updated_date` treatment, `closed_date`
+treatment, unavailable canonical concepts, and material source-native
+evidence outside the minimal Case also remain undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
