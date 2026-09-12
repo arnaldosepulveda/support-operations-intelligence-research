@@ -3212,6 +3212,75 @@ Increment 002 does not fully prescribe when source-contract documentation
 must predeclare future row-level `UNAVAILABLE` reasons. That
 implementation-timing ambiguity is not a falsification.
 
+### Revision / Falsification Conditions
+
+The current decision:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+must be revisited if future evidence or implementation establishes that an
+existing applicable canonical concept cannot be populated at the relevant
+observation boundary and one of Increment 002's `UNAVAILABLE` reasons can be
+defensibly assigned.
+
+Revision is required if future evidence establishes any of these conditions:
+
+1. **`VALUE_ABSENT`.** A source record models an applicable canonical
+   concept but lacks a usable source value at the relevant observation
+   boundary.
+2. **`CONCEPT_ABSENT`.** The source demonstrably lacks an equivalent for an
+   existing applicable canonical concept.
+3. **`EVIDENCE_INDETERMINATE`.** Relevant evidence exists but cannot establish
+   one defensible canonical value at the required observation boundary.
+4. **`TRANSFORMATION_NOT_APPLIED`.** A defined and applicable canonical
+   transformation exists but is not executed for a Case.
+5. **`TRANSFORMATION_UNRESOLVED`.** A defined applicable transformation
+   executes but does not produce one defensible canonical value.
+
+Revision is also required if future source-contract work:
+
+- accepts a currently deferred mapping and later encounters records where
+  the canonical value cannot be established;
+- defines a canonical normalization or transformation that creates a real
+  per-Case unavailable state;
+- introduces a justified canonical concept applicable to Calgary for which
+  Calgary cannot establish a value;
+- demonstrates that the current distinction between contract-level deferral
+  and adapter-level `UNAVAILABLE` is operationally insufficient or
+  contradictory.
+
+The following conditions alone do not falsify the current decision:
+
+- a field remains `DEFER_MAPPING`;
+- a field remains `RETAIN_SOURCE_NATIVE`;
+- a source concept is non-universal;
+- a source field contains blank values;
+- a future export contains more or fewer blank values;
+- a refreshed CSV changes row counts or hashes;
+- implementation has not yet been written;
+- a transformation has merely been contemplated but not defined;
+- a canonical concept has not yet been justified.
+
+The decision changes only when an actual applicable canonical target and a
+defensible Increment 002 `UNAVAILABLE` condition exist.
+
+The contract-level source decision remains
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`. Future adapter execution may emit
+per-Case `UNAVAILABLE` where an applicable reason exists, as already required
+by Increment 002; this revision condition assigns no value or reason now and
+adds no adapter behavior or physical representation.
+
+`created_at` and `canonical_status` remain `DEFER_MAPPING`. Submission
+channel, `service_name`, `agency_responsible`, `updated_date`, and
+`closed_date` remain `RETAIN_SOURCE_NATIVE`. None is reinterpreted as
+currently unavailable.
+
+This revision condition makes Decision Question 12 explicitly revisitable
+and falsifiable without changing its current result. It is a Design choice
+defining when the current source-contract decision must be reconsidered, not
+new external evidence or a research conclusion. It does not establish that
+Increment 004 is complete.
+
 ### Portability Boundary
 
 This Calgary decision is not portability validation. Another source may
