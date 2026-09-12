@@ -2406,6 +2406,480 @@ correctness beyond committed mappings, persistence correctness, portability,
 production readiness, External evidence, an analytical result, or a Research
 conclusion.
 
+## Field Evidence Physical Representation Decision
+
+### Decision Question
+
+How should Increment 005 physically represent the canonical distinction
+between observed, derived, simulated, and unavailable field evidence without
+permitting contradictory state/value combinations or collapsing
+`DEFER_MAPPING` into `UNAVAILABLE`?
+
+### Decision
+
+    FIELD_EVIDENCE_PHYSICAL_REPRESENTATION:
+        EXPLICIT_VARIANTS
+
+Increment 005 selects planned immutable standard-library dataclass variants
+equivalent to:
+
+```python
+ObservedEvidence[T]
+    value: T
+
+DerivedEvidence[T]
+    value: T
+
+SimulatedEvidence[T]
+    value: T
+
+UnavailableEvidence
+    reason: UnavailableReason
+```
+
+with a planned union equivalent to:
+
+```python
+FieldEvidence[T] = (
+    ObservedEvidence[T]
+    | DerivedEvidence[T]
+    | SimulatedEvidence[T]
+    | UnavailableEvidence
+)
+```
+
+This is a Design choice. No evidence variant or union is implemented by this
+documentation decision.
+
+### Rationale for Explicit Variants
+
+Explicit variants structurally avoid contradictory combinations such as:
+
+```python
+state = OBSERVED
+value = None
+unavailable_reason = VALUE_ABSENT
+```
+
+or:
+
+```python
+state = UNAVAILABLE
+value = "some value"
+reason = None
+```
+
+Available evidence and unavailable evidence are different result shapes, not
+loosely coordinated nullable fields. The variant determines which payload is
+valid and prevents a single object from simultaneously carrying a field value
+and an unavailable reason.
+
+### Canonical State Correspondence
+
+The physical variants correspond exactly to the existing canonical
+field-provenance vocabulary:
+
+    ObservedEvidence
+        -> OBSERVED
+
+    DerivedEvidence
+        -> DERIVED
+
+    SimulatedEvidence
+        -> SIMULATED
+
+    UnavailableEvidence
+        -> UNAVAILABLE
+
+No additional canonical provenance state is introduced, and the existing
+canonical vocabulary is not renamed.
+
+### Unavailable Reason Representation
+
+    UNAVAILABLE_REASON_CONTAINER:
+        ENUM
+
+The planned standard-library enum contains exactly:
+
+- `VALUE_ABSENT`;
+- `CONCEPT_ABSENT`;
+- `EVIDENCE_INDETERMINATE`;
+- `TRANSFORMATION_NOT_APPLIED`;
+- `TRANSFORMATION_UNRESOLVED`.
+
+No additional unavailable reason is authorized by this decision. The enum is
+not implemented in this task.
+
+### `DEFER_MAPPING` Is Not `UNAVAILABLE`
+
+This distinction is mandatory:
+
+    DEFER_MAPPING != UNAVAILABLE
+
+`DEFER_MAPPING` means that the source contract has not authorized a canonical
+mapping. It is a source-contract Design status.
+
+`UNAVAILABLE` means that a canonical concept or mapping is applicable for a
+particular emitted Case, but the evidence needed to populate it is unavailable
+for a justified canonical reason. It is a Case-level field-provenance state.
+
+Therefore, `DEFER_MAPPING` must not automatically become
+`UnavailableEvidence(...)`.
+
+The current Calgary contract includes:
+
+    requested_date -> created_at:
+        DEFER_MAPPING
+
+    canonical_status:
+        DEFER_MAPPING
+
+    Decision Question 13 deferred fields:
+        DEFER_MAPPING
+
+These decisions must not be represented merely by attaching:
+
+```python
+UnavailableEvidence(
+    TRANSFORMATION_NOT_APPLIED
+)
+```
+
+to every Case. Doing so would silently convert a contract-level unresolved
+mapping decision into a row-level evidence statement. In particular, a
+transformation that has merely been contemplated or whose mapping is deferred
+does not satisfy `TRANSFORMATION_NOT_APPLIED`.
+
+### Contract-Level Status Versus Case-Level Evidence
+
+Contract-level mapping statuses include:
+
+- `ACCEPT_MAPPING`;
+- `RETAIN_SOURCE_NATIVE`;
+- `DEFER_MAPPING`.
+
+They describe what an adapter contract is authorized to do.
+
+Case-level field-evidence variants include:
+
+- `ObservedEvidence(value)`;
+- `DerivedEvidence(value)`;
+- `SimulatedEvidence(value)`;
+- `UnavailableEvidence(reason)`.
+
+They describe the evidence state of an applicable field for one emitted Case.
+The two vocabularies must remain separate.
+
+Source-mapping statuses and related terms must not be added as field-evidence
+states or unavailable reasons. This decision therefore introduces no
+`DEFERRED`, `NOT_MAPPED`, `RETAIN_SOURCE_NATIVE`, or `ACCEPTED_MAPPING`
+evidence state or reason.
+
+### Current Calgary Use Boundary
+
+Defining all four physical variants realizes the canonical provenance
+vocabulary. It does not authorize the Calgary adapter to emit all four states
+arbitrarily.
+
+For the current Increment 005 boundary:
+
+- `OBSERVED` may later be appropriate where Increment 004 authorizes a direct
+  source-supported mapping or retained source-native value;
+- `UNAVAILABLE` may later be appropriate only when the concept or mapping is
+  applicable, the particular Case lacks sufficient evidence, and one of the
+  canonical unavailable reasons actually applies;
+- `DERIVED` requires a separately justified deterministic transformation;
+- `SIMULATED` requires explicitly simulated evidence.
+
+No current Calgary field is newly classified `DERIVED` or `SIMULATED` by this
+decision. No deferred Calgary field is newly classified `UNAVAILABLE`.
+
+Increment 004 Decision Question 12 remains:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+Future per-Case `UNAVAILABLE` may be emitted only when an applicable canonical
+concept or mapping and one of the canonical reasons are justified.
+
+### Value-Preservation Boundary
+
+`ObservedEvidence[T]`, `DerivedEvidence[T]`, and `SimulatedEvidence[T]` carry
+the evidence value supplied by the relevant authorized mapping or
+transformation.
+
+The evidence wrapper itself does not:
+
+- normalize;
+- parse;
+- coerce;
+- round;
+- strip;
+- infer;
+- reinterpret;
+- canonicalize.
+
+Those behaviors, if ever justified, belong to the corresponding field mapping
+or transformation decision.
+
+### No Optional-`None` Shortcut
+
+Increment 005 rejects a physical model equivalent to:
+
+```python
+source_status: str | None
+```
+
+when provenance state matters. `None` alone cannot distinguish:
+
+- unavailable value;
+- concept absent;
+- indeterminate evidence;
+- transformation not applied;
+- transformation unresolved.
+
+It also cannot preserve `OBSERVED`, `DERIVED`, or `SIMULATED` provenance. This
+does not mean that Python `Optional` is universally invalid; it is insufficient
+for this specific canonical evidence contract.
+
+### Unavailable-Variant Invariant
+
+`UnavailableEvidence` contains only:
+
+```python
+reason: UnavailableReason
+```
+
+It does not contain:
+
+- a value;
+- a fallback value;
+- a raw source value;
+- a raw record;
+- a source payload;
+- an explanatory free-text string;
+- a timestamp;
+- a provenance object;
+- a mapping status.
+
+This bounded representation preserves the reason without introducing a
+retention or persistence design.
+
+### Available-Variant Invariant
+
+`ObservedEvidence[T]`, `DerivedEvidence[T]`, and `SimulatedEvidence[T]` each
+contain only:
+
+```python
+value: T
+```
+
+They do not contain:
+
+- `unavailable_reason`;
+- a raw record;
+- a source payload;
+- persistence metadata;
+- audit metadata.
+
+Additional evidence lineage, if later required, must be designed separately
+rather than silently added here.
+
+### Generic Type Boundary
+
+`T` is a Python typing parameter used to preserve the value type of the
+represented field. It is an implementation and Design convenience.
+
+It does not claim:
+
+- runtime type enforcement;
+- serialization compatibility;
+- database compatibility;
+- cross-language schema portability.
+
+The planned implementation remains standard-library only.
+
+### Case Representation and Field-Assignment Boundaries
+
+    CASE_PYTHON_REPRESENTATION:
+        NOT_DEFINED
+
+This decision does not define which fields a future Python `Case` dataclass
+contains. It does not decide:
+
+- `source_status` field placement;
+- a source-native retained-field container;
+- `requested_date` handling;
+- `updated_date` handling;
+- `closed_date` handling;
+- `canonical_status`;
+- the full adapter result type.
+
+This step defines only the reusable physical representation of field evidence.
+It does not implement `Case` or the full Calgary adapter.
+
+No particular Calgary field is newly assigned `ObservedEvidence`,
+`DerivedEvidence`, `SimulatedEvidence`, or `UnavailableEvidence`, except that
+prior Increment 004 choices may be restated to explain the boundary. In
+particular, `created_at`, `canonical_status`, and the Decision Question 13
+fields remain `DEFER_MAPPING`; none becomes a per-Case evidence assignment.
+
+### Planned Implementation Shape
+
+The planned standard-library structure is equivalent to:
+
+```python
+from dataclasses import dataclass
+from enum import Enum
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+
+class UnavailableReason(Enum):
+    VALUE_ABSENT = "VALUE_ABSENT"
+    CONCEPT_ABSENT = "CONCEPT_ABSENT"
+    EVIDENCE_INDETERMINATE = "EVIDENCE_INDETERMINATE"
+    TRANSFORMATION_NOT_APPLIED = "TRANSFORMATION_NOT_APPLIED"
+    TRANSFORMATION_UNRESOLVED = "TRANSFORMATION_UNRESOLVED"
+
+
+@dataclass(frozen=True)
+class ObservedEvidence(Generic[T]):
+    value: T
+
+
+@dataclass(frozen=True)
+class DerivedEvidence(Generic[T]):
+    value: T
+
+
+@dataclass(frozen=True)
+class SimulatedEvidence(Generic[T]):
+    value: T
+
+
+@dataclass(frozen=True)
+class UnavailableEvidence:
+    reason: UnavailableReason
+
+
+FieldEvidence = (
+    ObservedEvidence[T]
+    | DerivedEvidence[T]
+    | SimulatedEvidence[T]
+    | UnavailableEvidence
+)
+```
+
+Equivalent Python 3.12 typing syntax may be considered during implementation.
+This shape is planned only and is not implemented here.
+
+### Planned Test Implications
+
+Future structural tests should verify:
+
+1. `UnavailableReason` contains exactly the five canonical reasons.
+2. Enum values exactly equal their canonical names.
+3. `ObservedEvidence` is frozen and contains only `value`.
+4. `DerivedEvidence` is frozen and contains only `value`.
+5. `SimulatedEvidence` is frozen and contains only `value`.
+6. `UnavailableEvidence` is frozen and contains only `reason`.
+7. `UnavailableEvidence` has no `value` field.
+8. Available variants have no unavailable-reason field.
+9. The `FieldEvidence` union contains exactly the four variants.
+10. Supplied values are preserved exactly by available variants.
+11. A supplied unavailable reason is preserved exactly.
+12. Mutation of every variant raises `FrozenInstanceError`.
+
+These are planned tests only. This documentation task creates or executes no
+test and makes no Engineering observation about test results.
+
+### Failure Conditions
+
+A future implementation violates this decision if it:
+
+- represents evidence only as value-or-`None`;
+- loses the distinction among the four canonical evidence states;
+- adds non-canonical evidence states;
+- adds non-canonical unavailable reasons;
+- treats `DEFER_MAPPING` as `UNAVAILABLE`;
+- emits unavailable evidence automatically for deferred Calgary mappings;
+- permits `UnavailableEvidence` to carry a field value;
+- puts `unavailable_reason` on available variants;
+- mutates or normalizes values inside the evidence wrapper;
+- silently adds raw-record retention;
+- silently adds persistence or audit metadata;
+- changes Increment 004 mapping decisions.
+
+### Revision Conditions
+
+This physical representation should be revisited if later requirements
+establish that:
+
+- evidence lineage must be structurally bound to every field value;
+- serialization or external API requirements need a different tagged form;
+- cross-language schema requirements emerge;
+- database representation materially constrains the model;
+- performance evidence makes object-per-field representation unsuitable;
+- the canonical provenance vocabulary is revised;
+- Increment 002 evidence-state semantics are revised.
+
+None of these conditions is currently claimed.
+
+### Claim Classification
+
+    FIELD_EVIDENCE_PHYSICAL_REPRESENTATION:
+        Design choice
+
+    UNAVAILABLE_REASON_CONTAINER:
+        Design choice
+
+    structural invariants:
+        Design choices
+
+    canonical evidence vocabulary:
+        prior canonical contract definition
+
+    Increment 004 mapping statuses:
+        prior Design choices
+
+    planned tests:
+        planned tests, not Engineering observations
+
+This documentation step produces no new Engineering observation, External
+evidence, research result, or research conclusion.
+
+### Prior-Decision Preservation
+
+The following Increment 005 decisions remain unchanged:
+
+    CASE_ID_PHYSICAL_REPRESENTATION:
+        STRUCTURED_SOURCE_IDENTITY
+
+    CASE_ID_PYTHON_CONTAINER:
+        FROZEN_DATACLASS
+
+    CALGARY_SOURCE_CASE_ID_ADMISSIBILITY:
+        REQUIRE_PRESENT_NONBLANK_STRING
+
+    IDENTITY_REJECTION_TRANSPORT:
+        EXPLICIT_RESULT_VARIANTS
+
+    IDENTITY_ADMISSION_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+    CASE_PYTHON_REPRESENTATION:
+        NOT_DEFINED
+
+All Increment 004 decisions remain unchanged. This physical-representation
+decision authorizes no new Calgary field mapping.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
