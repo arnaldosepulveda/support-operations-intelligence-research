@@ -303,20 +303,214 @@ case-fold, or otherwise transform `service_request_id` unless a later explicit
 implementation decision is justified and shown to remain consistent with the
 controlling contracts.
 
-## `case_id` Boundary
+## Case ID Physical Representation Decision
 
-Increment 002 deliberately deferred the exact `case_id` type and generation
-mechanism.
+### Decision Question
 
-This planning record does not choose a UUID, integer surrogate, hash,
-concatenated source key, database-generated identifier, or any other physical
-strategy.
+What is the smallest defensible physical representation of `case_id` required
+for the executable Calgary adapter, given that persistence and cross-source
+entity resolution are outside Increment 005?
 
-The minimum executable adapter cannot emit a complete physical Case until this
-implementation design question is resolved. The decision must be made during
-Increment 005 implementation, justified by the minimum executable adapter
-need, and checked against the Increment 002 identity contract before Case
-emission is implemented.
+### Requirements
+
+The Increment 005 representation must:
+
+1. be deterministic;
+2. preserve the exact source-identity components;
+3. require no normalization of `service_request_id`;
+4. require no database;
+5. require no external dependency;
+6. support equality and repeat-interpretation testing;
+7. avoid introducing unsupported global-identity semantics;
+8. remain replaceable when persistence requirements are introduced.
+
+### Candidate Representations
+
+#### A. Random UUID
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A random UUID introduces nondeterminism and an identity policy not required by
+the current adapter.
+
+#### B. Database-Generated Integer
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+Persistence is outside scope and no database exists.
+
+#### C. Hash of Source Identity
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A hash adds an opaque transformation plus collision and policy considerations
+without a demonstrated need.
+
+#### D. Concatenated String
+
+Example:
+
+    city_of_calgary_311:<source_case_id>
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A concatenated string is deterministic but introduces delimiter, escaping,
+parsing, and string-encoding policy unnecessarily.
+
+#### E. Structured Immutable Source Identity
+
+Result:
+
+    ACCEPT_FOR_INCREMENT_005
+
+An immutable structured value preserves both exact identity components,
+supports direct equality, requires no database or external dependency, and
+introduces no encoding or parsing policy.
+
+### Decision
+
+    CASE_ID_PHYSICAL_REPRESENTATION:
+        STRUCTURED_SOURCE_IDENTITY
+
+For Increment 005, `case_id` will be represented as an immutable structured
+value containing exactly:
+
+- `source_system`;
+- `source_case_id`.
+
+For Calgary:
+
+    source_system:
+        city_of_calgary_311
+
+    source_case_id:
+        the source-native service_request_id value
+
+No normalization or transformation of `service_request_id` is introduced.
+
+This decision selects the minimum physical identity shape required by the
+adapter. It does not select a Python class, dataclass, library, serialization
+format, or persistence representation.
+
+### Semantic Boundary
+
+This is a physical-representation Design choice for Increment 005.
+
+It does not establish that:
+
+- canonical identity is universally identical to source identity;
+- every future source must use the same representation;
+- database primary keys must use this structure;
+- source identities may be merged across systems;
+- entity resolution is performed;
+- the representation is a universal canonical ontology;
+- a persistence layer must store the structure directly.
+
+The authoritative identity semantics remain those of Increment 002. The
+representation gives the executable adapter the smallest deterministic value
+needed to satisfy the current Case contract.
+
+### Three Distinct Identity Concepts
+
+#### 1. Source Identity
+
+    (source_system, source_case_id)
+
+Meaning:
+
+    Authoritative identity of the source-native operational work item.
+
+#### 2. `case_id`
+
+Meaning:
+
+    Internal canonical Case identifier.
+
+Increment 005 physical representation:
+
+    Immutable structured value built from the authoritative source identity.
+
+#### 3. Future Persistence Key
+
+Meaning:
+
+    Database or storage identifier if persistence later requires one.
+
+Current status:
+
+    NOT_DEFINED
+
+These three concepts remain semantically distinct even though the Increment
+005 physical `case_id` contains the same two values as the authoritative
+source identity.
+
+### Determinism Boundary
+
+Given two valid adapter inputs with identical exact values for
+`source_system` and `source_case_id`, their physical Case identifiers must
+compare equal.
+
+Given different authoritative source-identity pairs, their physical Case
+identifiers must compare unequal.
+
+This is a planned implementation property, not an observed result.
+
+### No Source-ID Normalization
+
+`service_request_id` is carried lexically as supplied through the
+already-parsed adapter boundary.
+
+The `case_id` decision does not authorize:
+
+- stripping;
+- whitespace normalization;
+- case folding;
+- lowercasing;
+- uppercasing;
+- integer conversion;
+- UUID conversion;
+- numeric canonicalization;
+- delimiter parsing;
+- source-ID rewriting.
+
+Missing, blank, or unusable identity remains an adapter-rejection question.
+
+### Revision and Falsification Conditions
+
+This physical representation must be revisited if a later increment
+establishes that:
+
+- persistence requires an opaque or surrogate key;
+- storage technology imposes a materially different identity representation;
+- a valid Case must exist independently of source identity;
+- cross-source identity or entity-resolution requirements are introduced;
+- evidence falsifies the Increment 002 one-source-work-item to one-Case
+  identity assumption;
+- the structured representation prevents a required interoperability
+  behavior.
+
+These future possibilities do not currently falsify the decision.
+
+### Claim Classification
+
+Selected `case_id` representation:
+
+    Design choice
+
+Supporting identity semantics from Increment 002 and Increment 004:
+
+    Prior contract definitions and Design choices
+
+This decision produces no new External evidence, Engineering observation, or
+Research conclusion.
 
 ## Source-Native Preservation Boundary
 
@@ -407,8 +601,8 @@ behavior.
 ## Planned Implementation Sequence
 
 1. Establish the minimal test and package boundary.
-2. Decide the smallest Case and adapter representation necessary, including a
-   justified `case_id` strategy.
+2. Apply the selected structured `case_id` representation while choosing no
+   more Case or adapter representation than the executable boundary requires.
 3. Encode source-identity behavior.
 4. Encode the accepted canonical mappings.
 5. Encode retained source-native evidence.
@@ -426,20 +620,37 @@ to have occurred.
 ### Valid Identity
 
 A valid `service_request_id` produces the established authoritative source
-identity `(city_of_calgary_311, service_request_id)`.
+identity `(city_of_calgary_311, service_request_id)` and an immutable
+structured `case_id` containing those exact components.
 
 ### Repeat Interpretation
 
 The same valid source record produces an equivalent semantically relevant
-adapter result.
+adapter result, including an equal `case_id`.
+
+### Different Source Identity
+
+Different authoritative source-identity pairs produce unequal `case_id`
+values.
+
+### Exact Source-Identifier Preservation
+
+The exact lexical `source_case_id` supplied through the already-parsed input
+boundary is preserved in `case_id` without normalization.
+
+### Case-Identifier Isolation
+
+Native Calgary `source`, `status_description`, retained source-native
+evidence, and deferred canonical concepts cannot affect `case_id`.
 
 ### Missing Identity
 
-A source record without `service_request_id` does not emit a valid Case.
+A source record without `service_request_id` does not emit a valid Case or
+valid `case_id`.
 
 ### Blank Identity
 
-A blank `service_request_id` does not emit a valid Case.
+A blank `service_request_id` does not emit a valid Case or valid `case_id`.
 
 ### Unusable Identity Representation
 
@@ -506,8 +717,9 @@ Increment 005 is complete only when:
 1. A minimal executable package and test structure exists.
 2. The adapter accepts one already-parsed Calgary record through an explicit
    boundary.
-3. Valid identity produces `source_system = city_of_calgary_311` and
-   `source_case_id = service_request_id`.
+3. Valid identity produces `source_system = city_of_calgary_311`,
+   `source_case_id = service_request_id`, and the selected structured
+   `case_id` containing those exact identity components.
 4. Invalid or missing required identity fails without emitting a valid Case.
 5. `status_description` is represented only as `source_status`.
 6. `source` is preserved as submission-channel evidence and remains distinct
@@ -525,7 +737,9 @@ Increment 005 is complete only when:
     promoted to canonical fields.
 14. Row-level evidence-state handling preserves the Increment 002
     distinctions and does not equate deferral with unavailability.
-15. Repeated interpretation of the same fixture is deterministic.
+15. Repeated interpretation of the same authoritative source identity yields
+    equal `case_id` values, while different identity pairs yield unequal
+    `case_id` values.
 16. Automated tests pass.
 17. `git diff --check` passes before closure.
 18. No Increment 004 semantic decision is silently revised.
