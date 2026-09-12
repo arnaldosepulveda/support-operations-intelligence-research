@@ -1103,17 +1103,12 @@ carries that `CaseId`. `RejectedIdentity` communicates that admission failed
 and carries only a reason. `IdentityRejectionReason` identifies which
 committed admissibility condition failed.
 
-### Callable API Boundary
+### Callable API Relationship
 
-This decision does not select an adapter function name, adapter class name,
-raw-record Python type, `Mapping` versus `dict` boundary, validation-helper
-name, Case representation, full adapter result, or source-native evidence
-result structure.
-
-    IDENTITY_ADMISSION_API:
-        NOT_DEFINED
-
-The result transport can be decided independently of the callable API.
+The result transport was selected independently of its callable API. The
+minimal callable boundary that returns this transport is selected separately
+in the Calgary Identity Admission API Decision below; that API decision does
+not alter the result variants or rejection vocabulary.
 
 ### Planned Test Implications
 
@@ -1183,6 +1178,291 @@ None of these conditions is currently claimed to hold.
 
     Existing rejection vocabulary:
         previously committed Design choice
+
+This documentation step produces no new Engineering observation, External
+evidence, Research result, or Research conclusion.
+
+## Calgary Identity Admission API Decision
+
+### Decision Question
+
+What minimal callable boundary should apply the already committed Calgary
+source identity admissibility rules and return the already implemented
+identity admission result variants?
+
+### Callable Decision
+
+    IDENTITY_ADMISSION_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+Planned callable:
+
+```python
+admit_calgary_source_identity(
+    record: Mapping[str, object],
+) -> IdentityAdmissionResult
+```
+
+This callable API is a Design choice. It is not implemented by this
+documentation step.
+
+### Input Boundary
+
+    IDENTITY_ADMISSION_INPUT:
+        ALREADY_PARSED_RECORD_MAPPING
+
+The input represents one already-parsed Calgary source record. The function
+requires only mapping-style read access.
+
+It does not open CSV files, parse CSV text, fetch Socrata data, mutate the
+record, require `dict` specifically, perform bulk ingestion, validate the full
+Calgary record, establish provenance, or perform persistence.
+
+### Why `Mapping` Rather Than `dict`
+
+The function requires only read-only key lookup. A concrete `dict` requirement
+would be stronger than necessary. The planned boundary therefore uses:
+
+    Mapping[str, object]
+
+rather than:
+
+    dict[str, object]
+
+This is an Increment 005 implementation boundary, not a claim that every
+future source adapter must use `Mapping`.
+
+### Why the Mapping Value Is `object`
+
+The raw mapping value is typed as `object` because the function must be able
+to observe and reject `None`, integers, floats, UUID objects, and other
+non-string values without pretending the upstream parser has already
+guaranteed string identity. The function must not coerce those values.
+
+### Fixed Source Identity Field
+
+    CALGARY_SOURCE_CASE_ID_FIELD:
+        service_request_id
+
+The identity-admission function examines only this key for source identity.
+It must not derive identity from another Calgary field, row position, hash,
+timestamp, source submission channel, service name, agency, or synthetic
+sequence.
+
+### Fixed Source Namespace
+
+    CALGARY_SOURCE_SYSTEM:
+        city_of_calgary_311
+
+On successful admission, the produced `CaseId` uses exactly:
+
+```python
+source_system = "city_of_calgary_311"
+```
+
+The raw Calgary field named `source` must not be used as `source_system`. This
+preserves Increment 004 Decision Question 7.
+
+### Deterministic Decision Precedence
+
+The function evaluates the identity conditions in this exact order:
+
+1. **Field absent.** If `"service_request_id"` is not present in `record`,
+   return:
+
+   ```python
+   RejectedIdentity(
+       reason=IdentityRejectionReason.MISSING_SOURCE_CASE_ID,
+   )
+   ```
+
+2. **Null.** If the value is `None`, return:
+
+   ```python
+   RejectedIdentity(
+       reason=IdentityRejectionReason.NULL_SOURCE_CASE_ID,
+   )
+   ```
+
+3. **Non-string.** If the value is not an instance of `str`, return:
+
+   ```python
+   RejectedIdentity(
+       reason=IdentityRejectionReason.NON_STRING_SOURCE_CASE_ID,
+   )
+   ```
+
+4. **Empty string.** If the value is `""`, return:
+
+   ```python
+   RejectedIdentity(
+       reason=IdentityRejectionReason.EMPTY_SOURCE_CASE_ID,
+   )
+   ```
+
+5. **Whitespace-only string.** If the value contains only whitespace, return:
+
+   ```python
+   RejectedIdentity(
+       reason=IdentityRejectionReason.WHITESPACE_ONLY_SOURCE_CASE_ID,
+   )
+   ```
+
+6. **Accept.** Otherwise construct:
+
+   ```python
+   CaseId(
+       source_system="city_of_calgary_311",
+       source_case_id=value,
+   )
+   ```
+
+   and return `AcceptedIdentity(case_id=that_case_id)`.
+
+This precedence is part of the Design decision.
+
+### String Preservation and Non-Coercion
+
+The value `" 001AbC-09 "` is accepted because it contains non-whitespace
+characters. Its `source_case_id` remains exactly `" 001AbC-09 "`; no stripping
+or normalization occurs.
+
+Whitespace-only detection may use a predicate such as `value.isspace()` when
+implemented, provided the predicate does not transform the value. This
+decision does not require one specific expression.
+
+Values such as `123`, `1.0`, `UUID(...)`, or another non-string object produce
+`NON_STRING_SOURCE_CASE_ID`. The function must not call `str(value)` before
+admission.
+
+### `CaseId` Construction Invariant
+
+`CaseId` construction occurs only after all rejection conditions have been
+ruled out. Missing, null, non-string, empty, and whitespace-only input
+therefore produces no `CaseId`. This preserves the existing result-transport
+invariant.
+
+### Function Responsibility
+
+The identity-admission function is responsible only for:
+
+    raw Calgary service_request_id
+        -> identity admissibility decision
+        -> AcceptedIdentity or RejectedIdentity
+
+It is not responsible for full Case construction, `source_status` mapping,
+`created_at`, `canonical_status`, Decision Question 7 through Decision
+Question 13 fields, evidence-state representation, Case admission beyond
+source identity, ingestion, persistence, logging, metrics, or analytics.
+
+### Expected Rejection and Software Failure
+
+The five committed invalid-identity conditions are expected domain outcomes.
+The function returns `RejectedIdentity` for those conditions and does not
+raise an exception merely because one occurs.
+
+Unexpected programming or system failure transport remains:
+
+    NOT_DEFINED_BY_THIS_DECISION
+
+This decision introduces no broad `try/except Exception` behavior and does not
+convert unexpected software defects into `RejectedIdentity`.
+
+### Retention Boundaries
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+The function result still carries only a `CaseId` in `AcceptedIdentity` or an
+`IdentityRejectionReason` in `RejectedIdentity`.
+
+### Planned Test Matrix
+
+Future implementation tests must cover:
+
+1. missing `service_request_id` produces `RejectedIdentity` with
+   `MISSING_SOURCE_CASE_ID`;
+2. `service_request_id = None` produces `RejectedIdentity` with
+   `NULL_SOURCE_CASE_ID`;
+3. `service_request_id = 123` produces `RejectedIdentity` with
+   `NON_STRING_SOURCE_CASE_ID`;
+4. `service_request_id = ""` produces `RejectedIdentity` with
+   `EMPTY_SOURCE_CASE_ID`;
+5. `service_request_id = "   "` produces `RejectedIdentity` with
+   `WHITESPACE_ONLY_SOURCE_CASE_ID`;
+6. `service_request_id = "\t\n"` produces `RejectedIdentity` with
+   `WHITESPACE_ONLY_SOURCE_CASE_ID`;
+7. `service_request_id = "ABC-123"` produces `AcceptedIdentity` containing
+   `CaseId("city_of_calgary_311", "ABC-123")`;
+8. `service_request_id = " 001AbC-09 "` produces `AcceptedIdentity` with exact
+   lexical preservation;
+9. a successful result uses `source_system` exactly
+   `city_of_calgary_311`;
+10. the raw Calgary field `source` cannot override `source_system`;
+11. the input mapping is not mutated;
+12. rejected outcomes contain no `CaseId`.
+
+These are planned tests only. No execution result is claimed.
+
+### Unresolved Full-Adapter Concerns
+
+This decision does not resolve the Case Python representation, full Calgary
+Case adapter API, evidence-state physical representation, source-native
+retained-field container, `created_at` treatment, `canonical_status`
+treatment, persistence boundary, or batch-ingestion API.
+
+### Failure Conditions
+
+Future implementation violates this decision if it:
+
+- accepts a missing `service_request_id`;
+- accepts `None`;
+- accepts a non-string value;
+- coerces non-string identity to `str`;
+- accepts an empty string;
+- accepts a whitespace-only string;
+- strips or normalizes accepted identity;
+- constructs `CaseId` before admission succeeds;
+- uses the raw Calgary `source` field as `source_system`;
+- uses a `source_system` other than `city_of_calgary_311`;
+- raises an exception as normal transport for an expected rejection;
+- mutates the supplied mapping;
+- validates unrelated Calgary fields in this function;
+- constructs a full Case.
+
+### Revision Conditions
+
+This API decision must be revisited if later evidence or requirements
+establish:
+
+- upstream typed parsing that guarantees a stronger identity input contract;
+- a need for a source-independent generic admission abstraction;
+- non-`Mapping` source records;
+- cross-language or API interchange requirements;
+- materially different Calgary identity semantics;
+- revised Increment 002 or Increment 004 identity assumptions.
+
+None of these conditions is currently claimed to hold.
+
+### Claim Classification
+
+    identity-admission API:
+        Design choice
+
+    Mapping input boundary:
+        Design choice
+
+    decision precedence:
+        Design choice
+
+    fixed Calgary namespace assignment:
+        implementation of prior Increment 004 Design choice
+
+    planned tests:
+        Planned tests, not observations
 
 This documentation step produces no new Engineering observation, External
 evidence, Research result, or Research conclusion.
@@ -1759,8 +2039,14 @@ Admission logic:
 
     not implemented
 
+Callable API status at the time of this implementation record:
+
     IDENTITY_ADMISSION_API:
         NOT_DEFINED
+
+The callable API was selected later in the Calgary Identity Admission API
+Decision above. This implementation record does not claim that callable was
+implemented.
 
     REJECTED_RAW_VALUE_RETENTION:
         NOT_DEFINED
