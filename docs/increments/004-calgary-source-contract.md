@@ -1467,6 +1467,245 @@ submission-channel representation. `service_name` representation,
 treatment, unavailable canonical concepts, and material source-native
 evidence outside the minimal Case also remain undecided.
 
+## Decision Question 7 - Submission Channel
+
+### Decision Question
+
+How should Calgary `source` be represented given that Increment 002 did not
+establish a universal canonical intake-channel scalar?
+
+### Canonical Requirement / Boundary
+
+Increment 002 establishes that `intake_channel` is not a universal canonical
+Case field.
+
+Source system, intake or origin information, submission mechanism,
+interaction channel, creation mechanism, and originating actor or system are
+materially distinct concepts. Useful source-native evidence may be retained
+with its actual semantics without creating a universal canonical scalar.
+
+Decision Question 2 established:
+
+    source_system = city_of_calgary_311
+
+Calgary's native `source` field remains semantically distinct from
+`source_system`.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `source`;
+- type: `text`;
+- description: "The channel used to submit the request."
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank `source` values: 0;
+- whitespace-only `source` values: 0.
+
+No distinct-value inspection was performed for this decision.
+
+The retained evidence does not establish:
+
+- the complete submission-channel vocabulary;
+- normalized channel categories;
+- interaction-modality semantics for every value;
+- a channel hierarchy;
+- cross-source channel equivalence;
+- historical semantic stability for every value.
+
+### Competing Interpretations
+
+**Interpretation A — `RETAIN_SOURCE_NATIVE`.** Preserve Calgary `source` as
+source-native request-submission-channel evidence without creating a
+universal canonical Case scalar. Review classification: `STRONGEST`.
+
+**Interpretation B — `ACCEPT_MAPPING`.** Map Calgary `source` to an existing
+canonical Case field. Review classification: `UNSUPPORTED`.
+
+**Interpretation C — `DEFER_MAPPING`.** Preserve the evidence conceptually but
+postpone even the semantic retention decision because physical representation
+is unresolved. Review classification: `PLAUSIBLE`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat the
+corresponding canonical concept as unavailable. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation E — `REJECT_MAPPING`.** Do not preserve Calgary `source` as
+meaningful source evidence. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_SOURCE_NATIVE: STRONGEST
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: PLAUSIBLE
+    CANONICAL_CONCEPT_UNAVAILABLE: UNSUPPORTED
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`RETAIN_SOURCE_NATIVE`
+
+Calgary `source` is retained as source-native evidence with the meaning:
+
+> The channel used to submit the request.
+
+No universal canonical Case field is introduced. Calgary `source` is not
+mapped to `source_system` and is not equated with interaction channel.
+Interaction-channel equivalence would require separate future evidence.
+
+### Justification
+
+**SOURCE_SUBMISSION_CHANNEL_SEMANTICS: `SUPPORTED`.** Calgary explicitly
+defines the field as the channel used to submit the request.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes a property of the
+admitted Calgary request.
+
+**SOURCE_SYSTEM_SEPARATION: `SUPPORTED`.** `source_system` identifies the
+Calgary 311 source identity namespace, while Calgary `source` describes how
+the request was submitted.
+
+**UNIVERSAL_CHANNEL_FIELD_JUSTIFICATION: `NOT_ESTABLISHED`.** Increment 002
+established no universal intake-channel scalar, and the current evidence does
+not justify adding one.
+
+**SOURCE_NATIVE_PRESERVATION: `SUPPORTED`.** The field has explicit source
+meaning that can be preserved without forcing canonical expansion.
+
+**CHANNEL_NORMALIZATION_NEED: `NOT_ESTABLISHED`.** No committed current
+requirement needs normalized channel values.
+
+**CROSS_SOURCE_CHANNEL_BASIS: `NOT_ESTABLISHED`.** No retained cross-source
+channel evidence justifies a shared model.
+
+### Counterevidence / Limitation
+
+The strongest argument for `RETAIN_SOURCE_NATIVE` is that Calgary explicitly
+defines request-level submission-channel evidence, and native retention
+prevents semantic loss without turning a source-specific concept into a
+universal Case field.
+
+The strongest argument against `RETAIN_SOURCE_NATIVE` is that preserving
+source-specific evidence without an established physical extension mechanism
+could produce inconsistent adapters, uncontrolled extensions, or unclear
+future query semantics.
+
+`COUNTERARGUMENT`: An unspecified physical representation mechanism may
+produce inconsistent source adapters or unclear access patterns.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+The unresolved representation mechanism is an implementation and design
+issue. It does not defeat the semantic decision that the evidence is
+meaningful and should remain recoverable.
+
+### Representation Boundary
+
+This decision establishes only the semantic retention rule: Calgary `source`
+is retained as source-native evidence meaning "the channel used to submit the
+request."
+
+This decision does not choose:
+
+- a Python field name;
+- a database column name;
+- a JSON metadata structure;
+- an extension-object design;
+- an enum representation;
+- casing normalization;
+- synonym collapsing;
+- a channel hierarchy;
+- a canonical vocabulary.
+
+Exact physical representation remains deferred.
+
+### Source-System Boundary
+
+The canonical identity namespace remains:
+
+    source_system = city_of_calgary_311
+
+Calgary `source` means the channel used to submit the request. The two values
+describe different concepts: identity namespace and source-native submission
+channel, respectively.
+
+### Missingness Boundary
+
+Retained population evidence shows:
+
+    blank source: 0
+    whitespace-only source: 0
+
+This does not establish submission channel as universally required, create a
+new universal Case invariant or identity-core field, or require every future
+source to expose equivalent evidence.
+
+### Analytical Boundary
+
+`RETAIN_SOURCE_NATIVE` establishes nothing about:
+
+- channel effectiveness;
+- channel quality;
+- digital adoption;
+- contact deflection;
+- cost to serve;
+- customer preference;
+- channel-driven duration;
+- channel-driven SLA performance;
+- causal effects of submission channel.
+
+Those conclusions require separate analytical contracts and evidence.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The official definition of Calgary `source` is External evidence.
+`RETAIN_SOURCE_NATIVE` is the Design choice. The retention decision is not
+presented as an external fact or research conclusion.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence shows that:
+
+- Calgary `source` means something other than submission channel;
+- the field combines materially different concepts;
+- source migration materially changes its semantics;
+- later cross-source evidence supports a defensible canonical channel
+  concept;
+- a concrete product or analytical requirement justifies a shared
+  representation.
+
+Ordinary new rows, additional native channel values, refreshed exports, and
+changed CSV hashes do not automatically falsify source-native retention.
+
+`INCREMENT_002_SUBMISSION_CHANNEL_FALSIFICATION: none`
+
+Successful source-native retention does not justify extending Increment 002
+with a universal channel scalar.
+
+### Portability Boundary
+
+Source-native retention does not validate cross-source portability. A future
+canonical channel concept would require actual cross-source evidence.
+
+Decision Question 8 remains undecided: this decision does not establish
+`service_name` representation. `agency_responsible` representation,
+`updated_date` treatment, `closed_date` treatment, unavailable canonical
+concepts, and other source-native evidence beyond the specific Calgary
+`source` decision also remain undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
