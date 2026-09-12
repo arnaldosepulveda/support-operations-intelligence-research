@@ -1,10 +1,10 @@
 # Increment 004 - Calgary Source Contract
 
-Status: Planned
+Status: Complete
 
 Opened: 2026-09-11
 
-Completed: Not completed
+Completed: 2026-09-12
 
 ## Objective
 
@@ -4155,3 +4155,219 @@ The intended artifact is a bounded Calgary source contract that states:
 - what future evidence would falsify each material decision.
 
 It is not an analytics specification and not a portability proof.
+
+## Completion Review
+
+The read-only completion review produced:
+
+    FINAL_COMPLETION_DETERMINATION:
+        READY_TO_CLOSE_WITH_RETAINED_LIMITATIONS
+
+    OBJECTIVE_SATISFIED:
+        YES
+
+    FALSIFIABILITY_AND_REVISION_COVERAGE:
+        SUFFICIENT
+
+    LOCAL_HEADER_CONTRACT_COVERAGE:
+        COMPLETE
+
+    IDENTITY_CONTRACT_COMPLETE:
+        YES
+
+    CASE_ADMISSION_CONTRACT_COMPLETE:
+        YES
+
+    TEMPORAL_SOURCE_CONTRACT_COMPLETE_WITH_BOUNDARIES:
+        YES
+
+    STATUS_SOURCE_CONTRACT_COMPLETE:
+        YES
+
+    SOURCE_NATIVE_EVIDENCE_CONTRACT_COMPLETE:
+        YES
+
+    UNAVAILABLE_MODEL_CONTRACT_COMPLETE:
+        YES
+
+    DEFERRED_DECISIONS_EXPLICIT_AND_REVISITABLE:
+        YES
+
+    CLAIM_DISCIPLINE:
+        SATISFIED
+
+    PROVENANCE_LIMITATION_PRESERVED:
+        YES
+
+    PORTABILITY_VALIDATED:
+        NO
+
+    IMPLEMENTATION_BOUNDARY_PRESERVED:
+        YES
+
+    ANALYTICAL_BOUNDARY_PRESERVED:
+        YES
+
+    INTERNAL_CONTRADICTION_CHECK:
+        PASS
+
+    MATERIAL_BLOCKER:
+        none
+
+### Completion-Criteria Result
+
+All 18 written completion criteria were reviewed.
+
+    COMPLETION_CRITERIA_COUNT: 18
+
+    CRITERIA_1_18:
+        SATISFIED or SATISFIED_WITH_EXPLICIT_BOUNDARY
+
+    NOT_SATISFIED_CRITERIA:
+        none
+
+    COMPLETION_CRITERION_14:
+        SATISFIED
+
+Completion criterion 14 is satisfied because Decision Question 12 now
+contains explicit revision and falsification conditions. Every material
+decision has a reconstructable evidence basis, limitation or boundary, and
+condition for reconsideration.
+
+### Failure-Criteria Result
+
+    FAILURE_CRITERIA_TRIGGERED:
+        none
+
+No written failure criterion was triggered.
+
+### Retained Limitations
+
+The following remain retained limitations rather than closure blockers:
+
+- acquisition date is unknown;
+- an immutable source version is not established;
+- local artifact provenance is unconfirmed;
+- the current official row count differs from the retained local artifact;
+- the current official description says 2012-present while the retained
+  local `requested_date` minimum reaches 2010;
+- SHA-256 binding is prospective only;
+- `requested_date -> created_at` remains unresolved;
+- `canonical_status` remains unresolved;
+- `updated_date` semantics remain bounded to source-native update evidence;
+- `closed_date` does not establish resolution, finality, permanent
+  terminality, or no-reopen semantics;
+- reopening semantics remain unresolved;
+- temporal precision remains unresolved;
+- timezone semantics remain unresolved;
+- row-level `UNAVAILABLE` behavior is not implemented;
+- `address`, `comm_code`, `comm_name`, `location_type`, `longitude`,
+  `latitude`, and `point` remain deferred because authoritative semantics are
+  insufficient.
+
+These limitations are carried forward and do not invalidate closure of the
+bounded source-contract increment.
+
+### Resulting Calgary Source Contract
+
+    Case admission:
+        ADMIT_CASE
+
+    source_system:
+        city_of_calgary_311
+
+    source_case_id:
+        service_request_id
+
+    authoritative source identity:
+        (city_of_calgary_311, service_request_id)
+
+    created_at:
+        DEFER_MAPPING
+
+    source_status:
+        status_description
+
+    canonical_status:
+        DEFER_MAPPING
+
+    source:
+        RETAIN_SOURCE_NATIVE
+        submission-channel evidence
+
+    service_name:
+        RETAIN_SOURCE_NATIVE
+        service-type evidence
+
+    agency_responsible:
+        RETAIN_SOURCE_NATIVE
+        responsible-department evidence
+
+    updated_date:
+        RETAIN_SOURCE_NATIVE
+        source-native update-time evidence
+
+    closed_date:
+        RETAIN_SOURCE_NATIVE
+        source-native closure-time evidence
+
+    contract-level canonical UNAVAILABLE assignments:
+        none
+
+    remaining fields:
+        address
+        comm_code
+        comm_name
+        location_type
+        longitude
+        latitude
+        point
+
+    current treatment:
+        DEFER_MAPPING
+
+This is a bounded Calgary semantic source contract. It is not an implemented
+adapter or ingestion system.
+
+### Follow-On Work
+
+`FOLLOW_ON_WORK`:
+
+- revisit `created_at` if stronger source semantics emerge;
+- define `canonical_status` only if justified by a real analytical or
+  cross-source requirement;
+- obtain authoritative semantics for deferred source-native fields when
+  needed;
+- implement a Calgary adapter against this semantic contract;
+- implement row-level evidence-state and `UNAVAILABLE` handling;
+- define analytical contracts before duration, status, service, department,
+  or location analysis.
+
+These are follow-on activities, not Increment 004 completion requirements.
+
+### Completion Claim Classification
+
+Completion determination:
+
+    Engineering/research process decision
+
+The completed increment establishes:
+
+    a bounded Calgary semantic source contract
+
+It does not establish:
+
+- implemented ingestion;
+- an implemented source adapter;
+- a database schema;
+- analytics;
+- request-to-closure metric validity;
+- resolution time;
+- workflow decomposition;
+- production-system behavior;
+- business improvement;
+- causal effect;
+- AI effectiveness;
+- cross-source portability.
+
+Increment completion is not presented as a research result.
