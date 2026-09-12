@@ -1717,6 +1717,192 @@ establish adapter correctness, source-record validation correctness, Calgary
 identity validity, dataset validation, cross-source portability, persistence
 correctness, or production readiness.
 
+## Implementation Record 003 - Identity Admission Result Types
+
+### Objective
+
+Implement the committed typed identity-admission transport without
+implementing admission behavior.
+
+### Files
+
+    src/support_operations_intelligence/identity.py
+    tests/test_identity_admission_result.py
+
+### Design Implemented
+
+Implemented:
+
+- `IdentityRejectionReason`;
+- `AcceptedIdentity`;
+- `RejectedIdentity`;
+- `IdentityAdmissionResult`.
+
+The enum contains exactly the five committed rejection reasons. The two
+result variants use the committed frozen-dataclass shapes:
+
+```python
+@dataclass(frozen=True)
+class AcceptedIdentity:
+    case_id: CaseId
+
+
+@dataclass(frozen=True)
+class RejectedIdentity:
+    reason: IdentityRejectionReason
+
+
+IdentityAdmissionResult = AcceptedIdentity | RejectedIdentity
+```
+
+Admission logic:
+
+    not implemented
+
+    IDENTITY_ADMISSION_API:
+        NOT_DEFINED
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+Third-party dependencies introduced:
+
+    none
+
+No validator, adapter function, source-field extraction, normalization,
+serialization, persistence, logging, provenance, or rejected-data retention
+behavior is implemented.
+
+### Expected Pre-Implementation Failure
+
+Executed before the result types existed:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_identity_admission_result.py' \
+      -v
+
+Observed discovery result:
+
+    tests reported: 1 failed test module
+    errors: 1
+    result: FAILED (errors=1)
+
+Error type:
+
+    ImportError
+
+Reason:
+
+    cannot import name 'AcceptedIdentity' from
+    'support_operations_intelligence.identity'
+
+This expected pre-implementation failure is an Engineering observation. The
+transport-focused test could not pass before the planned result types existed.
+It is test-first evidence, not a product defect.
+
+### Focused Post-Implementation Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_identity_admission_result.py' \
+      -v
+
+Observed result:
+
+    tests run: 10
+    failures: 0
+    errors: 0
+    result: OK
+
+### `CaseId` Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed result:
+
+    tests run: 6
+    failures: 0
+    errors: 0
+    result: OK
+
+### Full-Suite Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed result:
+
+    tests run: 17
+    failures: 0
+    errors: 0
+    result: OK
+
+### Direct Structural Verification
+
+The direct repository-local Python verification observed:
+
+    reason_names = [
+        'MISSING_SOURCE_CASE_ID',
+        'NULL_SOURCE_CASE_ID',
+        'NON_STRING_SOURCE_CASE_ID',
+        'EMPTY_SOURCE_CASE_ID',
+        'WHITESPACE_ONLY_SOURCE_CASE_ID',
+    ]
+    reason_values = [
+        'MISSING_SOURCE_CASE_ID',
+        'NULL_SOURCE_CASE_ID',
+        'NON_STRING_SOURCE_CASE_ID',
+        'EMPTY_SOURCE_CASE_ID',
+        'WHITESPACE_ONLY_SOURCE_CASE_ID',
+    ]
+    accepted_is_dataclass = True
+    accepted_fields = ['case_id']
+    rejected_is_dataclass = True
+    rejected_fields = ['reason']
+    accepted_case_id = CaseId(
+        source_system='city_of_calgary_311',
+        source_case_id='ABC-123',
+    )
+    rejected_reason = EMPTY_SOURCE_CASE_ID
+    rejected_has_case_id = False
+    accepted_has_reason = False
+
+The focused tests also observed that ordinary mutation of each result variant
+raises `dataclasses.FrozenInstanceError`.
+
+These exact fields are implementation evidence that the two committed result
+variants themselves are structurally exclusive. This does not claim that
+Python's union type prevents arbitrary unrelated objects from existing.
+
+### Claim Classification and Boundary
+
+The result-type implementation is a Design implementation of prior Design
+choices. The expected red test, focused test result, `CaseId` regression
+result, full-suite result, and direct verification are Engineering
+observations.
+
+The bounded result establishes that the identity-admission transport types
+conform to the currently tested structural design under the repository-local
+Python execution boundary.
+
+This step does not establish identity validation correctness, Calgary adapter
+correctness, rejection behavior for raw records, ingestion correctness,
+dataset validation, portability, production readiness, an External evidence
+claim, an analytical result, Calgary semantic validation, or a Research
+conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
