@@ -179,9 +179,10 @@ The implementation must explicitly distinguish:
 These concepts must not be collapsed into one dictionary merely for
 convenience without a documented design decision.
 
-This planning record does not select a detailed Python representation. The
-smallest adequate structure must be decided incrementally during
-implementation and justified against the executable adapter need.
+This planning record selects only the bounded `CaseId` Python container
+recorded below. The smallest adequate structures for the remaining concepts
+must be decided incrementally during implementation and justified against the
+executable adapter need.
 
 ## Scope
 
@@ -397,8 +398,9 @@ For Calgary:
 No normalization or transformation of `service_request_id` is introduced.
 
 This decision selects the minimum physical identity shape required by the
-adapter. It does not select a Python class, dataclass, library, serialization
-format, or persistence representation.
+adapter. The Python container for that shape is selected separately below;
+this physical decision introduces no library, serialization format, or
+persistence representation.
 
 ### Semantic Boundary
 
@@ -512,6 +514,205 @@ Supporting identity semantics from Increment 002 and Increment 004:
 This decision produces no new External evidence, Engineering observation, or
 Research conclusion.
 
+## Case ID Python Container Decision
+
+### Decision Question
+
+What is the smallest Python representation that realizes the already accepted
+immutable structured Case identifier without adding persistence,
+serialization, validation-framework, or packaging policy?
+
+### Requirements
+
+The Python container must:
+
+1. expose named `source_system` and `source_case_id` fields;
+2. support value-based equality;
+3. prevent ordinary mutation after construction;
+4. use only the Python standard library;
+5. add no persistence or serialization semantics;
+6. add no source-ID normalization;
+7. remain easy to test directly;
+8. remain replaceable if later persistence requirements justify change.
+
+### Candidate Containers
+
+#### A. Plain Two-Element Tuple
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+Value equality and immutability are available, but positional members obscure
+the domain meaning of the two identity components.
+
+#### B. `NamedTuple`
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+`NamedTuple` is viable and immutable, but tuple semantics are unnecessary for
+the current domain object and could encourage positional treatment.
+
+#### C. Mutable Class or Mutable Dataclass
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+Case identity should not be ordinarily mutable after construction.
+
+#### D. Pydantic Model
+
+Result:
+
+    REJECT_FOR_INCREMENT_005
+
+A Pydantic model introduces a third-party dependency and validation and
+serialization policy that the current requirement does not need.
+
+#### E. Standard-Library Frozen Dataclass
+
+Result:
+
+    ACCEPT_FOR_INCREMENT_005
+
+### Decision
+
+    CASE_ID_PYTHON_CONTAINER:
+        FROZEN_DATACLASS
+
+Planned implementation shape:
+
+```python
+@dataclass(frozen=True)
+class CaseId:
+    source_system: str
+    source_case_id: str
+```
+
+This is a planned implementation shape. The class is not created by this
+documentation decision, and no test for it is claimed to exist or pass.
+
+### Rationale
+
+The standard-library frozen dataclass provides:
+
+- explicit named identity components;
+- deterministic value equality;
+- prevention of ordinary mutation through frozen-dataclass semantics;
+- no third-party dependency;
+- no database requirement;
+- no serializer requirement;
+- no inheritance hierarchy;
+- no generalized identity framework;
+- the minimal code needed for Increment 005.
+
+### Type Boundary
+
+`source_system`:
+
+    str
+
+`source_case_id`:
+
+    str
+
+For Increment 005, these types are a Calgary adapter implementation choice.
+The `source_case_id` string must preserve the source-native lexical value.
+
+The type choice does not authorize:
+
+- parsing to integer;
+- parsing to UUID;
+- trimming;
+- case conversion;
+- whitespace normalization;
+- numeric canonicalization;
+- rewriting.
+
+This decision does not claim that every future source system must use string
+identifiers.
+
+### Validation Boundary
+
+The frozen dataclass represents a valid physical Case identifier. It does not
+by itself decide whether raw adapter input contains valid identity.
+
+Identity admission and rejection remain the adapter boundary's
+responsibility. This decision does not yet define:
+
+- missing-value behavior;
+- blank-value behavior;
+- whitespace-only behavior;
+- exception type;
+- validation API;
+- adapter-result type.
+
+The distinction is:
+
+    CaseId representation
+        !=
+    raw source-record validation
+
+### Dataclass Policy Boundary
+
+This decision does not select:
+
+- `slots=True`;
+- `order=True`;
+- `unsafe_hash=True`;
+- a custom `__hash__`;
+- a custom `__eq__`;
+- a custom `__post_init__`;
+- validators;
+- factory methods;
+- serialization methods;
+- database-conversion methods.
+
+Default frozen-dataclass behavior is sufficient unless later evidence shows
+otherwise. No premature optimization is introduced.
+
+### Determinism Implication
+
+The planned implementation must satisfy:
+
+```python
+CaseId(
+    source_system="city_of_calgary_311",
+    source_case_id="X",
+)
+```
+
+compares equal to another `CaseId` constructed with those exact values.
+Changing either identity component must produce a non-equal `CaseId`.
+
+This remains planned behavior, not an observed Engineering observation.
+
+### Revision Conditions
+
+The Python container choice must be reconsidered if later implementation
+establishes a concrete need for:
+
+- persistence-specific identifiers;
+- serialization or interchange requirements;
+- cross-language representation requirements;
+- source identifiers that cannot be represented faithfully as strings;
+- a materially different representation supported by performance evidence;
+- cross-source identity requirements incompatible with this structure.
+
+These possibilities do not currently falsify the decision.
+
+### Claim Classification
+
+The `FROZEN_DATACLASS` selection is a Design choice.
+
+`STRUCTURED_SOURCE_IDENTITY` is a previously committed Design choice.
+
+This documentation decision produces no new Engineering observation,
+External evidence, Research result, or Research conclusion.
+
 ## Source-Native Preservation Boundary
 
 The adapter must not relabel:
@@ -601,8 +802,9 @@ behavior.
 ## Planned Implementation Sequence
 
 1. Establish the minimal test and package boundary.
-2. Apply the selected structured `case_id` representation while choosing no
-   more Case or adapter representation than the executable boundary requires.
+2. Apply the selected structured `case_id` representation through the planned
+   frozen-dataclass container while choosing no more Case or adapter
+   representation than the executable boundary requires.
 3. Encode source-identity behavior.
 4. Encode the accepted canonical mappings.
 5. Encode retained source-native evidence.
@@ -931,7 +1133,9 @@ The planned implementation artifact is the smallest executable and tested
 Calgary record-to-Case adapter boundary that conforms to Increment 002 and
 Increment 004.
 
-Its exact Python representation is not selected by this planning record.
+Apart from the planned frozen-dataclass `CaseId` container, the exact Python
+representation of the adapter and Case result is not selected by this
+planning record.
 
 ## Current Status
 
