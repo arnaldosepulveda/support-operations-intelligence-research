@@ -819,6 +819,97 @@ At closure, retain:
 This planning record does not claim that implementation reproducibility has
 already been established.
 
+## Implementation Record 001 - Minimal Python Execution/Test Boundary
+
+Implementation step:
+
+    Minimal Python execution/test boundary
+
+### Design Choices
+
+Source layout:
+
+    src/support_operations_intelligence/
+
+Test layout:
+
+    tests/
+
+Test framework:
+
+    Python standard-library unittest
+
+Execution command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Third-party dependencies introduced:
+
+    none
+
+Build-system decision:
+
+    none
+
+Installability claim:
+
+    none
+
+One executable and testable boundary is now required for Increment 005.
+Standard-library `unittest` satisfies the current import-test need without
+introducing a dependency. The explicit `PYTHONPATH=src` execution boundary
+avoids implying that packaging or installability has already been designed.
+The package structure remains deliberately minimal before any domain
+representation is introduced.
+
+### Observed Result
+
+Repository-local Python version:
+
+    Python 3.12.3
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed test result:
+
+    tests run: 1
+    failures: 0
+    errors: 0
+    result: OK
+
+The minimal package imported successfully under the explicit
+`PYTHONPATH=src` execution boundary using the repository-local Python
+environment.
+
+Direct inspection without the explicit source path produced:
+
+    without_explicit_src_path = None
+
+Inspection with the explicit source path found the package at:
+
+    src/support_operations_intelligence/__init__.py
+
+Importability through `PYTHONPATH=src` is the intended current execution
+boundary. This result does not establish that the project is installed or
+generally importable, and it makes no packaging or installability claim.
+
+### Claim Classification
+
+The `src/` layout is a Design choice.
+
+Selection of standard-library `unittest` is a Design choice.
+
+The successful import and test execution are Engineering observations.
+
+This bounded result establishes only that the minimal package imports under
+the explicit `PYTHONPATH=src` boundary using the repository-local interpreter.
+It does not establish application behavior, adapter correctness, Case-contract
+conformance, Calgary dataset validity, full reproducibility, package
+installation, production readiness, portability, analytical correctness, or a
+research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
