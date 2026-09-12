@@ -823,6 +823,199 @@ representation, service type, responsible department, `updated_date`,
 evidence outside the minimal Case also remains undecided. No analytical
 eligibility rule is introduced.
 
+## Decision Question 4 - Canonical `created_at`
+
+### Decision Question
+
+Does Calgary `requested_date` satisfy the Increment 002 canonical
+`created_at` definition?
+
+### Canonical Requirement
+
+`Case.created_at` is an optional canonical lifecycle concept representing the
+source-supported creation boundary of the source-native operational work
+item.
+
+It may be `OBSERVED` or established through a semantically justified
+deterministic derivation. It does not represent issue onset by default,
+ingestion time, first-seen time, retrieval time, or merely the earliest
+available timestamp. Its representation must not imply temporal precision
+greater than the source evidence supports. It may remain unavailable, and its
+presence or absence does not itself establish analytical eligibility.
+
+### Calgary Evidence
+
+Increment 003 retained the following evidence for `requested_date`:
+
+- official description: "The date the request was submitted.";
+- official type: `calendar_date`;
+- official format metadata: `date_ymd_time`;
+- logical data rows: 7,474,403;
+- blank values: 0;
+- parseable values: 7,474,403;
+- unparseable values: 0;
+- minimum parsed value: `2010-01-25 00:00:00`;
+- maximum parsed value: `2026-09-08 00:00:00`;
+- exact-midnight values: 3,603,999;
+- non-midnight values: 3,870,404;
+- exact-midnight percentage of parseable values: 48.217884%.
+
+The retained evidence boundaries are:
+
+- `REQUESTED_DATE_CREATION_TIME_EQUIVALENCE_UNRESOLVED`;
+- `SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED`;
+- `TIMEZONE_SEMANTICS_UNRESOLVED`.
+
+The evidence distinguishes request submission from source-native creation,
+issue onset, project ingestion, and observation or extract time. This decision
+concerns only whether submission is sufficiently established as source-native
+creation of the admitted Calgary request.
+
+### Competing Interpretations
+
+**Interpretation A — `ACCEPT_MAPPING`.** Map `requested_date` to `created_at`
+because the admitted entity is a submitted service request and the field is
+directly associated with submission. Review classification: `PLAUSIBLE`.
+
+**Interpretation B — `DEFER_MAPPING`.** Calgary establishes request
+submission, but retained evidence does not establish submission as the
+source-native request creation boundary. Review classification: `STRONGEST`.
+
+**Interpretation C — `REJECT_MAPPING`.** Treat `requested_date` as an
+established different lifecycle boundary that must not represent creation.
+Review classification: `UNSUPPORTED`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat current Calgary
+evidence as insufficient to populate canonical `created_at` under this source
+contract. Review classification: `PLAUSIBLE`.
+
+### Decision
+
+`DEFER_MAPPING`
+
+No mapping from `requested_date` to `created_at` is established at this stage.
+The reason is not poor population or parseability. Submission-to-creation
+semantic equivalence remains unestablished.
+
+Deferral leaves the candidate mapping open to stronger future semantic
+evidence. This decision does not mark the canonical concept unavailable and
+does not assign an unavailability reason.
+
+### Justification
+
+**SOURCE_SEMANTIC_SUPPORT: `PARTIALLY_SUPPORTED`.** Calgary directly
+establishes request submission, making `requested_date` a plausible creation
+candidate, but it does not explicitly define submission as creation of the
+source-native request.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** `requested_date` clearly applies to the
+admitted Calgary service request.
+
+**SUBMISSION_CREATION_EQUIVALENCE: `INDETERMINATE`.** Retained evidence
+establishes neither that the request cannot exist before submission nor that
+Calgary defines submission and creation as distinct boundaries. The canonical
+creation requirement is therefore not sufficiently established for
+`ACCEPT_MAPPING`.
+
+Complete population and parseability do not substitute for semantic
+equivalence.
+
+### Counterevidence / Limitation
+
+The strongest argument for acceptance is that the admitted source entity is
+specifically a submitted service request and `requested_date` is directly
+associated with submission, so submission may be the source-domain point at
+which the request comes into existence.
+
+The strongest argument against acceptance is that Increment 002 requires a
+source-supported creation boundary, while Calgary documents only submission,
+and Increment 003 explicitly preserved
+`REQUESTED_DATE_CREATION_TIME_EQUIVALENCE_UNRESOLVED`.
+
+For the chosen deferral:
+
+`COUNTERARGUMENT`: Because the source entity is the submitted request,
+submission may already be the most semantically honest source-native creation
+boundary.
+
+`COUNTERARGUMENT_RESULT: LEAVES_DECISION_INDETERMINATE`
+
+The argument makes `ACCEPT_MAPPING` plausible, but it does not provide the
+missing source-supported submission-to-creation equivalence required by the
+canonical contract.
+
+### Precision Boundary
+
+`SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED`
+
+Lexical seconds do not establish second-level source precision. Approximately
+48% exact-midnight representation does not establish date-only source capture,
+and midnight representation does not establish defaulting, imputation,
+rounding, truncation, or synthetic timestamps. Precision treatment remains
+undecided.
+
+### Timezone Boundary
+
+`TIMEZONE_SEMANTICS_UNRESOLVED`
+
+This decision does not infer UTC, Calgary local time, Mountain Time, MST, MDT,
+daylight-saving behavior, or offset behavior.
+
+### Analytical Boundary
+
+`DEFER_MAPPING` establishes nothing about request-to-closure duration,
+resolution time, observation windows, censoring, SLA eligibility, active work,
+handling time, queue time, or waiting time. The absence of a `created_at`
+mapping is a source-contract result, not an analytical conclusion.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+
+"The date the request was submitted" is external evidence. `DEFER_MAPPING` is
+the design choice supported by the current evidence boundary.
+
+### Falsification / Revision Condition
+
+This deferral should be revisited if credible future evidence:
+
+- explicitly states that request submission is source-native request creation;
+- explicitly defines creation separately from submission;
+- establishes a stable pre-submission request entity;
+- establishes `requested_date` as the source creation timestamp;
+- shows that a source migration changed `requested_date` semantics;
+- establishes that `requested_date` derives from another lifecycle boundary;
+- establishes synthetic or transformed timestamp behavior materially relevant
+  to creation semantics.
+
+Routine new rows, refreshed exports, or artifact-hash changes are not semantic
+falsification.
+
+`DEFER_MAPPING` is not equivalent to `CANONICAL_CONCEPT_UNAVAILABLE`. A
+plausible source candidate exists, but the semantic equivalence needed for
+canonical mapping is not established. No unavailability reason is assigned in
+this decision; unavailable concepts and reasons remain Decision Question 12
+territory.
+
+`INCREMENT_002_CREATED_AT_FALSIFICATION: none`
+
+Failure to establish a Calgary `created_at` mapping does not falsify an
+optional canonical concept. Cross-source portability remains unvalidated.
+
+Decision Question 5 remains undecided: this decision does not establish a
+mapping from `status_description` to `source_status`. The treatment of
+`canonical_status`, submission-channel representation, service type,
+responsible department, `updated_date`, `closed_date`, unavailable canonical
+concepts, and material source-native evidence outside the minimal Case also
+remains undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
