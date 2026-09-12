@@ -2189,6 +2189,223 @@ dataset validation, portability, production readiness, an External evidence
 claim, an analytical result, Calgary semantic validation, or a Research
 conclusion.
 
+## Implementation Record 004 - Calgary Identity Admission Function
+
+### Objective
+
+Implement the already committed identity-admission API and deterministic
+decision precedence without implementing the full Case adapter.
+
+### Files
+
+    src/support_operations_intelligence/identity.py
+    tests/test_calgary_identity_admission.py
+
+### Design Implemented
+
+Implemented:
+
+    admit_calgary_source_identity
+
+Input:
+
+    Mapping[str, object]
+
+Output:
+
+    IdentityAdmissionResult
+
+Source identity field:
+
+    service_request_id
+
+Fixed source system:
+
+    city_of_calgary_311
+
+Decision order:
+
+1. missing;
+2. `None`;
+3. non-string;
+4. empty;
+5. whitespace-only;
+6. accept.
+
+Full Case adapter:
+
+    not implemented
+
+Rejected raw value retention:
+
+    NOT_DEFINED
+
+Rejected source record retention:
+
+    NOT_DEFINED
+
+Third-party dependencies introduced:
+
+    none
+
+The callable is annotated with `record: Mapping[str, object]` and returns
+`IdentityAdmissionResult`. These annotations document the API boundary; they
+do not establish runtime validation by themselves.
+
+The implementation distinguishes an absent key from a present `None` value,
+rejects non-string input without coercion, rejects empty and whitespace-only
+strings, preserves accepted lexical values exactly, constructs `CaseId` only
+after successful admission, fixes the namespace to `city_of_calgary_311`, and
+does not mutate the input mapping.
+
+It does not inspect or map `requested_date`, `updated_date`, `closed_date`,
+`status_description`, `source`, `service_name`, `agency_responsible`,
+`address`, `comm_code`, `comm_name`, `location_type`, `longitude`, `latitude`,
+or `point`. The test containing raw `source = "Phone"` uses that value only to
+verify that it cannot override the fixed namespace.
+
+No full Case construction, CSV parsing, ingestion, evidence-state behavior,
+normalization, parsing, serialization, persistence, logging, provenance, raw
+rejected-value retention, or source-record retention is implemented.
+
+### Expected Pre-Implementation Failure
+
+Executed before `admit_calgary_source_identity` existed:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_calgary_identity_admission.py' \
+      -v
+
+Observed discovery result:
+
+    tests reported: 1 failed test module
+    errors: 1
+    result: FAILED (errors=1)
+
+Error type:
+
+    ImportError
+
+Reason:
+
+    cannot import name 'admit_calgary_source_identity' from
+    'support_operations_intelligence.identity'
+
+This expected pre-implementation failure is an Engineering observation. The
+focused test could not pass before the designed callable was implemented. It
+is test-first evidence, not a product defect.
+
+### Focused Post-Implementation Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_calgary_identity_admission.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### Identity-Result Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_identity_admission_result.py' \
+      -v
+
+Observed result:
+
+    tests run: 10
+    failures: 0
+    errors: 0
+    result: OK
+
+### `CaseId` Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed result:
+
+    tests run: 6
+    failures: 0
+    errors: 0
+    result: OK
+
+### Full-Suite Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed result:
+
+    tests run: 29
+    failures: 0
+    errors: 0
+    result: OK
+
+### Direct Decision-Path Verification
+
+The direct repository-local Python verification observed:
+
+    {} -> REJECTED MISSING_SOURCE_CASE_ID
+    {'service_request_id': None} -> REJECTED NULL_SOURCE_CASE_ID
+    {'service_request_id': 123} -> REJECTED NON_STRING_SOURCE_CASE_ID
+    {'service_request_id': ''} -> REJECTED EMPTY_SOURCE_CASE_ID
+    {'service_request_id': '   '} ->
+        REJECTED WHITESPACE_ONLY_SOURCE_CASE_ID
+    {'service_request_id': 'ABC-123'} ->
+        ACCEPTED 'city_of_calgary_311' 'ABC-123'
+    {'service_request_id': ' 001AbC-09 ', 'source': 'Phone'} ->
+        ACCEPTED 'city_of_calgary_311' ' 001AbC-09 '
+
+This directly preserves the distinction between missing and `None`, rejects
+non-string input without producing `"123"`, preserves the padded lexical
+value, and shows that raw `source` does not affect the namespace.
+
+### Input Immutability Verification
+
+The direct repository-local verification observed:
+
+    unchanged = True
+    record = {
+        'service_request_id': 'ABC-123',
+        'source': 'Phone',
+    }
+
+### Claim Classification and Boundary
+
+The function is a Design implementation of the committed API, identity
+admissibility, namespace, lexical-preservation, decision-precedence, and
+result-transport choices. The expected red result, focused result,
+identity-result regression, `CaseId` regression, full-suite result, direct
+path verification, and input-immutability verification are Engineering
+observations.
+
+The implemented Calgary identity-admission function conforms to the currently
+tested Increment 005 identity admissibility, namespace, lexical preservation,
+and result-transport design under the repository-local Python execution
+boundary.
+
+This step does not establish full Calgary adapter correctness, canonical Case
+correctness, dataset-wide validation, ingestion correctness, source semantic
+correctness beyond committed mappings, persistence correctness, portability,
+production readiness, External evidence, an analytical result, or a Research
+conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
