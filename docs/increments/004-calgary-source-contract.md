@@ -1706,6 +1706,241 @@ Decision Question 8 remains undecided: this decision does not establish
 concepts, and other source-native evidence beyond the specific Calgary
 `source` decision also remain undecided.
 
+## Decision Question 8 - Service Type / Classification
+
+### Decision Question
+
+How should Calgary `service_name` be represented under the Increment 002
+canonical Case contract?
+
+### Canonical Requirement / Boundary
+
+Increment 002 establishes that `category` and `sub_category` are not universal
+scalar Case fields. A Case may have zero or more classification concepts.
+Source-native classification meaning and structure must remain traceable, and
+hierarchy must not be inferred from naming, delimiters, or convenience.
+
+Increment 002 recognizes classification conceptually but does not define a
+concrete canonical mapping target for Calgary `service_name`. The concrete
+classification model and physical representation remain deferred. This
+decision does not create such a target.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `service_name`;
+- type: `text`;
+- description: "The type of service requested."
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank `service_name` values: 0;
+- whitespace-only `service_name` values: 0.
+
+No distinct-value inspection was performed for this decision.
+
+The retained evidence does not establish:
+
+- the complete service-name vocabulary;
+- a hierarchy;
+- parent or child relationships;
+- taxonomy depth;
+- historical stability;
+- normalization rules;
+- cross-source equivalence;
+- analytical grouping validity.
+
+### Competing Interpretations
+
+**Interpretation A — `RETAIN_SOURCE_NATIVE`.** Preserve Calgary
+`service_name` as source-native service-type and classification evidence
+without introducing universal scalar fields. Review classification:
+`STRONGEST`.
+
+**Interpretation B — `ACCEPT_MAPPING`.** Map `service_name` into an
+already-existing canonical classification representation. Review
+classification: `UNSUPPORTED`.
+
+**Interpretation C — `DEFER_MAPPING`.** Recognize the evidence but postpone
+even semantic retention because the physical representation is unresolved.
+Review classification: `PLAUSIBLE`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat canonical
+classification as unavailable for Calgary. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation E — `REJECT_MAPPING`.** Do not preserve `service_name` as
+meaningful classification evidence. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_SOURCE_NATIVE: STRONGEST
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: PLAUSIBLE
+    CANONICAL_CONCEPT_UNAVAILABLE: UNSUPPORTED
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`RETAIN_SOURCE_NATIVE`
+
+Calgary `service_name` is retained as source-native evidence meaning:
+
+> The type of service requested.
+
+No universal canonical scalar is introduced. No hierarchy is inferred, and
+no canonical service taxonomy is defined.
+
+### Justification
+
+**SOURCE_SERVICE_TYPE_SEMANTICS: `SUPPORTED`.** Calgary explicitly defines
+`service_name` as the type of service requested.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes the admitted Calgary
+service request.
+
+**CLASSIFICATION_ALIGNMENT: `SUPPORTED`.** "Type of service requested" is
+legitimately source-native classification evidence.
+
+**EXISTING_CANONICAL_CLASSIFICATION_TARGET: `NOT_ESTABLISHED`.** Increment 002
+recognizes classification conceptually but does not define a concrete
+representation or mapping target.
+
+**SOURCE_NATIVE_PRESERVATION: `SUPPORTED`.** The source evidence can be
+retained faithfully without forcing universal canonical structure.
+
+**HIERARCHY_NEUTRALITY: `SUPPORTED`.** Retention requires no parent or child,
+category or subcategory, or taxonomy assumptions.
+
+**SERVICE_CLASSIFICATION_NORMALIZATION_NEED: `NOT_ESTABLISHED`.** No committed
+current requirement needs normalized service classification.
+
+**CROSS_SOURCE_CLASSIFICATION_BASIS: `NOT_ESTABLISHED`.** No retained
+cross-source classification evidence justifies a shared service taxonomy.
+
+### Counterevidence / Limitation
+
+The strongest argument for `RETAIN_SOURCE_NATIVE` is that Calgary explicitly
+identifies the requested service type, and native retention preserves useful
+classification evidence without inventing universal scalars, normalization,
+or hierarchy.
+
+The strongest opposing argument is that source-native-only retention may
+postpone a coherent classification model and create inconsistent adapter or
+query semantics.
+
+`COUNTERARGUMENT`: An unresolved shared classification representation may
+produce inconsistent source-specific extensions or unclear access patterns.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+This concern motivates later representation design but does not defeat the
+semantic retention rule.
+
+### Category / Subcategory Boundary
+
+No universal `category`, `sub_category`, or `service_name` Case scalar is
+introduced.
+
+No classification hierarchy is inferred from field names, delimiters,
+wording, neighboring fields, or the apparent breadth of service labels.
+
+### Representation Boundary
+
+This decision establishes only semantic retention.
+
+It does not choose:
+
+- a Python field name;
+- a database column;
+- a JSON structure;
+- a classification-object schema;
+- a taxonomy identifier;
+- an enum representation;
+- casing normalization;
+- synonym collapsing;
+- a hierarchy;
+- a canonical service vocabulary.
+
+Exact physical representation remains deferred.
+
+### Missingness Boundary
+
+Retained population evidence shows:
+
+    blank service_name: 0
+    whitespace-only service_name: 0
+
+This does not establish universal classification availability, a universal
+required Case field, a Case invariant, an identity-core requirement, or a
+requirement for future sources to expose equivalent classification.
+
+### Analytical Boundary
+
+`RETAIN_SOURCE_NATIVE` establishes nothing about:
+
+- service-demand distribution;
+- high-volume service types;
+- service complexity;
+- service difficulty;
+- operational ownership;
+- duration by service type;
+- SLA by service type;
+- workload by service type;
+- operational priority;
+- causal effects of service type.
+
+Those conclusions require separate analytical contracts and evidence.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The official `service_name` definition is External evidence.
+`RETAIN_SOURCE_NATIVE` is the Design choice. The representation decision is
+not presented as an external fact or research conclusion.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence shows that:
+
+- `service_name` means something materially different from service type;
+- `service_name` combines multiple materially distinct concepts;
+- source migration materially changes its semantics;
+- an authoritative Calgary classification hierarchy becomes available;
+- cross-source evidence supports a defensible shared classification model;
+- a concrete analytical or product requirement requires standardized
+  classification;
+- Increment 002 is revised to define a concrete classification representation.
+
+Ordinary new rows, additional `service_name` values, refreshed exports, and
+changed CSV hashes do not automatically falsify source-native retention.
+
+`INCREMENT_002_SERVICE_CLASSIFICATION_FALSIFICATION: none`
+
+Native retention does not justify extending Increment 002 with universal
+`category`, `sub_category`, or `service_name` scalars.
+
+### Portability Boundary
+
+Source-native service classification is not portability evidence. A future
+shared classification model requires actual cross-source evidence.
+
+Decision Question 9 remains undecided: this decision does not establish
+`agency_responsible` representation. `updated_date` treatment, `closed_date`
+treatment, unavailable canonical concepts, and source-native evidence beyond
+the `service_name` question also remain undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
