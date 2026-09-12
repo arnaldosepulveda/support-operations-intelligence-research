@@ -2201,6 +2201,304 @@ Decision Question 10 remains undecided: this decision does not establish
 concepts, and source-native evidence beyond the `agency_responsible` question
 also remain undecided.
 
+## Decision Question 10 - Updated Date / Source-Native Update Time
+
+### Decision Question
+
+How should Calgary `updated_date` be treated under the Increment 002 canonical
+Case contract?
+
+### Canonical Requirement / Boundary
+
+Increment 002 establishes that `updated_at` is not a universal canonical Case
+scalar. Record modification, lifecycle change, latest event, and latest
+platform evidence are materially distinct concepts. Source-native temporal
+evidence may remain useful without becoming a universal canonical timestamp.
+
+`MAX(event_timestamp)` does not by itself establish `Case.updated_at`.
+Temporal meaning must come from source semantics rather than field-name
+resemblance. Precision, provenance, and observation boundaries must remain
+explicit. Physical representation and projections remain deferred.
+
+This decision does not create a universal update-time concept.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `updated_date`;
+- type: `calendar_date`;
+- format metadata: `date_ymd_time`;
+- description: "The most recent date the request was updated."
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank values: 77,829;
+- parseable values: 7,396,574;
+- unparseable values: 0;
+- minimum parsed value: `2012-01-01 02:11:34`;
+- maximum parsed value: `2026-09-08 00:00:00`;
+- exact-midnight values: 3,603,787;
+- non-midnight values: 3,792,787;
+- exact-midnight percentage of parseable values: 48.722381%;
+- non-midnight values with second zero: 63,453;
+- non-midnight values with second nonzero: 3,729,334.
+
+The retained evidence preserves these boundaries:
+
+    UPDATED_DATE_RECORD_VS_LIFECYCLE_MEANING_UNRESOLVED
+    SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED
+    TIMEZONE_SEMANTICS_UNRESOLVED
+
+No new temporal evidence is introduced by this decision.
+
+### Competing Interpretations
+
+**Interpretation A — `RETAIN_SOURCE_NATIVE`.** Preserve `updated_date` as
+source-native request-update-time evidence with exactly the source-supported
+meaning. Review classification: `STRONGEST`.
+
+**Interpretation B — `ACCEPT_MAPPING`.** Map `updated_date` into an
+already-existing canonical Case timestamp. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation C — `DEFER_MAPPING`.** Recognize the evidence but postpone
+semantic retention because its operational update mechanism or physical
+representation is unresolved. Review classification: `PLAUSIBLE`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat a corresponding
+canonical update-time concept as unavailable. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation E — `REJECT_MAPPING`.** Do not preserve `updated_date` as
+meaningful temporal evidence. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_SOURCE_NATIVE: STRONGEST
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: PLAUSIBLE
+    CANONICAL_CONCEPT_UNAVAILABLE: UNSUPPORTED
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`RETAIN_SOURCE_NATIVE`
+
+Calgary `updated_date` is retained as source-native temporal evidence
+meaning:
+
+> The most recent date the request was updated.
+
+No universal canonical update-time scalar is introduced.
+
+### Justification
+
+**SOURCE_UPDATE_SEMANTICS: `SUPPORTED`.** Calgary explicitly defines
+`updated_date` as the most recent date the request was updated, without
+establishing what kinds of updates qualify.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes the admitted Calgary
+service request.
+
+**LIFECYCLE_NEUTRALITY: `SUPPORTED`.** The value can be retained without
+claiming lifecycle transition, latest event, assignment change, routing,
+handoff, resolver action, or productive-work semantics.
+
+**UNIVERSAL_UPDATED_AT_JUSTIFICATION: `NOT_ESTABLISHED`.** Increment 002 does
+not establish universal `updated_at`, and the retained evidence does not
+justify an equivalent universal scalar.
+
+**SOURCE_NATIVE_PRESERVATION: `SUPPORTED`.** The field can be retained with
+its bounded source meaning without canonical expansion.
+
+**TEMPORAL_PRECISION_HONESTY: `SUPPORTED`.** Retention does not require
+claiming actual source measurement precision from the lexical representation.
+
+**TIMEZONE_HONESTY: `SUPPORTED`.** Retention does not require inventing a
+timezone or offset interpretation.
+
+**MISSINGNESS_NEUTRALITY: `SUPPORTED`.** Blank values can remain observed
+missingness without assigning a reason or lifecycle meaning.
+
+### Update / Lifecycle Boundary
+
+`UPDATED_DATE_RECORD_VS_LIFECYCLE_MEANING_UNRESOLVED`
+
+`updated_date` does not establish:
+
+- lifecycle-transition time;
+- latest event time;
+- status-change time;
+- assignment-change time;
+- routing-change time;
+- handoff time;
+- resolver activity;
+- productive-work time;
+- observation time;
+- extraction time;
+- ingestion time.
+
+The word "updated" is not proof of operational lifecycle meaning.
+
+This decision does not map:
+
+    updated_date -> Case.updated_at
+    updated_date -> Case.lifecycle_updated_at
+    updated_date -> Case.latest_event_at
+    updated_date -> Case.status_changed_at
+    updated_date -> Case.assignment_changed_at
+    updated_date -> Case.routing_changed_at
+    updated_date -> Case.handoff_at
+
+### Counterevidence / Limitation
+
+The strongest argument for `RETAIN_SOURCE_NATIVE` is that Calgary explicitly
+defines a request update-time concept that applies to the admitted request and
+can be retained without lifecycle interpretation or universal canonical
+expansion.
+
+The strongest opposing argument is that "updated" remains broad;
+record-versus-lifecycle meaning, exact observation boundary, immutable
+snapshot provenance, temporal precision, and timezone remain unresolved, and
+source-specific temporal fields may complicate common access.
+
+`COUNTERARGUMENT`: Unresolved update mechanisms and temporal context may cause
+consumers to mistake the field for lifecycle activity or implement
+inconsistent source-specific query semantics.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+Those limitations constrain interpretation but do not defeat bounded semantic
+retention.
+
+### Representation Boundary
+
+This decision establishes semantic retention only.
+
+It does not choose:
+
+- a Python field name;
+- a database column;
+- a database timestamp type;
+- timezone attachment;
+- timezone conversion;
+- UTC conversion;
+- precision reduction;
+- flooring;
+- truncation;
+- parser implementation;
+- a serialization format.
+
+Exact physical representation remains deferred.
+
+### Precision Boundary
+
+`SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED`
+
+- Lexical seconds do not prove second-level source measurement precision.
+- Midnight prevalence does not prove date-only capture.
+- Midnight values do not prove defaulting, imputation, rounding, truncation,
+  or synthetic timestamps.
+
+### Timezone Boundary
+
+`TIMEZONE_SEMANTICS_UNRESOLVED`
+
+No UTC, Calgary local time, Mountain Time, MST, MDT, DST behavior, or timezone
+offset interpretation is introduced.
+
+### Missingness Boundary
+
+Retained population evidence shows:
+
+    blank updated_date: 77,829
+    parseable nonblank: 7,396,574
+    unparseable nonblank: 0
+
+Blank values do not establish never updated, open, unchanged, newly created,
+source error, invalid Case, unavailable lifecycle, or any canonical
+`UNAVAILABLE` reason. This decision assigns no `UNAVAILABLE` reason.
+
+### Analytical Boundary
+
+`RETAIN_SOURCE_NATIVE` establishes nothing about:
+
+- time to first update;
+- time to latest update;
+- handling time;
+- active work;
+- queue time;
+- waiting time;
+- state residence;
+- time since last activity;
+- staleness;
+- responsiveness;
+- SLA performance;
+- lifecycle-transition timing;
+- workflow activity;
+- Case aging.
+
+No timestamp subtraction is justified by this decision. Those conclusions
+require separate analytical contracts and stronger semantics.
+
+### Pairwise Temporal Boundary
+
+Increment 003 retained pairwise timestamp observations. This decision does
+not use those orderings to infer an expected lifecycle sequence, invalid
+records, final-update semantics, closure semantics, or chronology rules.
+
+The pairwise observations do not resolve what "updated" means operationally.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The official `updated_date` definition is External evidence.
+`RETAIN_SOURCE_NATIVE` is the Design choice.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence shows that:
+
+- `updated_date` specifically means record-modification time;
+- `updated_date` specifically means lifecycle-update time;
+- `updated_date` represents latest-event time;
+- `updated_date` combines materially different temporal mechanisms;
+- source migration materially changes its semantics;
+- authoritative documentation establishes stronger precision semantics;
+- authoritative documentation establishes timezone semantics;
+- cross-source evidence supports a defensible shared update-time concept;
+- a concrete analytical or product requirement requires standardized update
+  semantics.
+
+Ordinary new rows, changed update values, refreshed exports, and changed CSV
+hashes do not automatically falsify source-native retention.
+
+`INCREMENT_002_UPDATED_DATE_FALSIFICATION: none`
+
+Source-native update-time retention does not justify extending Increment 002
+with a universal `updated_at` scalar.
+
+### Portability Boundary
+
+Source-native update-time evidence is not portability evidence. A future
+shared update-time model requires actual cross-source evidence.
+
+Decision Question 11 remains undecided: this decision does not establish
+`closed_date` treatment. Unavailable canonical concepts and remaining
+source-native evidence beyond the `updated_date` question also remain
+undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
