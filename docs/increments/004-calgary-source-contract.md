@@ -3222,6 +3222,487 @@ contract.
 Decision Question 13 remains undecided: this decision does not identify or
 model material source-native evidence outside Case.
 
+## Decision Question 13 - Material Source-Native Evidence Outside Case
+
+### Decision Question
+
+Which remaining Calgary fields contain material source-native evidence that
+should be retained outside the canonical Case contract, and which fields
+cannot yet support such a semantic-retention decision?
+
+### Decision Boundary
+
+**CANONICAL CASE CONCEPT.** A concept justified by Increment 002 as part of
+the canonical Case contract.
+
+**RETAINED SOURCE-NATIVE EVIDENCE.** Meaningful source evidence preserved
+with its source semantics without canonical mapping.
+
+**RAW SOURCE FIELD PRESENCE.** A source column exists. Field presence alone
+does not establish semantic meaning or materiality.
+
+**MATERIAL SOURCE-NATIVE EVIDENCE.** Source evidence whose loss would remove
+a meaningful source-supported fact or materially weaken later
+reconstruction, interpretation, or justified source-specific analysis.
+
+**PHYSICAL REPRESENTATION.** How retained evidence is eventually stored or
+serialized. This remains deferred.
+
+Materiality is not defined merely as potential usefulness for analytics.
+
+### Prior Decision Boundary
+
+Decision Question 13 does not revisit these committed decisions:
+
+    source
+        RETAIN_SOURCE_NATIVE
+
+    service_name
+        RETAIN_SOURCE_NATIVE
+
+    agency_responsible
+        RETAIN_SOURCE_NATIVE
+
+    updated_date
+        RETAIN_SOURCE_NATIVE
+
+    closed_date
+        RETAIN_SOURCE_NATIVE
+
+Those decisions remain unchanged.
+
+### Remaining Field Inventory
+
+After excluding fields addressed by Decisions 1 through 12, the remaining
+retained local-header fields are exactly:
+
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+The four computed-region fields present in current official metadata are
+absent from the retained local header and are not candidates in this Decision
+Question. They are not modeled here.
+
+### Increment 002 Location Boundary
+
+Increment 002 establishes that `location` is not a universal Case scalar.
+Location concepts may describe different entities or contexts, more than one
+location concept may legitimately exist, and source-native spatial evidence
+may be retained without canonicalization. Location concepts must remain
+distinguishable rather than being collapsed into one generic field.
+
+This decision does not create a canonical geospatial model.
+
+`UNIVERSAL_LOCATION_FIELD_JUSTIFICATION: NOT_SUPPORTED`
+
+### Materiality Test
+
+Each remaining field is assessed independently against these questions:
+
+- whether authoritative retained evidence establishes source semantics;
+- whether the evidence describes the admitted request or its source context;
+- whether the retained local artifact contains nonblank values;
+- whether discarding populated values would lose a source-supported fact;
+- whether Increment 002 provides a canonical target;
+- whether evidence can remain recoverable without canonicalization;
+- whether semantic redundancy with another field is established.
+
+Population and field-name resemblance do not answer the semantic questions.
+
+### `address` Assessment
+
+Retained evidence:
+
+    Field: address
+    Official field presence: retained
+    Authoritative official type: not retained in Increment 003
+    Authoritative official definition: not retained in Increment 003
+    Local rows: 7,474,403
+    Blank: 7,474,403
+    Whitespace-only: 0
+    Nonblank: 0
+
+Assessment:
+
+    ADDRESS_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    ADDRESS_VALUE_EVIDENCE: ABSENT_IN_RETAINED_LOCAL_ARTIFACT
+    ADDRESS_MATERIAL_NATIVE_RETENTION: NOT_JUSTIFIED
+
+Field-level recommendation:
+
+    FIELD: address
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: ABSENT_IN_RETAINED_LOCAL_ARTIFACT
+
+**JUSTIFICATION.** The field exists in the retained source structure, but
+authoritative semantics were not retained and the local artifact contains no
+populated `address` values. No positive semantic-retention decision is
+currently justified.
+
+**LIMITATION.** This does not establish that Calgary lacks an address
+concept.
+
+The all-blank retained local field does not justify `CONCEPT_ABSENT` or
+`VALUE_ABSENT` at contract level. It also does not justify universal
+unavailability.
+
+### `comm_code` Assessment
+
+Retained evidence:
+
+    Field: comm_code
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 429,787
+    Whitespace-only: 0
+    Nonblank: 7,044,616
+
+Assessment:
+
+    COMM_CODE_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    COMM_CODE_VALUE_EVIDENCE: PRESENT
+    COMM_CODE_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: comm_code
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Populated evidence exists, but authoritative semantics are
+not established strongly enough to justify semantic retention.
+
+**LIMITATION.** No community hierarchy, immutable identifier semantics,
+geographic containment, or equivalence with `comm_name` is inferred.
+
+### `comm_name` Assessment
+
+Retained evidence:
+
+    Field: comm_name
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 429,787
+    Whitespace-only: 0
+    Nonblank: 7,044,616
+
+Assessment:
+
+    COMM_NAME_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    COMM_NAME_VALUE_EVIDENCE: PRESENT
+    COMM_NAME_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: comm_name
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Populated evidence exists, but retained authoritative
+semantics are insufficient for safe semantic retention.
+
+**LIMITATION.** No hierarchy, neighborhood equivalence, containment,
+historical stability, or one-to-one dependency with `comm_code` is inferred.
+
+### `location_type` Assessment
+
+Retained evidence:
+
+    Field: location_type
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 0
+    Whitespace-only: 0
+    Nonblank: 7,474,403
+
+Assessment:
+
+    LOCATION_TYPE_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    LOCATION_TYPE_VALUE_EVIDENCE: PRESENT
+    LOCATION_TYPE_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: location_type
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Complete local population does not establish the field's
+source semantics or taxonomy.
+
+**LIMITATION.** No location taxonomy, hierarchy, or canonical location role
+is inferred from the field name or population completeness.
+
+### `longitude` Assessment
+
+Retained evidence:
+
+    Field: longitude
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 430,664
+    Whitespace-only: 0
+    Nonblank: 7,043,739
+
+Assessment:
+
+    LONGITUDE_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    LONGITUDE_VALUE_EVIDENCE: PRESENT
+    LONGITUDE_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: longitude
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Populated values exist, but retained evidence does not
+establish the coordinate semantics, represented location role, or coordinate
+reference system.
+
+**LIMITATION.** No exact physical location, request location, incident
+location, service location, geocoding accuracy, coordinate reference system,
+or precision is inferred.
+
+### `latitude` Assessment
+
+Retained evidence:
+
+    Field: latitude
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 430,664
+    Whitespace-only: 0
+    Nonblank: 7,043,739
+
+Assessment:
+
+    LATITUDE_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    LATITUDE_VALUE_EVIDENCE: PRESENT
+    LATITUDE_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: latitude
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Populated values exist, but retained evidence does not
+establish the coordinate semantics, represented location role, or coordinate
+reference system.
+
+**LIMITATION.** The same geospatial boundaries recorded for `longitude`
+apply. No additional latitude-specific meaning is inferred.
+
+### `point` Assessment
+
+Retained evidence:
+
+    Field: point
+    Authoritative official type: not retained
+    Authoritative official definition: not retained
+    Blank: 430,664
+    Whitespace-only: 0
+    Nonblank: 7,043,739
+
+Assessment:
+
+    POINT_SOURCE_SEMANTICS: NOT_ESTABLISHED
+    POINT_VALUE_EVIDENCE: PRESENT
+    POINT_MATERIAL_NATIVE_RETENTION: INDETERMINATE
+
+Field-level recommendation:
+
+    FIELD: point
+    RECOMMENDED_DECISION: DEFER_MAPPING
+    SOURCE_SEMANTIC_RULE: not established from retained authoritative evidence
+    VALUE_EVIDENCE: PRESENT
+
+**JUSTIFICATION.** Populated values exist, but authoritative point semantics
+and the relationship to `latitude` and `longitude` are not established.
+
+**LIMITATION.** `point` is not assumed to be derivable from `latitude` and
+`longitude`, and `latitude` and `longitude` are not assumed to be derivable
+from `point`.
+
+### Redundancy Results
+
+    COMM_CODE_COMM_NAME_EQUIVALENCE: NOT_ESTABLISHED
+    LAT_LONG_POINT_EQUIVALENCE: NOT_ESTABLISHED
+
+No source field is discarded or deduplicated on the basis of presumed
+redundancy.
+
+### Competing Overall Decisions
+
+**`RETAIN_JUSTIFIED_MATERIAL_SOURCE_NATIVE_EVIDENCE`.** Evaluate remaining
+fields individually and retain those whose source semantics and populated
+evidence justify retention, without canonical expansion. Review
+classification: `STRONGEST`.
+
+**`RETAIN_ALL_REMAINING_FIELDS_AS_MATERIAL`.** Treat every remaining column
+as material despite missing authoritative semantic definitions. Raw presence
+and population are insufficient. Review classification: `UNSUPPORTED`.
+
+**`DEFER_ALL_REMAINING_SOURCE_NATIVE_EVIDENCE`.** Defer all current fields.
+This matches the current field-level results but is weaker as a general rule
+because future fields or stronger evidence must still be assessed
+individually. Review classification: `PLAUSIBLE`.
+
+**`EXPAND_CANONICAL_CASE`.** Add location, community, or geospatial fields to
+canonical Case. Increment 002 establishes no such universal target, and the
+retained evidence does not justify one. Review classification: `UNSUPPORTED`.
+
+**`REJECT_ALL_REMAINING_FIELDS`.** Discard all remaining fields from
+source-contract consideration. Populated evidence may later prove material,
+so categorical rejection is not justified. Review classification:
+`UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_JUSTIFIED_MATERIAL_SOURCE_NATIVE_EVIDENCE: STRONGEST
+    RETAIN_ALL_REMAINING_FIELDS_AS_MATERIAL: UNSUPPORTED
+    DEFER_ALL_REMAINING_SOURCE_NATIVE_EVIDENCE: PLAUSIBLE
+    EXPAND_CANONICAL_CASE: UNSUPPORTED
+    REJECT_ALL_REMAINING_FIELDS: UNSUPPORTED
+
+The strongest decision rule is to evaluate remaining source fields
+individually and retain them when source semantics and value evidence justify
+retention. In the current retained evidence, however, none of the seven
+remaining fields has sufficiently established authoritative semantics to
+support a positive `RETAIN_SOURCE_NATIVE` decision. Therefore all seven
+current field-level outcomes are `DEFER_MAPPING`.
+
+This is not a blanket rule that remaining source-native evidence should
+always be deferred.
+
+### Decision
+
+`READY_RESULT: READY_TO_DEFER_REMAINING_NATIVE_EVIDENCE`
+
+Selected source-contract result:
+
+All seven remaining fields are individually `DEFER_MAPPING` because retained
+authoritative semantics are insufficient for safe semantic-retention
+decisions.
+
+This does not mean the fields are immaterial, should be discarded, or cannot
+support future retention. The deferral is caused by semantic evidence
+insufficiency, not merely unresolved physical representation.
+
+### Address Boundary
+
+The retained local artifact contains no populated `address` values.
+
+This does not establish that Calgary lacks an address concept, that address
+is universally unavailable, `CONCEPT_ABSENT`, or contract-level
+`VALUE_ABSENT`.
+
+### Geospatial Boundary
+
+Decision Question 13 establishes no exact physical address role, customer
+location, incident location, service location, request-origin location,
+responsible-department location, coordinate reference system, geocoding
+accuracy, spatial precision, geographic hierarchy, spatial containment, or
+coordinate/point equivalence.
+
+### Community Boundary
+
+Decision Question 13 establishes no `comm_code` / `comm_name` one-to-one
+equivalence, immutable community identifier, neighborhood equivalence,
+administrative hierarchy, geographic containment, stable historical
+boundary, or parent/child community relationship.
+
+### Physical Representation Boundary
+
+This decision does not choose a Case extension object, source-metadata
+object, dictionary, JSON blob, relational side table, raw-payload
+representation, PostGIS representation, geometry column, numeric coordinate
+type, lookup table, or serialization structure.
+
+### Analytical Boundary
+
+Decision Question 13 establishes nothing about requests by community,
+geographic demand, hotspots, workload by location, neighborhood performance,
+location-based SLA, department geography, distance, spatial clustering,
+inequity, or geographic causal effects.
+
+### Privacy / Consequence Boundary
+
+No field-specific privacy classification is established by the retained
+Increment 003 evidence.
+
+Decision Question 13 does not determine whether any remaining field is safe
+or unsafe for publication, external sharing, analytical use, or geospatial
+display. Privacy and consequence treatment remain outside this source-contract
+decision.
+
+### Prior-Decision Falsification
+
+`DQ1_DQ12_PRIOR_DECISION_FALSIFICATION: none`
+
+No prior Increment 004 decision changes.
+
+### Increment 002 Falsification
+
+`INCREMENT_002_MATERIAL_NATIVE_EVIDENCE_FALSIFICATION: none`
+
+Deferring remaining source-native fields does not extend or reject the
+canonical Case contract.
+
+### Counterevidence / Limitation
+
+Six remaining fields contain populated local values, and Increment 002
+requires material source-native evidence to remain recoverable or explicitly
+accounted for. Those facts make future positive retention decisions plausible.
+
+Population cannot establish what the fields mean, which location or context
+they describe, or whether apparently related fields are equivalent. The
+missing authoritative semantic definitions therefore prevent positive
+retention decisions now without establishing that the evidence is immaterial.
+
+This decision should be revisited if retained authoritative evidence later
+establishes the meaning, entity alignment, contextual role, or semantic
+relationships of one or more fields. Each field must then be reassessed
+individually.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    Increment 002 canonical contract
+    Increment 003 retained External evidence
+    Increment 003 Engineering observations
+    Prior Increment 004 decisions
+
+Authoritative field definitions, when available, would be External evidence.
+Local blankness and population counts are Engineering observations.
+`DEFER_MAPPING` decisions are Design choices.
+
+### Portability Boundary
+
+Calgary location, community, and geospatial field presence does not establish
+cross-source portability.
+
+Another source may expose different geographic concepts, different location
+roles, different coordinate systems, no community fields, or richer or poorer
+spatial evidence.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
