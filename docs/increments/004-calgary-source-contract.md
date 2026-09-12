@@ -2824,6 +2824,404 @@ unavailable canonical concepts. Source-native evidence beyond `closed_date`,
 analytical eligibility for request-to-closure duration, censoring treatment,
 and closure-based population definitions also remain undecided.
 
+## Decision Question 12 - Canonical Unavailable Concepts
+
+### Decision Question
+
+Which canonical concepts, if any, should be explicitly marked `UNAVAILABLE`
+for the Calgary source contract, and with which Increment 002 reason?
+
+### Increment 002 Evidence-State Model
+
+Increment 002 establishes these evidence states:
+
+**`OBSERVED`.** Canonical value established directly from source evidence.
+
+**`DERIVED`.** Canonical value established through a documented,
+deterministic, semantically justified transformation.
+
+**`UNAVAILABLE`.** No canonical value established at the relevant observation
+boundary.
+
+**`SIMULATED`.** Canonical value established through a declared simulation.
+
+These states describe canonical field provenance or status. They are not
+interchangeable with source-contract decision labels or analytical claim
+classifications.
+
+### Increment 002 `UNAVAILABLE` Reasons
+
+Increment 002 establishes these reasons:
+
+**`VALUE_ABSENT`.** Source models the concept but the record has no usable
+value.
+
+**`CONCEPT_ABSENT`.** Source lacks an equivalent canonical concept.
+
+**`EVIDENCE_INDETERMINATE`.** Relevant evidence cannot establish one
+defensible value.
+
+**`TRANSFORMATION_NOT_APPLIED`.** A defined applicable transformation was not
+executed.
+
+**`TRANSFORMATION_UNRESOLVED`.** The applicable transformation ran but
+produced no defensible value.
+
+No stronger definitions are introduced by this decision.
+
+### State Distinctions
+
+**`ACCEPT_MAPPING`.** A justified source-to-canonical mapping exists.
+
+**`DEFER_MAPPING`.** Source-to-canonical equivalence remains undecided. This
+is not automatically `UNAVAILABLE`.
+
+**`RETAIN_SOURCE_NATIVE`.** Meaningful source evidence is preserved without
+canonical mapping. This is not automatically `UNAVAILABLE`.
+
+**`CANONICAL_CONCEPT_UNAVAILABLE`.** An applicable existing canonical concept
+is explicitly unavailable under a justified Increment 002 reason.
+
+**NON-UNIVERSAL / NON-CANONICAL CONCEPT.** Increment 002 did not establish a
+universal Case scalar. Absence of a canonical target is not an unavailable
+canonical value.
+
+**ROW-LEVEL SOURCE MISSINGNESS.** A particular source field is blank for a
+particular record. This is not equivalent to contract-level canonical
+unavailability.
+
+### Current Calgary Decision Inventory
+
+The committed Increment 004 decisions remain:
+
+    Case admission
+        ADMIT_CASE
+
+    source_system
+        ACCEPT_MAPPING
+        city_of_calgary_311
+
+    source_case_id
+        ACCEPT_MAPPING
+        service_request_id
+
+    created_at
+        DEFER_MAPPING
+
+    source_status
+        ACCEPT_MAPPING
+        status_description
+
+    canonical_status
+        DEFER_MAPPING
+
+    submission channel
+        RETAIN_SOURCE_NATIVE
+
+    service_name
+        RETAIN_SOURCE_NATIVE
+
+    agency_responsible
+        RETAIN_SOURCE_NATIVE
+
+    updated_date
+        RETAIN_SOURCE_NATIVE
+
+    closed_date
+        RETAIN_SOURCE_NATIVE
+
+This decision changes none of those results.
+
+### Actual Canonical Target Universe
+
+Increment 002 establishes the required identity concepts:
+
+- `case_id`;
+- `source_system`;
+- `source_case_id`.
+
+It establishes the accepted optional canonical concepts:
+
+- `created_at`;
+- `source_status`;
+- `canonical_status`.
+
+Classification supports zero or more classifications conceptually; concrete
+representation remains deferred.
+
+Increment 002 establishes that these are not universal Case scalars:
+
+- `updated_at`;
+- `closed_at`;
+- `owning_group`;
+- `intake_channel`;
+- `priority`;
+- `customer_id`;
+- `location`.
+
+Non-universal concepts are not treated as missing canonical fields.
+
+### Availability Assessments
+
+**CREATED_AT_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.** Decision Question 4
+remains `DEFER_MAPPING`. Evidence exists, but
+`requested_date -> created_at` semantic equivalence remains unresolved. No new
+evidence justifies replacing deferral with `UNAVAILABLE`.
+
+**CANONICAL_STATUS_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.** Decision
+Question 6 remains `DEFER_MAPPING`. `source_status` exists, but canonical
+vocabulary and normalization remain undefined. No new evidence justifies
+replacing deferral with `UNAVAILABLE`.
+
+**SUBMISSION_CHANNEL_CANONICAL_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.**
+Meaningful native evidence exists, the prior `RETAIN_SOURCE_NATIVE` result
+remains authoritative, and Increment 002 establishes no universal intake
+channel target.
+
+**SERVICE_CLASSIFICATION_CANONICAL_UNAVAILABLE_ASSIGNMENT:
+`NOT_JUSTIFIED`.** Meaningful native classification evidence exists, the prior
+`RETAIN_SOURCE_NATIVE` result remains authoritative, and concrete canonical
+classification representation remains deferred.
+
+**RESPONSIBILITY_CANONICAL_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.**
+Meaningful native responsible-department evidence exists, the prior
+`RETAIN_SOURCE_NATIVE` result remains authoritative, and Increment 002
+establishes no universal organizational target.
+
+**UPDATED_TIME_CANONICAL_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.** Meaningful
+native update-time evidence exists, the prior `RETAIN_SOURCE_NATIVE` result
+remains authoritative, and Increment 002 establishes no universal
+`updated_at` target.
+
+**CLOSURE_TIME_CANONICAL_UNAVAILABLE_ASSIGNMENT: `NOT_JUSTIFIED`.** Meaningful
+native closure-time evidence exists, the prior `RETAIN_SOURCE_NATIVE` result
+remains authoritative, and Increment 002 establishes no universal `closed_at`
+target.
+
+Lack of a universal target is not canonical unavailability.
+
+`NON_UNIVERSAL_CONCEPTS_REQUIRE_UNAVAILABLE: NO`
+
+### Row-Level Missingness Boundary
+
+Decision Question 12 is contract-level only. Retained source blankness
+includes:
+
+    updated_date: 77,829 blank
+    closed_date: 78,347 blank
+
+These observations do not establish contract-level canonical unavailability.
+This decision assigns no row-level reason and does not decide whether future
+adapter execution will use `VALUE_ABSENT` or another `UNAVAILABLE` reason for
+particular records. That remains implementation and adapter work.
+
+### `UNAVAILABLE`-Reason Assessments
+
+`UNAVAILABLE_REASON`:
+
+    VALUE_ABSENT
+
+`CURRENT_CALGARY_CONTRACT_ASSIGNMENT`:
+
+    NOT_JUSTIFIED
+
+Decision Question 12 does not classify individual records, and no
+contract-wide canonical assignment is supported.
+
+`UNAVAILABLE_REASON`:
+
+    CONCEPT_ABSENT
+
+`CURRENT_CALGARY_CONTRACT_ASSIGNMENT`:
+
+    NOT_JUSTIFIED
+
+Deferred canonical concepts have relevant evidence, while native-only
+concepts generally lack universal canonical targets rather than being proven
+absent from Calgary.
+
+`UNAVAILABLE_REASON`:
+
+    EVIDENCE_INDETERMINATE
+
+`CURRENT_CALGARY_CONTRACT_ASSIGNMENT`:
+
+    NOT_JUSTIFIED
+
+Applying this now would strengthen deliberate Decision Question 4 or Decision
+Question 6 deferrals without new evidence. It may become applicable during
+future adapter execution.
+
+`UNAVAILABLE_REASON`:
+
+    TRANSFORMATION_NOT_APPLIED
+
+`CURRENT_CALGARY_CONTRACT_ASSIGNMENT`:
+
+    NOT_JUSTIFIED
+
+No specific applicable transformation has been defined and omitted.
+
+`UNAVAILABLE_REASON`:
+
+    TRANSFORMATION_UNRESOLVED
+
+`CURRENT_CALGARY_CONTRACT_ASSIGNMENT`:
+
+    NOT_JUSTIFIED
+
+No applicable transformation was executed and failed to produce a defensible
+value.
+
+### Competing Interpretations
+
+**Interpretation A — `NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`.** Preserve the
+accepted mappings, deliberate deferrals, source-native decisions, and
+non-universal boundaries without assigning contract-level `UNAVAILABLE`.
+Review classification: `STRONGEST`.
+
+**Interpretation B — `RECORD_SPECIFIC_CANONICAL_UNAVAILABLE_ASSIGNMENTS`.**
+Assign `UNAVAILABLE` to one or more existing canonical concepts. Increment
+002's adapter rule could support future assignments, but no present assignment
+satisfies all requirements without changing prior decisions. Review
+classification: `PLAUSIBLE`.
+
+**Interpretation C — `DEFER_UNAVAILABLE_DECISION`.** Postpone the whole
+contract-level unavailable decision. The current semantic question can be
+answered while future adapter assignments remain deferred. Review
+classification: `UNSUPPORTED`.
+
+**Interpretation D — `REVISE_PRIOR_SOURCE_CONTRACT_DECISION`.** Change a
+prior decision because of an unavailable-model inconsistency. No contradiction
+or new evidence requires revision. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS: STRONGEST
+    RECORD_SPECIFIC_CANONICAL_UNAVAILABLE_ASSIGNMENTS: PLAUSIBLE
+    DEFER_UNAVAILABLE_DECISION: UNSUPPORTED
+    REVISE_PRIOR_SOURCE_CONTRACT_DECISION: UNSUPPORTED
+
+### Decision
+
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`
+
+No current Calgary canonical concept is assigned `UNAVAILABLE` at this
+source-contract stage.
+
+Existing `ACCEPT_MAPPING`, `DEFER_MAPPING`, `RETAIN_SOURCE_NATIVE`, and
+non-universal concept boundaries remain unchanged.
+
+Exact unavailable assignments:
+
+    none
+
+### Counterevidence / Limitation
+
+The strongest argument for the selected decision is that accepted mappings
+already establish available canonical values; `created_at` and
+`canonical_status` remain deliberately deferred; meaningful source-native
+evidence is retained without canonical targets; several concepts are
+explicitly non-universal; and no row-level adapter representation exists.
+Assigning `UNAVAILABLE` merely to complete a schema would collapse materially
+different knowledge states.
+
+The strongest opposing argument is that Increment 002 requires an adapter
+that cannot establish an optional canonical value to emit the Case with
+`UNAVAILABLE` and an applicable reason. That could suggest that the
+`created_at` and `canonical_status` gaps should already be classified.
+
+The adapter requirement creates a future implementation obligation, but it
+does not defeat the selected contract-level decision.
+
+### Adapter-Conformance Interpretation
+
+`ADAPTER_UNAVAILABLE_REQUIREMENT_INTERPRETATION: ROW_LEVEL_OR_IMPLEMENTATION_LEVEL`
+
+Increment 002 requires implementations to preserve the evidence-state
+distinctions and says that, on optional-concept failure, the adapter emits the
+Case with `UNAVAILABLE`.
+
+This does not require the current semantic source-contract review to replace
+unresolved source-to-canonical mappings with `UNAVAILABLE`. A future adapter
+must assign applicable evidence states and reasons when emitting actual Cases.
+
+`ADAPTER_CONFORMANCE_CONTRADICTION_WITH_PRIOR_DECISIONS: none`
+
+### Prior-Decision Falsification
+
+    DQ4_CREATED_AT_PRIOR_DECISION_FALSIFICATION: none
+    DQ6_CANONICAL_STATUS_PRIOR_DECISION_FALSIFICATION: none
+    DQ7_SUBMISSION_CHANNEL_PRIOR_DECISION_FALSIFICATION: none
+    DQ8_SERVICE_CLASSIFICATION_PRIOR_DECISION_FALSIFICATION: none
+    DQ9_RESPONSIBILITY_PRIOR_DECISION_FALSIFICATION: none
+    DQ10_UPDATED_DATE_PRIOR_DECISION_FALSIFICATION: none
+    DQ11_CLOSED_DATE_PRIOR_DECISION_FALSIFICATION: none
+
+No prior decision is revised.
+
+### Analytical Boundary
+
+Decision Question 12 establishes nothing about:
+
+- analytical eligibility;
+- metric denominators;
+- censoring;
+- duration validity;
+- open or closed populations;
+- closure populations;
+- missing-data imputation;
+- exclusion rules;
+- metric calculations.
+
+### Physical Representation Boundary
+
+This decision does not choose:
+
+- a Python value representation;
+- an enum implementation;
+- a JSON structure;
+- database nullability;
+- a reason-code column;
+- a metadata object;
+- a source-adapter return type;
+- a serialization format.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    Increment 002 canonical contract
+    Increment 003 retained evidence
+    Prior Increment 004 decisions
+
+The Increment 002 evidence-state vocabulary is a prior contract definition.
+The Calgary decision to make no contract-level `UNAVAILABLE` assignments is a
+Design choice constrained by those definitions and prior evidence. It is not
+presented as a research conclusion.
+
+### Increment 002 Falsification / Limitation
+
+`INCREMENT_002_UNAVAILABLE_MODEL_FALSIFICATION: none`
+
+Increment 002 does not fully prescribe when source-contract documentation
+must predeclare future row-level `UNAVAILABLE` reasons. That
+implementation-timing ambiguity is not a falsification.
+
+### Portability Boundary
+
+This Calgary decision is not portability validation. Another source may
+support concepts Calgary does not, omit concepts Calgary supports, require
+different unavailable reasons, or expose evidence that changes the canonical
+contract.
+
+Decision Question 13 remains undecided: this decision does not identify or
+model material source-native evidence outside Case.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
