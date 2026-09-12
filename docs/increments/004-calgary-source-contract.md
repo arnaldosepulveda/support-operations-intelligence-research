@@ -1941,6 +1941,266 @@ Decision Question 9 remains undecided: this decision does not establish
 treatment, unavailable canonical concepts, and source-native evidence beyond
 the `service_name` question also remain undecided.
 
+## Decision Question 9 - Responsible Department
+
+### Decision Question
+
+How should Calgary `agency_responsible` be represented under the Increment 002
+canonical Case contract?
+
+### Canonical Requirement / Boundary
+
+Increment 002 establishes that `owning_group` is not a universal Case scalar.
+Organizational responsibility and workflow assignment are materially different
+concepts, and source contracts must preserve the actual source meaning.
+Source-native organizational semantics may remain recoverable without creating
+a universal organizational scalar.
+
+Responsibility must not be silently interpreted as assignment, ownership,
+queue state, routing state, or reassignment history. Future normalization
+requires separate justification, and organizational representation remains
+deferred.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `agency_responsible`;
+- type: `text`;
+- description: "The department responsible for this request."
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank `agency_responsible` values: 0;
+- whitespace-only `agency_responsible` values: 0.
+
+No distinct-value inspection was performed for this decision.
+
+The retained evidence does not establish:
+
+- a current assignee;
+- an assignment group;
+- a queue;
+- a routing destination;
+- transfer history;
+- reassignment history;
+- a responsible individual;
+- a lower-level team;
+- a resolver team;
+- an organizational hierarchy;
+- ownership equivalence;
+- cross-source organizational equivalence;
+- a normalized agency vocabulary.
+
+### Competing Interpretations
+
+**Interpretation A — `RETAIN_SOURCE_NATIVE`.** Preserve `agency_responsible`
+as source-native responsible-department evidence without creating a universal
+organizational Case scalar. Review classification: `STRONGEST`.
+
+**Interpretation B — `ACCEPT_MAPPING`.** Map `agency_responsible` into an
+already-existing canonical organizational field. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation C — `DEFER_MAPPING`.** Recognize the evidence but postpone
+semantic retention because physical representation is unresolved. Review
+classification: `PLAUSIBLE`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat a corresponding
+canonical organizational concept as unavailable. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation E — `REJECT_MAPPING`.** Do not preserve
+`agency_responsible` as meaningful source evidence. Review classification:
+`UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_SOURCE_NATIVE: STRONGEST
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: PLAUSIBLE
+    CANONICAL_CONCEPT_UNAVAILABLE: UNSUPPORTED
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`RETAIN_SOURCE_NATIVE`
+
+Calgary `agency_responsible` is retained as source-native evidence meaning:
+
+> The department responsible for this request.
+
+No universal organizational Case scalar is introduced.
+
+### Justification
+
+**SOURCE_RESPONSIBILITY_SEMANTICS: `SUPPORTED`.** Calgary explicitly defines
+`agency_responsible` as the department responsible for the request.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes the admitted Calgary
+service request.
+
+**RESPONSIBILITY_ASSIGNMENT_SEPARATION: `SUPPORTED`.** The evidence can be
+retained while explicitly refusing to interpret responsibility as current
+assignment, queue, or routing state.
+
+**UNIVERSAL_ORGANIZATIONAL_FIELD_JUSTIFICATION: `NOT_ESTABLISHED`.** Neither
+Increment 002 nor the retained evidence establishes a universal
+`owning_group`, `assigned_group`, or `responsible_department` target.
+
+**SOURCE_NATIVE_PRESERVATION: `SUPPORTED`.** The field can be retained with
+its exact source meaning without canonical expansion.
+
+**ORGANIZATIONAL_HIERARCHY_NEUTRALITY: `SUPPORTED`.** Retention requires no
+parent department, child team, organizational tree, escalation level,
+assignment group, queue, or ownership-hierarchy assumption.
+
+**ORGANIZATIONAL_NORMALIZATION_NEED: `NOT_ESTABLISHED`.** No committed current
+requirement needs normalized department names.
+
+**CROSS_SOURCE_ORGANIZATIONAL_BASIS: `NOT_ESTABLISHED`.** No retained
+cross-source evidence supports a shared organizational-responsibility model.
+
+### Responsibility / Assignment Boundary
+
+`agency_responsible` means source-native responsible department only.
+
+It does not establish:
+
+- a current assignee;
+- an assignment group;
+- a queue;
+- a routing destination;
+- a work owner;
+- a first recipient;
+- a last actor;
+- a resolver team;
+- transfer history;
+- reassignment history.
+
+This decision does not map:
+
+    agency_responsible -> owning_group
+    agency_responsible -> assigned_group
+    agency_responsible -> current_queue
+    agency_responsible -> current_owner
+
+### Counterevidence / Limitation
+
+The strongest argument for `RETAIN_SOURCE_NATIVE` is that Calgary explicitly
+identifies the responsible department for the admitted request, and native
+retention preserves that meaning without equating responsibility with
+assignment or creating a universal organizational field.
+
+The strongest opposing argument is that source-native-only retention may
+produce inconsistent adapter or query semantics and postpone a coherent
+distinction among responsibility, ownership, and assignment.
+
+`COUNTERARGUMENT`: An unresolved shared organizational representation may lead
+to inconsistent source-specific extensions or unclear access patterns as
+workflow capabilities expand.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+This motivates later representation design but does not defeat the semantic
+retention rule.
+
+### Representation Boundary
+
+This decision establishes semantic retention only.
+
+It does not choose:
+
+- a Python field name;
+- a database column;
+- a JSON structure;
+- an organizational-object schema;
+- a department identifier;
+- an enum representation;
+- normalization;
+- a hierarchy;
+- a canonical organization vocabulary.
+
+Exact physical representation remains deferred.
+
+### Missingness Boundary
+
+Retained population evidence shows:
+
+    blank agency_responsible: 0
+    whitespace-only agency_responsible: 0
+
+This does not establish universal organizational availability, a required
+Case field, a Case invariant, identity-core status, or a requirement that
+every future source provide equivalent evidence.
+
+### Analytical Boundary
+
+`RETAIN_SOURCE_NATIVE` establishes nothing about:
+
+- departmental workload;
+- department performance;
+- staffing;
+- capacity;
+- queue size;
+- reassignment;
+- handoffs;
+- routing quality;
+- ownership quality;
+- resolution performance;
+- SLA performance;
+- causal effects of department responsibility.
+
+Those conclusions require separate analytical contracts and evidence.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The official `agency_responsible` definition is External evidence.
+`RETAIN_SOURCE_NATIVE` is the Design choice.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence shows that:
+
+- `agency_responsible` means something other than responsible department;
+- it actually encodes assignment or queue state;
+- it combines multiple organizational concepts;
+- source migration materially changes its semantics;
+- an authoritative organizational hierarchy becomes available;
+- cross-source evidence supports a defensible shared
+  responsibility/assignment model;
+- a concrete analytical or product requirement needs standardized
+  organizational representation.
+
+Ordinary new rows, additional department values, refreshed exports, and
+changed CSV hashes do not automatically falsify source-native retention.
+
+`INCREMENT_002_RESPONSIBILITY_FALSIFICATION: none`
+
+Native retention does not justify extending Increment 002 with universal
+`owning_group`, assignment, queue, or ownership scalars.
+
+### Portability Boundary
+
+Source-native responsible-department evidence is not portability evidence. A
+future shared organizational model requires actual cross-source evidence.
+
+Decision Question 10 remains undecided: this decision does not establish
+`updated_date` treatment. `closed_date` treatment, unavailable canonical
+concepts, and source-native evidence beyond the `agency_responsible` question
+also remain undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
