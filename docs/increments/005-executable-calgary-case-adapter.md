@@ -2880,6 +2880,221 @@ The following Increment 005 decisions remain unchanged:
 All Increment 004 decisions remain unchanged. This physical-representation
 decision authorizes no new Calgary field mapping.
 
+## Implementation Record 005 - Field Evidence Representation
+
+### Objective
+
+Implement the committed physical representation for canonical field evidence
+states without assigning those states to Calgary fields or implementing
+`Case`.
+
+### Files
+
+    src/support_operations_intelligence/evidence.py
+    tests/test_field_evidence.py
+
+### Implemented
+
+    UnavailableReason
+    ObservedEvidence
+    DerivedEvidence
+    SimulatedEvidence
+    UnavailableEvidence
+    FieldEvidence
+
+The implementation uses only standard-library `dataclass`, `Enum`, `Generic`,
+and `TypeVar` concepts. The available variants are frozen dataclasses
+containing only `value`; the unavailable variant is a frozen dataclass
+containing only `reason`; and the union contains exactly those four variants.
+
+    CASE_PYTHON_REPRESENTATION:
+        NOT_DEFINED
+
+    CALGARY_FIELD_EVIDENCE_ASSIGNMENTS:
+        none added
+
+    DQ12:
+        NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS remains unchanged
+
+    THIRD_PARTY_DEPENDENCIES:
+        none
+
+No `DeferredEvidence`, `DEFERRED`, `NOT_MAPPED`, `RETAIN_SOURCE_NATIVE`, or
+`ACCEPT_MAPPING` evidence representation is introduced. No evidence lineage,
+persistence, serialization, logging, provenance storage, database
+representation, `Case`, or Calgary adapter behavior is implemented.
+
+### Expected Pre-Implementation Failure
+
+Executed after the structural test was created and before
+`support_operations_intelligence.evidence` existed:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_field_evidence.py' \
+      -v
+
+Observed discovery result:
+
+    tests reported: 1 failed test module
+    tests run: 1
+    failures: 0
+    errors: 1
+    result: FAILED (errors=1)
+
+Error type:
+
+    ImportError
+
+Underlying reason:
+
+    ModuleNotFoundError: No module named
+    'support_operations_intelligence.evidence'
+
+This expected red result is an Engineering observation. The focused test
+could not import a module that had not yet been implemented. It is test-first
+evidence, not a product defect.
+
+### Focused Post-Implementation Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_field_evidence.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### `CaseId` Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed result:
+
+    tests run: 6
+    failures: 0
+    errors: 0
+    result: OK
+
+### Identity-Result Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_identity_admission_result.py' \
+      -v
+
+Observed result:
+
+    tests run: 10
+    failures: 0
+    errors: 0
+    result: OK
+
+### Calgary Identity-Admission Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_calgary_identity_admission.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### Full-Suite Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed result:
+
+    tests run: 41
+    failures: 0
+    errors: 0
+    result: OK
+
+### Direct Structure Verification
+
+The direct repository-local Python verification observed:
+
+    reason_names = ['VALUE_ABSENT', 'CONCEPT_ABSENT',
+        'EVIDENCE_INDETERMINATE', 'TRANSFORMATION_NOT_APPLIED',
+        'TRANSFORMATION_UNRESOLVED']
+    reason_values = ['VALUE_ABSENT', 'CONCEPT_ABSENT',
+        'EVIDENCE_INDETERMINATE', 'TRANSFORMATION_NOT_APPLIED',
+        'TRANSFORMATION_UNRESOLVED']
+    observed_fields = ['value']
+    derived_fields = ['value']
+    simulated_fields = ['value']
+    unavailable_fields = ['reason']
+    field_evidence_origins = ['ObservedEvidence', 'DerivedEvidence',
+        'SimulatedEvidence', 'UnavailableEvidence']
+    observed_value = ' 001AbC-09 '
+    derived_value = ' 001AbC-09 '
+    simulated_value = ' 001AbC-09 '
+    unavailable_reason = VALUE_ABSENT
+
+This verifies the exact five-member enum, enum values identical to member
+names, one-field shapes, exact four-variant union, lexical value preservation,
+and unavailable-reason preservation.
+
+### Direct Immutability Verification
+
+The direct repository-local Python verification observed:
+
+    ObservedEvidence FrozenInstanceError
+    DerivedEvidence FrozenInstanceError
+    SimulatedEvidence FrozenInstanceError
+    UnavailableEvidence FrozenInstanceError
+
+### Calgary and DQ12 Boundaries
+
+The generic evidence module contains no Calgary field name or Calgary-specific
+assignment. No code emits `UnavailableEvidence` for a Calgary Case or field.
+The existence of the type does not convert `DEFER_MAPPING` into `UNAVAILABLE`
+and does not create a canonical unavailable assignment.
+
+Increment 004 remains:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+### Claim Classification and Boundary
+
+The committed evidence representation is a Design implementation. The
+expected red result, focused result, regression results, full-suite result,
+direct structure verification, and direct immutability verification are
+Engineering observations.
+
+The implemented field-evidence types conform to the currently tested
+Increment 005 structural representation of the canonical provenance
+vocabulary under the repository-local Python execution boundary.
+
+This step does not establish that any Calgary field is `OBSERVED`, `DERIVED`,
+`SIMULATED`, or `UNAVAILABLE`; resolve `DEFER_MAPPING`; or establish `Case`
+correctness, full-adapter correctness, dataset-wide validity, ingestion
+correctness, persistence correctness, provenance-lineage completeness,
+portability, production readiness, External evidence, a research result, or a
+research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
