@@ -2499,6 +2499,331 @@ Decision Question 11 remains undecided: this decision does not establish
 source-native evidence beyond the `updated_date` question also remain
 undecided.
 
+## Decision Question 11 - Closed Date / Source-Native Closure Time
+
+### Decision Question
+
+How should Calgary `closed_date` be treated under the Increment 002 canonical
+Case contract?
+
+### Canonical Requirement / Boundary
+
+Increment 002 establishes that `closed_at` is not a universal canonical Case
+scalar. Resolved, closed, completed, cancelled, abandoned, and rejected are
+not equivalent, and closure need not be terminal. Reopening remains possible
+unless source semantics prohibit it.
+
+One generic closure scalar cannot safely imply first, latest-known, current,
+or final closure. Source-native lifecycle timestamps may be preserved, and
+Case admission does not require closure. Purpose-specific lifecycle
+projections and physical representation remain deferred.
+
+This decision does not create a universal closure ontology.
+
+### Calgary Evidence
+
+Increment 003 retained the following source evidence:
+
+- field: `closed_date`;
+- type: `calendar_date`;
+- format metadata: `date_ymd_time`;
+- description: "The date the request was closed."
+
+Increment 003 also retained these local observations:
+
+- logical data rows: 7,474,403;
+- blank values: 78,347;
+- parseable values: 7,396,056;
+- unparseable values: 0;
+- minimum parsed value: `2010-02-17 00:00:00`;
+- maximum parsed value: `2026-09-09 00:00:00`;
+- exact-midnight values: 3,528,193;
+- non-midnight values: 3,867,863;
+- exact-midnight percentage of parseable values: 47.703709%;
+- non-midnight values with second zero: 65,943;
+- non-midnight values with second nonzero: 3,801,920.
+
+The retained evidence preserves these boundaries:
+
+    CLOSED_DATE_LIFECYCLE_SEMANTICS_INCOMPLETE
+    REOPENING_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA
+    FINAL_CLOSURE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA
+    SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED
+    TIMEZONE_SEMANTICS_UNRESOLVED
+
+No new temporal or lifecycle evidence is introduced by this decision.
+
+### Competing Interpretations
+
+**Interpretation A — `RETAIN_SOURCE_NATIVE`.** Preserve `closed_date` as
+source-native closure-time evidence with exactly the source-supported meaning.
+Review classification: `STRONGEST`.
+
+**Interpretation B — `ACCEPT_MAPPING`.** Map `closed_date` into an
+already-existing canonical Case closure timestamp. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation C — `DEFER_MAPPING`.** Recognize the evidence but postpone
+semantic retention because closure finality, reopening, or physical
+representation remains unresolved. Review classification: `PLAUSIBLE`.
+
+**Interpretation D — `CANONICAL_CONCEPT_UNAVAILABLE`.** Treat a corresponding
+canonical closure concept as unavailable. Review classification:
+`UNSUPPORTED`.
+
+**Interpretation E — `REJECT_MAPPING`.** Do not preserve `closed_date` as
+meaningful lifecycle evidence. Review classification: `UNSUPPORTED`.
+
+Competing-decision summary:
+
+    RETAIN_SOURCE_NATIVE: STRONGEST
+    ACCEPT_MAPPING: UNSUPPORTED
+    DEFER_MAPPING: PLAUSIBLE
+    CANONICAL_CONCEPT_UNAVAILABLE: UNSUPPORTED
+    REJECT_MAPPING: UNSUPPORTED
+
+### Decision
+
+`RETAIN_SOURCE_NATIVE`
+
+Calgary `closed_date` is retained as source-native temporal evidence meaning:
+
+> The date the request was closed.
+
+No universal closure, resolution, or finality scalar is introduced.
+
+### Justification
+
+**SOURCE_CLOSURE_SEMANTICS: `SUPPORTED`.** Calgary explicitly defines
+`closed_date` as the date the request was closed, without establishing
+resolution, completion, terminality, or finality.
+
+**ENTITY_ALIGNMENT: `SUPPORTED`.** The field describes the admitted Calgary
+service request.
+
+**CLOSURE_RESOLUTION_SEPARATION: `SUPPORTED`.** The field can be retained
+without treating closure as resolution, successful completion, customer
+satisfaction, cancellation, abandonment, rejection, or permanent finish.
+
+**REOPENING_NEUTRALITY: `SUPPORTED`.** Retention does not require claiming
+that a closed request cannot reopen.
+
+**FINALITY_NEUTRALITY: `SUPPORTED`.** Retention does not require claiming that
+`closed_date` represents first, latest, current, or final closure.
+
+**UNIVERSAL_CLOSED_AT_JUSTIFICATION: `NOT_ESTABLISHED`.** Increment 002 does
+not establish universal `closed_at`, and the retained evidence does not
+justify an equivalent universal scalar.
+
+**SOURCE_NATIVE_PRESERVATION: `SUPPORTED`.** The field can be retained with
+its exact source meaning without canonical expansion.
+
+**TEMPORAL_PRECISION_HONESTY: `SUPPORTED`.** Retention does not require
+claiming actual source measurement precision from the lexical representation.
+
+**TIMEZONE_HONESTY: `SUPPORTED`.** Retention does not require inventing a
+timezone or offset interpretation.
+
+**MISSINGNESS_NEUTRALITY: `SUPPORTED`.** Blank values can remain observed
+missingness without assigning a reason or lifecycle meaning.
+
+### Closure / Resolution Boundary
+
+`CLOSED_DATE_LIFECYCLE_SEMANTICS_INCOMPLETE`
+
+`closed_date` does not establish:
+
+- resolution;
+- successful completion;
+- customer satisfaction;
+- cancellation;
+- abandonment;
+- rejection;
+- terminal disposition;
+- permanent finish.
+
+This decision does not map:
+
+    closed_date -> Case.closed_at
+    closed_date -> Case.resolved_at
+    closed_date -> Case.completed_at
+    closed_date -> Case.final_disposition_at
+    closed_date -> Case.terminal_at
+    closed_date -> Case.final_closed_at
+
+### Reopening Boundary
+
+`REOPENING_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`
+
+This decision does not claim that a closed request cannot reopen.
+
+### Finality Boundary
+
+`FINAL_CLOSURE_SEMANTICS_UNRESOLVED_FROM_CURRENT_OFFICIAL_COLUMN_METADATA`
+
+This decision does not claim that `closed_date` is first closure, latest
+closure, current closure, final closure, or permanently terminal closure.
+
+### Counterevidence / Limitation
+
+The strongest argument for `RETAIN_SOURCE_NATIVE` is that Calgary explicitly
+supplies request-level closure-time evidence, and native retention preserves
+that evidence without claiming resolution, finality, or no-reopen semantics.
+
+The strongest opposing argument is that closure semantics, reopening
+behavior, first/latest/final closure meaning, status relationships, precision,
+and timezone remain unresolved, and consumers may mistake the value for
+resolution or permanent terminality.
+
+`COUNTERARGUMENT`: Incomplete lifecycle semantics and temporal context may
+encourage incorrect resolution or finality assumptions or inconsistent
+source-specific access.
+
+`COUNTERARGUMENT_RESULT: DOES_NOT_BLOCK_CURRENT_DECISION`
+
+These limitations constrain interpretation but do not defeat bounded
+source-native retention.
+
+### Representation Boundary
+
+This decision establishes semantic retention only.
+
+It does not choose:
+
+- a Python field name;
+- a database column;
+- a database timestamp type;
+- timezone normalization;
+- UTC conversion;
+- precision transformation;
+- parser implementation;
+- a serialization format;
+- a lifecycle-projection schema.
+
+Exact physical representation remains deferred.
+
+### Precision Boundary
+
+`SOURCE_TEMPORAL_PRECISION_NOT_ESTABLISHED`
+
+- Lexical seconds do not prove second-level source measurement precision.
+- Midnight prevalence does not prove date-only capture.
+- Midnight values do not prove defaulting, imputation, rounding, truncation,
+  or synthetic timestamps.
+
+### Timezone Boundary
+
+`TIMEZONE_SEMANTICS_UNRESOLVED`
+
+No timezone or offset interpretation is introduced.
+
+### Missingness Boundary
+
+Retained population evidence shows:
+
+    blank closed_date: 78,347
+    parseable nonblank: 7,396,056
+    unparseable nonblank: 0
+
+Blank values do not establish open, unresolved, active, pending, never closed,
+reopened, invalid record, source error, unavailable lifecycle, or a canonical
+`UNAVAILABLE` reason. This decision assigns no `UNAVAILABLE` reason.
+
+A nonblank `closed_date` does not prove currently closed, terminal, resolved,
+or final closure.
+
+### Pairwise Temporal Boundary
+
+Increment 003 retained these Engineering observations:
+
+    requested_date vs closed_date
+        both nonblank: 7,396,056
+        requested < closed: 6,605,371
+        requested = closed: 789,758
+        requested > closed: 927
+
+    updated_date vs closed_date
+        both nonblank: 7,318,258
+        updated < closed: 146,846
+        updated = closed: 5,954,904
+        updated > closed: 1,216,508
+
+This decision does not use those observations to infer invalid records,
+expected lifecycle sequence, corruption, closure finality, reopening,
+latest-event semantics, resolution semantics, or chronology rules.
+
+### Analytical Boundary
+
+`RETAIN_SOURCE_NATIVE` establishes nothing about:
+
+- resolution time;
+- time to resolution;
+- handling time;
+- active work;
+- queue time;
+- waiting time;
+- completion time;
+- terminal disposition;
+- final closure time;
+- reopen rate;
+- closure quality;
+- SLA performance;
+- Case aging;
+- lifecycle-state residence.
+
+No timestamp subtraction is justified by this decision. A later analytical
+contract may define a bounded request-to-closure elapsed duration, but
+Decision Question 11 does not authorize or define that metric.
+
+### Claim Classification
+
+Primary classification:
+
+    Design choice
+
+Evidence basis:
+
+    External evidence retained in Increment 003
+    Engineering observations retained in Increment 003
+    Prior source-contract decisions in Increment 004
+
+The official `closed_date` definition is External evidence.
+`RETAIN_SOURCE_NATIVE` is the Design choice.
+
+### Falsification / Revision Condition
+
+This decision should be revisited if future evidence establishes:
+
+- resolution semantics;
+- first-closure semantics;
+- latest-closure semantics;
+- final-closure semantics;
+- reopening behavior;
+- combined lifecycle mechanisms;
+- source migration that materially changes semantics;
+- authoritative temporal precision;
+- authoritative timezone semantics;
+- defensible cross-source closure equivalence;
+- a concrete requirement for standardized closure semantics.
+
+Ordinary new rows, changed `closed_date` values, refreshed exports, and
+changed CSV hashes do not automatically falsify source-native retention.
+
+`INCREMENT_002_CLOSED_DATE_FALSIFICATION: none`
+
+Source-native closure-time retention does not justify extending Increment 002
+with universal `closed_at`, `resolved_at`, or finality fields.
+
+### Portability Boundary
+
+Source-native closure-time evidence is not portability evidence. A future
+shared closure model requires actual cross-source evidence.
+
+Decision Question 12 remains undecided: this decision does not establish
+unavailable canonical concepts. Source-native evidence beyond `closed_date`,
+analytical eligibility for request-to-closure duration, censoring treatment,
+and closure-based population definitions also remain undecided.
+
 ## Planned Decision Questions
 
 The increment must consider, without presuming answers, the following.
