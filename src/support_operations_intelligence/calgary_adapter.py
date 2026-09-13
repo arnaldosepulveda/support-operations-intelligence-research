@@ -7,6 +7,10 @@ from support_operations_intelligence.evidence import (
     UnavailableEvidence,
     UnavailableReason,
 )
+from support_operations_intelligence.identity import (
+    RejectedIdentity,
+    admit_calgary_source_identity,
+)
 
 
 @dataclass(frozen=True)
@@ -36,3 +40,23 @@ def map_calgary_source_status(
         return UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
 
     return ObservedEvidence(value)
+
+
+CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
+
+
+def map_calgary_case(
+    record: Mapping[str, object],
+) -> CalgaryCaseMappingResult:
+    identity_result = admit_calgary_source_identity(record)
+
+    if isinstance(identity_result, RejectedIdentity):
+        return identity_result
+
+    case = Case(case_id=identity_result.case_id)
+    source_status = map_calgary_source_status(record)
+
+    return CalgaryMappedCase(
+        case=case,
+        source_status=source_status,
+    )

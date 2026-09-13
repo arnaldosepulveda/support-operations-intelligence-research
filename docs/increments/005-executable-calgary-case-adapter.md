@@ -5539,6 +5539,305 @@ physical container remains `NOT_DEFINED`. DQ13 remains `DEFER_MAPPING`.
 `REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
 `NOT_DEFINED`. No complete source-contract realization is claimed.
 
+## Implementation Record 009 - Calgary Case Mapping Transport
+
+### Objective
+
+Implement the committed `CURRENT_CANONICAL_SLICE_ONLY` composition of Calgary
+identity admission, `Case` construction, and `source_status` evidence mapping.
+
+### Files
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_case_mapping.py`.
+
+### Implemented
+
+    IMPLEMENTED:
+        CalgaryCaseMappingResult
+        map_calgary_case
+
+    RESULT TRANSPORT:
+        CalgaryMappedCase | RejectedIdentity
+
+    SUCCESS:
+        CalgaryMappedCase
+
+    EXPECTED DOMAIN REJECTION:
+        RejectedIdentity
+
+    IDENTITY PRECEDENCE:
+        identity admission occurs before optional status mapping
+
+    REJECTION SHORT-CIRCUIT:
+        yes
+
+    REJECTED OBJECT PRESERVATION:
+        existing RejectedIdentity returned directly
+
+    ACCEPTED CASEID PRESERVATION:
+        accepted CaseId reused directly
+
+    OPTIONAL STATUS UNAVAILABLE:
+        remains successful CalgaryMappedCase
+
+    UNEXPECTED SOFTWARE FAILURE:
+        not caught or reclassified
+
+    INPUT MUTATION:
+        forbidden
+        none observed
+
+    SCOPE:
+        CURRENT_CANONICAL_SLICE_ONLY
+
+    DQ7-DQ11:
+        still physically unresolved
+
+    FULL INCREMENT 004 REALIZATION:
+        not established
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The implementation adds only the committed result alias, required existing
+identity imports, and composition function. It does not add a broad exception
+handler, success or rejection wrapper, rejection reason, `None` result,
+generic result framework, raw-record retention, logging, persistence,
+source-native field, or deferred canonical field.
+
+### Expected Pre-Implementation Failure
+
+After the twelve focused mapping tests were created and before
+`map_calgary_case` was added, this command was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_case_mapping.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported:
+
+```text
+ImportError: cannot import name 'map_calgary_case' from 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.001s
+OK
+```
+
+The focused tests verified:
+
+1. valid identity plus observed status returns `CalgaryMappedCase`;
+2. lexical `source_case_id` is preserved;
+3. the fixed Calgary source-system namespace is preserved;
+4. missing status produces a successful mapped Case with `VALUE_ABSENT`;
+5. non-string status produces a successful mapped Case with
+   `EVIDENCE_INDETERMINATE`;
+6. missing identity produces `MISSING_SOURCE_CASE_ID`;
+7. null identity produces `NULL_SOURCE_CASE_ID`;
+8. non-string identity produces `NON_STRING_SOURCE_CASE_ID`;
+9. empty identity produces `EMPTY_SOURCE_CASE_ID`;
+10. whitespace-only identity produces `WHITESPACE_ONLY_SOURCE_CASE_ID`;
+11. the input mapping is not mutated;
+12. identity rejection short-circuits status mapping.
+
+This result is an Engineering observation for the exercised in-memory parsed
+records under the repository-local Python execution boundary.
+
+### Component Regression Results
+
+Each existing focused component suite was executed independently:
+
+```text
+test_calgary_identity_admission.py: 12 tests, OK
+test_calgary_source_status.py: 12 tests, OK
+test_calgary_mapped_case.py: 12 tests, OK
+test_case.py: 12 tests, OK
+test_case_id.py: 6 tests, OK
+test_identity_admission_result.py: 10 tests, OK
+test_field_evidence.py: 12 tests, OK
+```
+
+Every suite completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 89 tests in 0.002s
+OK
+```
+
+The suite completed with zero failures and zero errors. This result is an
+Engineering observation for the current repository state and execution
+environment.
+
+### Direct Success-Path Verification
+
+Direct execution reported:
+
+```text
+type = CalgaryMappedCase
+source_system = 'city_of_calgary_311'
+source_case_id = ' 001AbC-09 '
+source_status_type = ObservedEvidence
+source_status_value = ' Closed '
+```
+
+This verifies the exercised success representation, fixed source-system
+namespace, lexical source-identity preservation, and exact status-value
+preservation.
+
+### Direct Unavailable-Status Success Verification
+
+Direct execution reported:
+
+```text
+CalgaryMappedCase UnavailableEvidence VALUE_ABSENT
+CalgaryMappedCase UnavailableEvidence EVIDENCE_INDETERMINATE
+```
+
+Unavailable optional `source_status` evidence did not reject either exercised
+Case.
+
+### Direct Identity-Rejection Verification
+
+Direct execution reported, in decision-precedence order:
+
+```text
+RejectedIdentity MISSING_SOURCE_CASE_ID
+RejectedIdentity NULL_SOURCE_CASE_ID
+RejectedIdentity NON_STRING_SOURCE_CASE_ID
+RejectedIdentity EMPTY_SOURCE_CASE_ID
+RejectedIdentity WHITESPACE_ONLY_SOURCE_CASE_ID
+```
+
+No additional rejection reason or wrapper was observed.
+
+### Direct Object-Preservation Verification
+
+Using standard-library mocks, direct execution reported:
+
+```text
+rejection_same = True
+case_id_same = True
+```
+
+The exercised composition returned the exact `RejectedIdentity` supplied by
+identity admission and constructed `Case` with the exact `CaseId` supplied by
+`AcceptedIdentity`. These are in-memory Python object-preservation results and
+do not establish persistence identity.
+
+### Unexpected Software-Failure Verification
+
+With `map_calgary_source_status` configured to raise
+`RuntimeError("synthetic unexpected failure")`, direct execution reported:
+
+```text
+propagated_exception = RuntimeError 'synthetic unexpected failure'
+```
+
+The unexpected exception propagated and was not converted to
+`RejectedIdentity`, `UnavailableEvidence`, `None`, or another result. This is
+an Engineering observation of the designed software-failure boundary.
+
+### Input-Immutability Verification
+
+Direct execution reported:
+
+```text
+input_unchanged = True
+```
+
+No input mutation was observed for the exercised successful record.
+
+### Result-Alias Inspection
+
+Direct type-argument inspection reported:
+
+```text
+result_alias_args = ['CalgaryMappedCase', 'RejectedIdentity']
+```
+
+The alias contains exactly the committed success and expected-rejection
+representations. This is a static/documented transport contract; it does not
+enforce return types at runtime.
+
+### Preserved Boundaries
+
+Generic `Case`, `CaseId`, `CalgaryMappedCase`, identity-admission semantics,
+source-status mapping semantics, and evidence types remain unchanged.
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`. `created_at` and `canonical_status`
+remain `DEFER_MAPPING` and absent. DQ13 remains `DEFER_MAPPING` and absent.
+
+DQ7-DQ11 remain `RETAIN_SOURCE_NATIVE` but are not read or carried by this
+current canonical-slice result. Their physical container remains:
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+Rejected raw-value and source-record retention remain:
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+The implementation does not establish complete Increment 004 realization or
+a complete Calgary source-record adapter.
+
+### Claim Classification and Boundary
+
+`CalgaryCaseMappingResult` and `map_calgary_case` implement prior Design
+choices. The expected red result, focused and regression results, full-suite
+result, direct success, unavailable-status, rejection, object-preservation,
+exception-propagation, input-immutability, and alias checks are Engineering
+observations.
+
+Allowed interpretation:
+
+> `map_calgary_case` conforms to the tested Increment 005
+> `CURRENT_CANONICAL_SLICE_ONLY` composition semantics for the exercised
+> in-memory parsed-record inputs under the repository-local Python execution
+> boundary.
+
+This implementation does not establish complete Calgary adapter correctness,
+complete Increment 004 realization, DQ7-DQ11 source-native retention,
+rejected-record retention behavior, persistence correctness, dataset validity,
+dataset-wide branch coverage, runtime type enforcement, portability,
+production readiness, External evidence, or a research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
