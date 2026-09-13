@@ -5838,6 +5838,622 @@ rejected-record retention behavior, persistence correctness, dataset validity,
 dataset-wide branch coverage, runtime type enforcement, portability,
 production readiness, External evidence, or a research conclusion.
 
+## Calgary Source-Native Evidence Retention Decision
+
+### Decision Question
+
+How should DQ7-DQ11 be physically retained and structurally associated with
+an accepted Calgary Case without adding source-specific fields to generic
+`Case`, widening `CalgaryMappedCase` beyond its committed canonical role,
+interpreting source-native values as stronger canonical semantics, or
+pretending the retained subset is the complete raw source record?
+
+### Source-Native Container Decision
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        FROZEN_SOURCE_SPECIFIC_DATACLASS
+
+The planned representation is:
+
+```python
+@dataclass(frozen=True)
+class CalgarySourceNativeEvidence:
+    source: ObservedEvidence[str] | UnavailableEvidence
+    service_name: ObservedEvidence[str] | UnavailableEvidence
+    agency_responsible: ObservedEvidence[str] | UnavailableEvidence
+    updated_date: ObservedEvidence[str] | UnavailableEvidence
+    closed_date: ObservedEvidence[str] | UnavailableEvidence
+```
+
+This is a Design choice. It is not implemented by this documentation-only
+step.
+
+### Exact Source-Native Field Names
+
+The container retains the Calgary source-contract field names exactly:
+
+1. `source`;
+2. `service_name`;
+3. `agency_responsible`;
+4. `updated_date`;
+5. `closed_date`.
+
+The fields are not renamed to stronger interpretations such as `channel`,
+`service_type`, `owner`, `assigned_group`, `resolver_group`,
+`lifecycle_updated_at`, `resolution_date`, or `final_closed_at`. Descriptive
+source metadata does not justify strengthening the physical field names.
+
+### Source-Native Value Type
+
+    CALGARY_SOURCE_NATIVE_FIELD_TYPE:
+        OBSERVED_OR_UNAVAILABLE_LEXICAL_EVIDENCE
+
+Every field uses exactly:
+
+```python
+ObservedEvidence[str] | UnavailableEvidence
+```
+
+The representation does not use `str | None`, `object`, or
+`FieldEvidence[str]`. The broader field-evidence union would permit
+`DerivedEvidence` and `SimulatedEvidence`, neither of which is justified for
+these retained source-native values.
+
+### Lexical Fidelity
+
+    SOURCE_NATIVE_LEXICAL_PRESERVATION:
+        EXACT_NONBLANK_STRING
+
+For any nonblank string, `ObservedEvidence(value)` retains the exact supplied
+string. This decision selects no stripping, case normalization, timestamp
+normalization, datetime parsing, timezone conversion, canonical vocabulary
+mapping, or semantic reinterpretation.
+
+For example, the value `" 311 App "` remains:
+
+```python
+ObservedEvidence(" 311 App ")
+```
+
+### Row-Level Unavailable Policy
+
+    CALGARY_SOURCE_NATIVE_UNAVAILABLE_POLICY:
+        ROW_LEVEL_EVIDENCE_STATE
+
+Each DQ7-DQ11 field follows the same deterministic rule:
+
+1. a missing field produces
+   `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`;
+2. `None` produces
+   `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`;
+3. a non-string value produces
+   `UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)`;
+4. `""` produces
+   `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`;
+5. a whitespace-only string produces
+   `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`;
+6. any other string produces `ObservedEvidence` containing the exact original
+   string.
+
+This row-level policy does not alter the Increment 004
+`RETAIN_SOURCE_NATIVE` decisions. An individual row may lack usable evidence
+for an applicable source-native concept.
+
+### Concept-Absent Boundary
+
+    CALGARY_SOURCE_NATIVE_CONCEPT_ABSENT_DEFAULT:
+        NOT_SELECTED
+
+DQ7-DQ11 establish applicable Calgary source concepts. Missing or unusable
+row evidence is not automatically `CONCEPT_ABSENT`; the applicable outcomes
+are `VALUE_ABSENT` or `EVIDENCE_INDETERMINATE` under the rule above.
+
+### Temporal Representation Boundary
+
+    UPDATED_DATE_PHYSICAL_REPRESENTATION:
+        SOURCE_LEXICAL_EVIDENCE_ONLY
+
+    CLOSED_DATE_PHYSICAL_REPRESENTATION:
+        SOURCE_LEXICAL_EVIDENCE_ONLY
+
+Neither `updated_date` nor `closed_date` is parsed as a `datetime`, `date`,
+duration, or canonical lifecycle timestamp at this retention boundary. A
+value such as `"2026/09/08 03:14:15 PM"` means only that Calgary supplied that
+lexical value for the corresponding source field.
+
+Retention establishes no timezone, temporal precision, active-work,
+resolution, final-closure, terminality, or reopening semantics.
+
+If a caller supplies `updated_date` or `closed_date` as a Python `datetime`,
+`date`, integer, or other non-string object, the mapper must not serialize it
+back to text. It produces
+`UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)` because this
+boundary has no justification to reconstruct source lexical evidence from an
+already transformed value.
+
+### Structural Binding Decision
+
+A standalone `CalgarySourceNativeEvidence` could become detached from the
+accepted Case it describes. The selected higher-level binding is:
+
+    CALGARY_ACCEPTED_ADAPTER_REPRESENTATION:
+        FROZEN_ADAPTED_CASE_DATACLASS
+
+The planned representation is:
+
+```python
+@dataclass(frozen=True)
+class CalgaryAdaptedCase:
+    mapped_case: CalgaryMappedCase
+    source_native: CalgarySourceNativeEvidence
+```
+
+This is a Design choice and is not implemented by this documentation step.
+
+### CalgaryMappedCase Remains Unchanged
+
+    CALGARY_MAPPED_CASE_SOURCE_NATIVE_INCLUSION:
+        NOT_SELECTED
+
+`CalgaryMappedCase` retains its committed role as the two-field carrier for
+the currently implemented canonical Case slice: `case` and `source_status`.
+Adding DQ7-DQ11 directly would mix canonical Case evidence with source-specific
+retained evidence and unnecessarily revise that bounded role. Composition is
+selected instead.
+
+### Exact Adapted-Case Shape
+
+`CalgaryAdaptedCase` has exactly:
+
+1. `mapped_case`;
+2. `source_native`.
+
+It does not contain a raw record, `created_at`, `canonical_status`, DQ13
+fields, persistence metadata, ingestion metadata, database identifiers, or
+audit metadata.
+
+### Adapted-Case Object Preservation
+
+    CALGARY_ADAPTED_CASE_MAPPED_CASE_PRESERVATION:
+        REUSE_EXISTING_MAPPED_CASE
+
+    CALGARY_ADAPTED_CASE_SOURCE_NATIVE_PRESERVATION:
+        REUSE_EXISTING_SOURCE_NATIVE_EVIDENCE
+
+The planned in-memory behavior is:
+
+```python
+adapted.mapped_case is mapped_case
+adapted.source_native is source_native
+```
+
+Neither object is reconstructed merely to wrap it. This is an in-memory
+Python object-preservation Design choice and does not imply persistence
+identity.
+
+### Source-Native Mapping API
+
+    CALGARY_SOURCE_NATIVE_MAPPING_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+The planned callable is:
+
+```python
+def map_calgary_source_native_evidence(
+    record: Mapping[str, object],
+) -> CalgarySourceNativeEvidence:
+    ...
+```
+
+It maps only `source`, `service_name`, `agency_responsible`, `updated_date`,
+and `closed_date`. It does not map `service_request_id`,
+`status_description`, `created_at`, `canonical_status`, or any DQ13 field.
+
+### Source-Native Input Mutation
+
+    CALGARY_SOURCE_NATIVE_MAPPING_INPUT_MUTATION:
+        FORBIDDEN
+
+The planned function reads the supplied `Mapping` only. Assignment, pop,
+deletion, update, `setdefault`, and in-place normalization are not authorized.
+
+### Top-Level Adapter API
+
+The existing `map_calgary_case` remains unchanged and limited to
+`CURRENT_CANONICAL_SLICE_ONLY`. The selected higher-level operation is:
+
+    CALGARY_ADAPTER_API:
+        CALGARY_RECORD_ADAPTER_FUNCTION
+
+The planned callable is:
+
+```python
+def adapt_calgary_record(
+    record: Mapping[str, object],
+) -> CalgaryAdapterResult:
+    ...
+```
+
+### Top-Level Result Transport
+
+    CALGARY_ADAPTER_RESULT_TRANSPORT:
+        ADAPTED_CASE_OR_REJECTED_IDENTITY
+
+The planned alias is:
+
+```python
+CalgaryAdapterResult = CalgaryAdaptedCase | RejectedIdentity
+```
+
+This is distinct from and does not replace the existing lower-level alias:
+
+```python
+CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
+```
+
+### Top-Level Composition Order
+
+The future top-level adapter follows this exact sequence:
+
+1. call `map_calgary_case(record)`;
+2. if the result is `RejectedIdentity`, return that exact object immediately
+   without mapping source-native fields;
+3. if the result is `CalgaryMappedCase`, call
+   `map_calgary_source_native_evidence(record)`;
+4. return
+   `CalgaryAdaptedCase(mapped_case=mapped_case, source_native=source_native)`.
+
+### Top-Level Rejection Short-Circuit
+
+    CALGARY_ADAPTER_REJECTION_SHORT_CIRCUIT:
+        YES
+
+Identity rejection through `map_calgary_case` means no
+`CalgaryAdaptedCase`, no source-native evidence container, and no
+source-native field mapping. Mandatory identity admission remains the outer
+gate.
+
+This does not imply that rejected raw records are discarded.
+
+### Expected Rejection and Software Failure
+
+    CALGARY_ADAPTER_EXPECTED_REJECTION:
+        RejectedIdentity
+
+    CALGARY_ADAPTER_UNEXPECTED_SOFTWARE_FAILURE:
+        NOT_CAUGHT_OR_RECLASSIFIED
+
+The future adapter must not broadly convert unexpected exceptions into domain
+rejection, unavailable evidence, or another result. Unexpected software
+failures remain exceptions unless a later decision defines another transport.
+
+### Raw-Record Retention Is Distinct
+
+`CalgarySourceNativeEvidence` retains only the five selected DQ7-DQ11 fields.
+It is not the complete raw CSV row, raw-record archival, source-file
+preservation, rejected-record retention, or byte-for-byte source
+reproduction.
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+No complete raw-record retention claim is made.
+
+### DQ7 Semantic Boundary
+
+`source` is retained exactly as Calgary source-native submission-channel
+evidence. It is not `source_system`; canonical `source_system` remains
+`city_of_calgary_311`.
+
+### DQ8 Semantic Boundary
+
+`service_name` is retained as Calgary source-native service-name/type
+evidence. It does not establish workflow, queue, root cause, resolution type,
+or a product taxonomy.
+
+### DQ9 Semantic Boundary
+
+`agency_responsible` is retained as Calgary responsible-department evidence.
+It is not renamed or interpreted as assigned team, current queue, individual
+owner, resolver group, or active worker.
+
+### DQ10 Semantic Boundary
+
+`updated_date` is retained only as source-native update-time lexical
+evidence. It is not last operational work time, last assignment time, state
+transition time, or canonical `updated_at`.
+
+### DQ11 Semantic Boundary
+
+`closed_date` is retained only as source-native closure-time lexical evidence.
+It does not establish resolution time, final closure, non-reopenability,
+terminality, or successful outcome.
+
+### Deferred Concepts Remain Outside
+
+    created_at:
+        DEFER_MAPPING
+        absent
+
+    canonical_status:
+        DEFER_MAPPING
+        absent
+
+Neither concept enters `CalgarySourceNativeEvidence`, `CalgaryAdaptedCase`,
+or `adapt_calgary_record` in this decision.
+
+The following DQ13 fields remain `DEFER_MAPPING` and absent:
+
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+Source-column presence does not turn `DEFER_MAPPING` into
+`RETAIN_SOURCE_NATIVE`.
+
+### Increment 004 Realization Boundary
+
+This design does not establish `INCREMENT_004_REALIZATION_COMPLETE`.
+
+    INCREMENT_004_ACCEPTED_RECORD_PHYSICAL_REALIZATION_CANDIDATE:
+        REQUIRES_IMPLEMENTATION_AND_VERIFICATION
+
+If implemented and verified, the accepted-record path would physically
+represent identity decisions DQ2-DQ3, source-status DQ5, and retained
+DQ7-DQ11 while preserving the explicit deferrals for DQ4, DQ6, and DQ13.
+Increment 005 closure must be evaluated only after implementation evidence and
+all acceptance criteria are reviewed; no closure is predeclared.
+
+### Planned Implementation Location
+
+The planned implementation location is:
+
+```text
+src/support_operations_intelligence/calgary_adapter.py
+```
+
+Planned additions are limited to:
+
+- `CalgarySourceNativeEvidence`;
+- `map_calgary_source_native_evidence`;
+- `CalgaryAdaptedCase`;
+- `CalgaryAdapterResult`;
+- `adapt_calgary_record`.
+
+### No Generic Source-Native Framework
+
+No generic `SourceNativeEvidence`, `GenericAdapterEnvelope`,
+`BaseAdaptedCase`, `SourceField[T]`, or multi-source adapter abstraction is
+selected. Only one source-specific implementation exists; a generic framework
+requires demonstrated cross-source commonality.
+
+### Planned Source-Native Tests
+
+Future source-native mapper tests should cover at least:
+
+1. all five nonblank strings retained exactly;
+2. padded `source` retained exactly;
+3. padded `service_name` retained exactly;
+4. padded `agency_responsible` retained exactly;
+5. `updated_date` lexical value retained exactly;
+6. `closed_date` lexical value retained exactly;
+7. missing field produces `VALUE_ABSENT`;
+8. `None` produces `VALUE_ABSENT`;
+9. empty string produces `VALUE_ABSENT`;
+10. whitespace-only string produces `VALUE_ABSENT`;
+11. non-string produces `EVIDENCE_INDETERMINATE`;
+12. the input `Mapping` is not mutated.
+
+Representative fields may exercise missing and malformed cases, but future
+tests must establish that the shared rule applies to all five mappings. These
+are planned tests only.
+
+### Planned Adapted-Case Tests
+
+Future structural tests should verify:
+
+1. `CalgaryAdaptedCase` is a dataclass;
+2. it is frozen;
+3. its fields are exactly `mapped_case` and `source_native`;
+4. the supplied `mapped_case` is preserved directly;
+5. the supplied `source_native` is preserved directly;
+6. canonical identity remains reachable through
+   `adapted.mapped_case.case.case_id`;
+7. `source_status` remains reachable through
+   `adapted.mapped_case.source_status`;
+8. all five native fields remain reachable through `adapted.source_native`;
+9. `created_at` is absent;
+10. `canonical_status` is absent;
+11. DQ13 fields are absent;
+12. ordinary reassignment is rejected.
+
+These are planned tests only.
+
+### Planned Top-Level Adapter Tests
+
+Future top-level adapter tests should cover at least:
+
+1. a valid record produces `CalgaryAdaptedCase`;
+2. the canonical `mapped_case` is preserved in the adapted output;
+3. all DQ7-DQ11 source-native evidence is present;
+4. invalid identity produces `RejectedIdentity`;
+5. invalid identity short-circuits source-native mapping;
+6. the exact `RejectedIdentity` object is reused;
+7. source-native `VALUE_ABSENT` does not reject an accepted Case;
+8. source-native `EVIDENCE_INDETERMINATE` does not reject an accepted Case;
+9. raw `source` does not alter canonical `source_system`;
+10. the input `Mapping` is not mutated;
+11. an unexpected source-native mapping exception propagates;
+12. no DQ13 mapping occurs.
+
+These are planned tests only.
+
+### Alternatives
+
+#### A. Add DQ7-DQ11 to Generic Case
+
+    RESULT:
+        REJECT
+
+Source-specific evidence is not universal Case identity or core.
+
+#### B. Add DQ7-DQ11 to CalgaryMappedCase
+
+    RESULT:
+        REJECT_FOR_CURRENT_BOUNDARY
+
+This mixes the committed canonical-slice carrier with source-native
+retention.
+
+#### C. Free-Form Dictionary for Retained Fields
+
+    RESULT:
+        REJECT
+
+This creates a weak structural contract and permits silent field drift.
+
+#### D. Store the Entire Raw Mapping in CalgaryAdaptedCase
+
+    RESULT:
+        REJECT_FOR_CURRENT_INCREMENT
+
+This exceeds DQ7-DQ11 retention and conflates selected evidence retention
+with raw-record archival.
+
+#### E. Parse Updated or Closed Date During Retention
+
+    RESULT:
+        REJECT
+
+This adds transformations and temporal assumptions unnecessary for
+source-native preservation.
+
+#### F. Rename Agency Responsible to Owning or Resolver Group
+
+    RESULT:
+        REJECT
+
+The stronger semantics are unsupported.
+
+#### G. Use Source as Source System
+
+    RESULT:
+        REJECT
+
+This violates the established identity namespace decision.
+
+#### H. Generic Multi-Source Evidence Framework
+
+    RESULT:
+        DEFER
+
+No demonstrated cross-source requirement exists.
+
+#### I. Claim Increment 004 Complete from Design Alone
+
+    RESULT:
+        REJECT
+
+A planned representation is not implementation evidence.
+
+### Failure Conditions
+
+A future implementation violates this design if it:
+
+- modifies generic `Case`;
+- widens `CalgaryMappedCase` with DQ7-DQ11;
+- fails to bind retained evidence structurally to the accepted mapped Case;
+- changes `source_system` using raw `source`;
+- renames retained fields into stronger semantics;
+- normalizes nonblank source strings;
+- parses timestamps during retention;
+- serializes transformed non-string timestamps back to text;
+- emits `DerivedEvidence` or `SimulatedEvidence` for DQ7-DQ11;
+- defaults applicable concepts to `CONCEPT_ABSENT`;
+- maps DQ13 into this container;
+- introduces `created_at` or `canonical_status`;
+- maps source-native evidence after identity rejection;
+- catches unexpected software failures as domain rejection;
+- mutates the input `Mapping`;
+- introduces an unjustified generic framework;
+- claims complete raw-record retention;
+- claims implementation evidence from this design-only step;
+- changes Increment 004 semantics.
+
+### Revision Conditions
+
+This design may be revisited if:
+
+- Increment 004 changes;
+- source metadata establishes stronger or different semantics;
+- a raw-record archival requirement is introduced;
+- rejected-record retention becomes defined;
+- persistence or serialization requires another envelope;
+- multiple adapters demonstrate a reusable cross-source abstraction;
+- temporal parsing becomes independently justified in a later analytical
+  layer;
+- source-native evidence requires explicit source-location or provenance
+  metadata beyond the current field-evidence model.
+
+None of these conditions is currently claimed.
+
+### Claim Classification
+
+    CalgarySourceNativeEvidence representation:
+        Design choice
+
+    per-field evidence policy:
+        Design choice
+
+    lexical preservation:
+        Design choice
+
+    CalgaryAdaptedCase:
+        Design choice
+
+    structural binding:
+        Design choice
+
+    CalgaryAdapterResult:
+        Design choice
+
+    adapt_calgary_record:
+        Design choice
+
+    rejection short-circuit:
+        Design choice
+
+    planned tests:
+        not Engineering observations
+
+    existing Calgary dataset findings:
+        prior Engineering observations
+
+    existing mapper and identity behavior:
+        prior Engineering observations
+
+This documentation-only step produces no new External evidence, Internal
+evaluation result, or research conclusion.
+
+### Prior-Boundary Preservation
+
+Generic `Case` remains `case_id` only. `CalgaryMappedCase` remains exactly
+`case` plus `source_status`. `CalgaryCaseMappingResult` remains
+`CalgaryMappedCase | RejectedIdentity`, and `map_calgary_case` remains
+unchanged and `CURRENT_CANONICAL_SLICE_ONLY`.
+
+Identity admission and the source-status mapper remain unchanged. Increment
+004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains unchanged. `created_at` and
+`canonical_status` remain `DEFER_MAPPING`. DQ7-DQ11 remain
+`RETAIN_SOURCE_NATIVE`, and DQ13 remains `DEFER_MAPPING`.
+
+`REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
+`NOT_DEFINED`. No Increment 004 completion claim is made.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
