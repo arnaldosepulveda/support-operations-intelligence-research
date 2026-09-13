@@ -6727,6 +6727,257 @@ rejected-record retention, temporal semantic validity, canonical lifecycle
 timestamps, persistence correctness, dataset-wide validation, portability,
 production readiness, or a research conclusion.
 
+## Implementation Record 011 - Calgary Adapted Case Structural Binding
+
+### Objective
+
+Implement only the committed structural binding between the tested
+`CalgaryMappedCase` and `CalgarySourceNativeEvidence` representations.
+
+### Files
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_adapted_case.py`.
+
+### Implemented
+
+    IMPLEMENTED:
+        CalgaryAdaptedCase
+
+    SHAPE:
+        mapped_case: CalgaryMappedCase
+        source_native: CalgarySourceNativeEvidence
+
+    IMMUTABILITY:
+        frozen dataclass
+
+    MAPPED CASE PRESERVATION:
+        supplied CalgaryMappedCase retained directly
+
+    SOURCE-NATIVE PRESERVATION:
+        supplied CalgarySourceNativeEvidence retained directly
+
+    FIELD FLATTENING:
+        none
+
+    OUT OF SCOPE / NOT IMPLEMENTED:
+        CalgaryAdapterResult
+        adapt_calgary_record
+
+    CREATED_AT:
+        not included
+        DEFER_MAPPING
+
+    CANONICAL_STATUS:
+        not included
+        DEFER_MAPPING
+
+    DQ13:
+        not included
+        DEFER_MAPPING
+
+    INCREMENT 004 REALIZATION:
+        not yet established
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The implementation adds only the committed frozen dataclass. It does not
+reconstruct `CalgaryMappedCase` or `CalgarySourceNativeEvidence` internally;
+the generated initializer retains the exact objects supplied by the caller.
+No factory function, result-transport alias, or top-level adapter function
+was added.
+
+### Expected Pre-Implementation Failure
+
+After the twelve focused structural tests were created and before
+`CalgaryAdaptedCase` was added, this command was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_adapted_case.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported:
+
+```text
+ImportError: cannot import name 'CalgaryAdaptedCase' from 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.000s
+OK
+```
+
+The focused tests verified:
+
+1. `CalgaryAdaptedCase` is a dataclass;
+2. it is frozen, rejecting ordinary reassignment;
+3. its fields are exactly `mapped_case` and `source_native`, in that order;
+4. the supplied `CalgaryMappedCase` is preserved directly (`is`-identity);
+5. the supplied `CalgarySourceNativeEvidence` is preserved directly
+   (`is`-identity);
+6. nested canonical identity remains reachable through
+   `adapted.mapped_case.case.case_id.source_system` and
+   `.source_case_id`;
+7. the supplied `source_status` evidence object remains reachable through
+   `adapted.mapped_case.source_status`;
+8. all five DQ7-DQ11 evidence objects remain reachable and preserved
+   through `adapted.source_native`;
+9. `created_at` is absent as a dataclass field;
+10. `canonical_status` is absent as a dataclass field;
+11. all seven DQ13 fields are absent as dataclass fields;
+12. both top-level fields (`mapped_case`, `source_native`) reject ordinary
+    reassignment.
+
+This result is an Engineering observation for the exercised in-memory
+objects under the repository-local Python execution boundary.
+
+### Component Regression Results
+
+Each existing focused component suite was executed independently:
+
+```text
+test_calgary_source_native_evidence.py: 12 tests, OK
+test_calgary_case_mapping.py: 12 tests, OK
+test_calgary_mapped_case.py: 12 tests, OK
+test_calgary_source_status.py: 12 tests, OK
+```
+
+Every suite completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 113 tests in 0.003s
+OK
+```
+
+The suite completed with zero failures and zero errors, growing from the
+prior 101 tests by exactly the 12 new focused tests. This result is an
+Engineering observation for the current repository state and execution
+environment.
+
+### Direct Structure and Object-Preservation Verification
+
+Direct execution against constructed `CalgaryMappedCase` and
+`CalgarySourceNativeEvidence` objects reported:
+
+```text
+is_dataclass = True
+fields = ['mapped_case', 'source_native']
+mapped_case_same = True
+source_native_same = True
+case_same = True
+status_same = True
+source_case_id = 'ABC-123'
+agency_responsible = 'Roads'
+```
+
+The supplied `mapped_case` and `source_native` objects were retained
+directly, and the nested `Case` and `source_status` objects supplied to
+`CalgaryMappedCase` remained the exact same objects when reached through
+`CalgaryAdaptedCase`. These are in-memory Python object-preservation
+results and do not establish database, persistence, distributed, or
+serialization identity.
+
+### Direct Immutability Verification
+
+Direct execution attempting ordinary reassignment (no
+`object.__setattr__` bypass) reported:
+
+```text
+mapped_case reassignment -> FrozenInstanceError: cannot assign to field 'mapped_case'
+source_native reassignment -> FrozenInstanceError: cannot assign to field 'source_native'
+```
+
+Both top-level fields rejected ordinary reassignment.
+
+### Top-Level Symbol Absence Verification
+
+Direct inspection of `support_operations_intelligence.calgary_adapter`
+reported:
+
+```text
+CalgaryAdapterResult False
+adapt_calgary_record False
+```
+
+Neither symbol was introduced by this implementation step; both remain
+planned only.
+
+### Preserved Boundaries
+
+Generic `Case`, `CalgaryMappedCase`, `CalgarySourceNativeEvidence`,
+`CalgaryCaseMappingResult`, `map_calgary_case`,
+`map_calgary_source_native_evidence`, `map_calgary_source_status`,
+`admit_calgary_source_identity`, `CaseId`, and evidence types remain
+unchanged (confirmed by `git diff -- case.py identity.py evidence.py`
+producing no output; the `calgary_adapter.py` diff is additive only).
+
+`CalgaryAdaptedCase` does not flatten `case`, `source_status`, `source`,
+`service_name`, `agency_responsible`, `updated_date`, or `closed_date` onto
+its own top level; those remain nested in `CalgaryMappedCase` and
+`CalgarySourceNativeEvidence` respectively.
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains unchanged.
+`created_at` and `canonical_status` remain `DEFER_MAPPING` and absent from
+`CalgaryAdaptedCase`. DQ13 fields remain `DEFER_MAPPING` and absent.
+
+`REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
+`NOT_DEFINED`. `CalgaryAdapterResult` and `adapt_calgary_record` remain
+unimplemented.
+
+The implementation does not establish complete Increment 004 realization or
+a complete Calgary source-record adapter.
+
+### Claim Classification and Boundary
+
+`CalgaryAdaptedCase` implements a prior Design choice. The expected red
+result, focused and regression results, full-suite result, direct
+structure/object-preservation, immutability, and top-level-symbol-absence
+checks are Engineering observations.
+
+Allowed interpretation:
+
+> `CalgaryAdaptedCase` conforms to the tested Increment 005
+> structural-binding representation for exercised in-memory objects under
+> the repository-local Python execution boundary.
+
+This implementation does not establish `adapt_calgary_record` behavior,
+`CalgaryAdapterResult` transport implementation, complete Calgary adapter
+correctness, complete Increment 004 realization, raw-record retention,
+rejected-record retention, temporal semantic validity, persistence
+correctness, dataset-wide validation, portability, production readiness, or
+a research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:

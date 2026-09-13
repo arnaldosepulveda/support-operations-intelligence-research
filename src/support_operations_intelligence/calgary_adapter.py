@@ -95,6 +95,12 @@ def map_calgary_source_native_evidence(
     )
 
 
+@dataclass(frozen=True)
+class CalgaryAdaptedCase:
+    mapped_case: CalgaryMappedCase
+    source_native: CalgarySourceNativeEvidence
+
+
 CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
 
 
