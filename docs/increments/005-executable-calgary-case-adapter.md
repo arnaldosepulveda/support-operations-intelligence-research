@@ -6454,6 +6454,279 @@ Identity admission and the source-status mapper remain unchanged. Increment
 `REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
 `NOT_DEFINED`. No Increment 004 completion claim is made.
 
+## Implementation Record 010 - Calgary Source-Native Evidence Mapping
+
+### Objective
+
+Implement the committed DQ7-DQ11 source-native evidence container and
+lexical mapping boundary only.
+
+### Files
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_source_native_evidence.py`.
+
+### Implemented
+
+    IMPLEMENTED:
+        CalgarySourceNativeEvidence
+        map_calgary_source_native_evidence
+
+    FIELDS:
+        source
+        service_name
+        agency_responsible
+        updated_date
+        closed_date
+
+    FIELD TYPE:
+        ObservedEvidence[str] | UnavailableEvidence
+
+    LEXICAL PRESERVATION:
+        exact nonblank source string
+
+    UNAVAILABLE POLICY:
+        missing/None/empty/whitespace -> VALUE_ABSENT
+        non-string -> EVIDENCE_INDETERMINATE
+
+    TEMPORAL REPRESENTATION:
+        updated_date and closed_date remain source lexical evidence only
+
+    INPUT MUTATION:
+        forbidden
+        none observed
+
+    OUT OF SCOPE / NOT IMPLEMENTED:
+        CalgaryAdaptedCase
+        CalgaryAdapterResult
+        adapt_calgary_record
+
+    INCREMENT 004 REALIZATION:
+        not yet established
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The implementation adds only the committed frozen dataclass and mapping
+function. `map_calgary_source_status` and `map_calgary_case` were not
+modified; a private, file-local helper (`_map_source_native_lexical_field`)
+applies the shared DQ7-DQ11 rule to avoid duplicating it five times, and
+introduces no new public abstraction.
+
+### Expected Pre-Implementation Failure
+
+After the twelve focused source-native tests were created and before
+`CalgarySourceNativeEvidence` and `map_calgary_source_native_evidence` were
+added, this command was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_source_native_evidence.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported:
+
+```text
+ImportError: cannot import name 'CalgarySourceNativeEvidence' from 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.000s
+OK
+```
+
+The focused tests verified:
+
+1. the container is a frozen dataclass with the exact field order
+   `source`, `service_name`, `agency_responsible`, `updated_date`,
+   `closed_date`, and rejects ordinary reassignment;
+2. all five nonblank source strings are retained exactly;
+3. padded non-temporal values (`source`, `service_name`,
+   `agency_responsible`) are retained exactly, with no stripping;
+4. padded/distinctive `updated_date` and `closed_date` lexical values are
+   retained exactly, with no parsing;
+5. a missing field produces `VALUE_ABSENT` for each of the five fields;
+6. `None` produces `VALUE_ABSENT` for each of the five fields;
+7. an empty string produces `VALUE_ABSENT` for each of the five fields;
+8. a whitespace-only string produces `VALUE_ABSENT` for each of the five
+   fields;
+9. a non-string value produces `EVIDENCE_INDETERMINATE` for each of the
+   five fields;
+10. non-string `datetime`/`date` objects for `updated_date` and
+    `closed_date` produce `EVIDENCE_INDETERMINATE` and are not serialized
+    back into `ObservedEvidence` text;
+11. the input `Mapping` is not mutated;
+12. the result exposes exactly the five DQ7-DQ11 fields, with no
+    `service_request_id`, `status_description`, `created_at`,
+    `canonical_status`, or DQ13 field present.
+
+This result is an Engineering observation for the exercised in-memory parsed
+records under the repository-local Python execution boundary.
+
+### Component Regression Results
+
+Each existing focused component suite was executed independently:
+
+```text
+test_calgary_case_mapping.py: 12 tests, OK
+test_calgary_source_status.py: 12 tests, OK
+test_calgary_mapped_case.py: 12 tests, OK
+test_calgary_identity_admission.py: 12 tests, OK
+```
+
+Every suite completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 101 tests in 0.002s
+OK
+```
+
+The suite completed with zero failures and zero errors, growing from the
+prior 89 tests by exactly the 12 new focused tests. This result is an
+Engineering observation for the current repository state and execution
+environment.
+
+### Direct Lexical-Preservation Verification
+
+Direct execution against a padded valid record reported:
+
+```text
+source ObservedEvidence '  Mobile App  '
+service_name ObservedEvidence ' Roads - Pothole '
+agency_responsible ObservedEvidence ' Roads '
+updated_date ObservedEvidence '2026/09/08 03:14:15 PM'
+closed_date ObservedEvidence '2026/09/09 08:02:01 AM'
+```
+
+All five fields retained the exact supplied lexical strings, including
+padding on non-temporal fields and the unparsed temporal strings.
+
+### Direct Unavailable-Evidence Verification
+
+Direct execution reported, for a representative field:
+
+```text
+missing   -> UnavailableEvidence VALUE_ABSENT
+none      -> UnavailableEvidence VALUE_ABSENT
+empty     -> UnavailableEvidence VALUE_ABSENT
+whitespace -> UnavailableEvidence VALUE_ABSENT
+non-string -> UnavailableEvidence EVIDENCE_INDETERMINATE
+```
+
+The focused suite establishes this same rule holds independently across all
+five DQ7-DQ11 fields.
+
+### Direct Non-String Temporal Verification
+
+Direct execution using `datetime.datetime` for `updated_date` and
+`datetime.date` for `closed_date` reported:
+
+```text
+updated_date UnavailableEvidence EVIDENCE_INDETERMINATE
+closed_date UnavailableEvidence EVIDENCE_INDETERMINATE
+```
+
+Neither non-string temporal input was serialized back into `ObservedEvidence`
+text.
+
+### Direct Structure Verification
+
+Direct dataclass inspection reported:
+
+```text
+is_dataclass = True
+fields = ['source', 'service_name', 'agency_responsible', 'updated_date', 'closed_date']
+```
+
+### Input-Immutability Verification
+
+Direct execution reported no change between the supplied record and a copy
+taken before calling `map_calgary_source_native_evidence`. No input mutation
+was observed for the exercised record.
+
+### Out-of-Scope Symbol Verification
+
+Direct inspection of `support_operations_intelligence.calgary_adapter`
+reported:
+
+```text
+CalgaryAdaptedCase exists = False
+CalgaryAdapterResult exists = False
+adapt_calgary_record exists = False
+```
+
+These remain planned only and were not introduced by this implementation
+step.
+
+### Preserved Boundaries
+
+Generic `Case`, `CalgaryMappedCase`, `CalgaryCaseMappingResult`,
+`map_calgary_case`, identity admission, and `map_calgary_source_status`
+remain unchanged (confirmed by `git diff HEAD^ HEAD -- src tests
+pyproject.toml` restricted to the new file and additive edits only).
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains unchanged.
+`created_at` and `canonical_status` remain `DEFER_MAPPING` and absent from
+`CalgarySourceNativeEvidence`. DQ13 fields remain `DEFER_MAPPING` and absent.
+
+`REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
+`NOT_DEFINED`. `CalgaryAdaptedCase`, `CalgaryAdapterResult`, and
+`adapt_calgary_record` remain unimplemented.
+
+The implementation does not establish complete Increment 004 realization or
+a complete Calgary source-record adapter.
+
+### Claim Classification and Boundary
+
+`CalgarySourceNativeEvidence` and `map_calgary_source_native_evidence`
+implement prior Design choices. The expected red result, focused and
+regression results, full-suite result, direct lexical-preservation,
+unavailable-evidence, non-string-temporal, structure, input-immutability,
+and out-of-scope-symbol checks are Engineering observations.
+
+Allowed interpretation:
+
+> `CalgarySourceNativeEvidence` and `map_calgary_source_native_evidence`
+> conform to the tested Increment 005 DQ7-DQ11 lexical-retention semantics
+> for exercised in-memory parsed-record inputs under the repository-local
+> Python execution boundary.
+
+This implementation does not establish complete Calgary adapter correctness,
+complete Increment 004 realization, structural binding to
+`CalgaryMappedCase`, top-level adapter behavior, raw-record retention,
+rejected-record retention, temporal semantic validity, canonical lifecycle
+timestamps, persistence correctness, dataset-wide validation, portability,
+production readiness, or a research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:

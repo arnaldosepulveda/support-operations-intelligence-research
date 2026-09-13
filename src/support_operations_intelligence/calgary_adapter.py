@@ -42,6 +42,59 @@ def map_calgary_source_status(
     return ObservedEvidence(value)
 
 
+@dataclass(frozen=True)
+class CalgarySourceNativeEvidence:
+    source: ObservedEvidence[str] | UnavailableEvidence
+    service_name: ObservedEvidence[str] | UnavailableEvidence
+    agency_responsible: ObservedEvidence[str] | UnavailableEvidence
+    updated_date: ObservedEvidence[str] | UnavailableEvidence
+    closed_date: ObservedEvidence[str] | UnavailableEvidence
+
+
+def _map_source_native_lexical_field(
+    record: Mapping[str, object],
+    field_name: str,
+) -> ObservedEvidence[str] | UnavailableEvidence:
+    if field_name not in record:
+        return UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+
+    value = record[field_name]
+
+    if value is None:
+        return UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+
+    if not isinstance(value, str):
+        return UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)
+
+    if value == "":
+        return UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+
+    if value.isspace():
+        return UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+
+    return ObservedEvidence(value)
+
+
+def map_calgary_source_native_evidence(
+    record: Mapping[str, object],
+) -> CalgarySourceNativeEvidence:
+    return CalgarySourceNativeEvidence(
+        source=_map_source_native_lexical_field(record, "source"),
+        service_name=_map_source_native_lexical_field(
+            record, "service_name"
+        ),
+        agency_responsible=_map_source_native_lexical_field(
+            record, "agency_responsible"
+        ),
+        updated_date=_map_source_native_lexical_field(
+            record, "updated_date"
+        ),
+        closed_date=_map_source_native_lexical_field(
+            record, "closed_date"
+        ),
+    )
+
+
 CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
 
 
