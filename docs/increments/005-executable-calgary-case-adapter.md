@@ -5039,6 +5039,506 @@ integration, a final generic `Case` schema, source-native evidence retention,
 persistence correctness, dataset validity, portability, production readiness,
 External evidence, or a research conclusion.
 
+## Calgary Canonical Case Mapping Result Decision
+
+### Decision Question
+
+How should the bounded Calgary Case-mapping boundary represent either:
+
+1. successful identity admission plus the currently implemented canonical
+   `source_status` evidence; or
+2. expected identity rejection,
+
+without conflating expected rejection with software failure and without
+claiming that unresolved source-native retention has been implemented?
+
+### Result Transport Decision
+
+    CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
+        MAPPED_CASE_OR_REJECTED_IDENTITY
+
+The planned result alias is:
+
+```python
+CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
+```
+
+This is a Design choice. The alias is planned only and is not implemented by
+this documentation step.
+
+Expected Case-mapping rejection currently occurs only because mandatory
+identity admission failed. The result therefore reuses the already-defined
+`RejectedIdentity` representation rather than introducing a duplicate
+`RejectedCalgaryCase`, `RejectedMapping`, `MappingError`, or other rejection
+type.
+
+The existing rejection reasons remain exactly:
+
+- `MISSING_SOURCE_CASE_ID`;
+- `NULL_SOURCE_CASE_ID`;
+- `NON_STRING_SOURCE_CASE_ID`;
+- `EMPTY_SOURCE_CASE_ID`;
+- `WHITESPACE_ONLY_SOURCE_CASE_ID`.
+
+No new rejection reason is introduced by this decision.
+
+### Current Scope
+
+    CALGARY_CASE_MAPPING_SCOPE:
+        CURRENT_CANONICAL_SLICE_ONLY
+
+The mapped success currently covers only:
+
+- admitted `Case` identity;
+- `source_status` evidence.
+
+It does not carry:
+
+- DQ7-DQ11 source-native retained evidence;
+- `created_at`;
+- `canonical_status`;
+- DQ13 fields.
+
+Accordingly, `CalgaryCaseMappingResult` must not be described as a complete
+source-record representation, complete Increment 004 realization, full
+ingestion result, persistence record, final canonical `Case` schema, or
+complete Calgary adapter.
+
+### Success Representation
+
+Successful mapping returns `CalgaryMappedCase` directly. It is not wrapped in
+`AcceptedCalgaryCase`, `AcceptedMapping`, `Success`, `Result`, or another
+success envelope.
+
+`CalgaryMappedCase` is already the explicit success-side representation for
+the currently implemented canonical slice. An additional wrapper has no
+demonstrated need at this boundary.
+
+### Rejection Representation
+
+Expected identity rejection returns the existing `RejectedIdentity` result.
+Invalid mandatory identity is not represented with `None`, a Boolean, an
+exception, a duplicate Calgary-specific rejection type, or unavailable field
+evidence.
+
+### Mapping API Decision
+
+    CALGARY_CASE_MAPPING_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+The planned callable is:
+
+```python
+def map_calgary_case(
+    record: Mapping[str, object],
+) -> CalgaryCaseMappingResult:
+    ...
+```
+
+This is a Design choice. The function is planned only and is not implemented
+by this documentation step.
+
+### Exact Composition Order
+
+The future function follows this deterministic sequence.
+
+1. Call `admit_calgary_source_identity(record)`.
+2. If the result is `RejectedIdentity`, return that same rejection
+   immediately. Do not construct `Case`, map `source_status`, or construct
+   `CalgaryMappedCase`.
+3. If the result is `AcceptedIdentity`, construct
+   `Case(case_id=accepted.case_id)` using its existing `case_id` object.
+4. Call `map_calgary_source_status(record)`.
+5. Construct and return
+   `CalgaryMappedCase(case=case, source_status=source_status)`.
+
+### Identity Gate Precedence
+
+    IDENTITY_ADMISSION_PRECEDES_OPTIONAL_FIELD_MAPPING:
+        YES
+
+Increment 002 does not permit Case emission without admissible mandatory
+identity. Optional `source_status` evidence cannot rescue or replace failed
+identity. This precedence concerns Case admission, not the validity of
+`source_status`.
+
+### Rejection Short-Circuit
+
+    IDENTITY_REJECTION_SHORT_CIRCUITS_CASE_MAPPING:
+        YES
+
+When identity admission returns `RejectedIdentity`, the composition returns
+the rejection, does not construct `Case`, does not construct
+`CalgaryMappedCase`, and does not evaluate optional `source_status` for the
+mapped Case result.
+
+This does not mean that the raw source record is discarded globally.
+Rejected-source-record retention remains separately unresolved.
+
+### Rejected Object Preservation
+
+    REJECTED_IDENTITY_RESULT_PRESERVATION:
+        RETURN_EXISTING_REJECTED_IDENTITY
+
+The composition returns the `RejectedIdentity` produced by identity admission
+directly. It does not construct a second rejection merely to copy its reason.
+This is a Python object-preservation Design choice only and does not imply
+persistence identity.
+
+### Accepted CaseId Preservation
+
+    ACCEPTED_CASE_ID_PRESERVATION:
+        REUSE_ACCEPTED_IDENTITY_CASE_ID
+
+The `Case` is constructed with exactly `accepted.case_id`, without
+reconstruction or normalization. For the planned in-memory implementation:
+
+```python
+case.case_id is accepted.case_id
+```
+
+### Unavailable Source Status Does Not Reject the Case
+
+`map_calgary_source_status(record)` may return
+`UnavailableEvidence(VALUE_ABSENT)` or
+`UnavailableEvidence(EVIDENCE_INDETERMINATE)`. Mapping still succeeds as a
+`CalgaryMappedCase` because `source_status` is optional canonical evidence.
+
+Unavailable `source_status` must not be converted to `RejectedIdentity` or
+another rejection result.
+
+### Expected Rejection and Software Failure
+
+    EXPECTED_DOMAIN_REJECTION:
+        RejectedIdentity
+
+    UNEXPECTED_SOFTWARE_FAILURE_TRANSPORT:
+        NOT_CAUGHT_OR_RECLASSIFIED_BY_THIS_BOUNDARY
+
+The planned function must not broadly catch programming or system exceptions
+and convert them into `RejectedIdentity`, `UnavailableEvidence`, `HOLD`, a
+failure enum, or a generic error result. Unexpected failures remain
+exceptions unless a later decision establishes another failure transport.
+
+This keeps expected invalid identity distinct from software failure.
+
+### No Generic Result Framework
+
+This decision rejects introducing `Result[T, E]`, `Either`, `Success` /
+`Failure`, generic adapter-result base classes, or exception wrappers for this
+step. The current boundary has one explicit success representation and one
+already-defined expected rejection representation.
+
+### Input Mutation
+
+    CALGARY_CASE_MAPPING_INPUT_MUTATION:
+        FORBIDDEN
+
+The composition reads the supplied `Mapping` only. It must not assign into
+it, pop or delete entries, update it, call `setdefault`, or normalize values
+in place. The subordinate functions already follow this behavior.
+
+### Source-System Boundary
+
+Successful identity retains:
+
+    source_system:
+        city_of_calgary_311
+
+through `admit_calgary_source_identity`. The composition must not interpret
+Calgary's raw `source` field as canonical `source_system`.
+
+DQ7 remains separately:
+
+    source:
+        RETAIN_SOURCE_NATIVE
+
+### DQ5 and DQ12 Remain Unchanged
+
+    DQ5:
+        status_description -> source_status
+        ACCEPT_MAPPING
+
+    DQ12:
+        NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+A successful `CalgaryMappedCase` may contain row-level unavailable
+`source_status` evidence without becoming a rejected Case. This does not
+change the source-contract-level DQ12 decision.
+
+### Deferred Canonical Fields Remain Outside
+
+    created_at:
+        DEFER_MAPPING
+        absent
+
+    canonical_status:
+        DEFER_MAPPING
+        absent
+
+Neither concept enters `map_calgary_case` in this decision, and neither is
+assigned `None` or `UnavailableEvidence`.
+
+### DQ7-DQ11 Remain Physically Unresolved
+
+The following fields remain `RETAIN_SOURCE_NATIVE`:
+
+- `source`;
+- `service_name`;
+- `agency_responsible`;
+- `updated_date`;
+- `closed_date`.
+
+They are not carried by `CalgaryMappedCase` or `CalgaryCaseMappingResult` in
+the current canonical-slice transport.
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+The current Case-mapping result is not sufficient to claim complete Increment
+004 source-contract realization because physical retention of DQ7-DQ11
+remains unresolved.
+
+### DQ13 Remains Outside
+
+The following fields remain `DEFER_MAPPING` and do not enter the result:
+
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+### Rejected Raw Value and Record Retention
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+Returning `RejectedIdentity` does not establish whether rejected raw values
+or records are logged, persisted, retained, discarded, or externally
+reported.
+
+### Planned Implementation Location
+
+The planned implementation location is:
+
+```text
+src/support_operations_intelligence/calgary_adapter.py
+```
+
+That module already contains `CalgaryMappedCase` and
+`map_calgary_source_status`. The future composition may add
+`CalgaryCaseMappingResult` and `map_calgary_case`; no new module is currently
+justified.
+
+### Planned Implementation Shape
+
+The future implementation is equivalent to:
+
+```python
+CalgaryCaseMappingResult = CalgaryMappedCase | RejectedIdentity
+
+
+def map_calgary_case(
+    record: Mapping[str, object],
+) -> CalgaryCaseMappingResult:
+    identity_result = admit_calgary_source_identity(record)
+
+    if isinstance(identity_result, RejectedIdentity):
+        return identity_result
+
+    case = Case(case_id=identity_result.case_id)
+    source_status = map_calgary_source_status(record)
+
+    return CalgaryMappedCase(
+        case=case,
+        source_status=source_status,
+    )
+```
+
+This code is a planned shape, not an implementation or observed execution
+result. It includes no broad exception handling.
+
+### Planned Test Matrix
+
+Future tests should cover at least:
+
+1. valid identity plus observed status returns `CalgaryMappedCase`;
+2. the admitted lexical `source_case_id` remains unchanged;
+3. successful identity retains `source_system == "city_of_calgary_311"`;
+4. valid identity plus missing status returns `CalgaryMappedCase` with
+   `UnavailableEvidence(VALUE_ABSENT)`;
+5. valid identity plus non-string status returns `CalgaryMappedCase` with
+   `UnavailableEvidence(EVIDENCE_INDETERMINATE)`;
+6. missing `service_request_id` returns
+   `RejectedIdentity(MISSING_SOURCE_CASE_ID)`;
+7. `None` `service_request_id` returns
+   `RejectedIdentity(NULL_SOURCE_CASE_ID)`;
+8. non-string `service_request_id` returns
+   `RejectedIdentity(NON_STRING_SOURCE_CASE_ID)`;
+9. empty `service_request_id` returns
+   `RejectedIdentity(EMPTY_SOURCE_CASE_ID)`;
+10. whitespace-only `service_request_id` returns
+    `RejectedIdentity(WHITESPACE_ONLY_SOURCE_CASE_ID)`;
+11. the input mapping is not mutated;
+12. identity rejection short-circuits optional status mapping.
+
+For test 12, a later implementation may use standard-library
+`unittest.mock` to verify that `map_calgary_source_status` is not called after
+identity rejection. These are planned tests only and are not Engineering
+observations.
+
+### Additional Planned Composition Checks
+
+Future verification should also establish:
+
+- the `RejectedIdentity` returned by identity admission is returned directly,
+  where practical to test;
+- the `CaseId` from `AcceptedIdentity` is reused directly;
+- unexpected exceptions from subordinate mapping are not silently converted
+  to expected domain rejection.
+
+These checks are planned only. No result is fabricated by this design step.
+
+### Alternatives
+
+#### A. AcceptedCalgaryCase / RejectedCalgaryCase Wrapper Pair
+
+    RESULT:
+        REJECT_FOR_CURRENT_BOUNDARY
+
+This duplicates the existing success and identity-rejection representations.
+
+#### B. CalgaryMappedCase | None
+
+    RESULT:
+        REJECT
+
+This loses the explicit rejection reason.
+
+#### C. Raise an Exception for Invalid Identity
+
+    RESULT:
+        REJECT_FOR_EXPECTED_IDENTITY_REJECTION
+
+Identity rejection is already an explicit expected result.
+
+#### D. Convert Unavailable Source Status to RejectedIdentity
+
+    RESULT:
+        REJECT
+
+`source_status` is optional and does not determine Case identity
+admissibility.
+
+#### E. Catch All Exceptions and Convert to RejectedIdentity
+
+    RESULT:
+        REJECT
+
+This conflates expected domain rejection with software or system failure.
+
+#### F. Generic Result / Either Framework
+
+    RESULT:
+        DEFER
+
+No demonstrated need currently justifies it.
+
+#### G. Describe This as the Complete Calgary Adapter
+
+    RESULT:
+        REJECT
+
+Physical DQ7-DQ11 source-native retention remains unresolved.
+
+### Failure Conditions
+
+A future implementation violates this decision if it:
+
+- constructs a `Case` after identity rejection;
+- maps `source_status` after identity rejection;
+- loses the explicit identity rejection reason;
+- raises an exception for expected identity rejection rather than returning
+  `RejectedIdentity`;
+- rejects a Case solely because `source_status` is unavailable;
+- reconstructs or normalizes the accepted `CaseId`;
+- changes `source_system` semantics;
+- mutates input;
+- catches broad software exceptions and relabels them as domain rejection;
+- adds `created_at` or `canonical_status`;
+- adds DQ7-DQ11 without a separate design;
+- adds DQ13;
+- claims complete source-contract realization;
+- changes Increment 004 semantics;
+- introduces a generic result framework without evidence.
+
+### Revision Conditions
+
+This decision may be revisited if:
+
+- identity rejection semantics change;
+- a later source-native retention envelope changes the success-side result;
+- multiple source adapters demonstrate a common generic result requirement;
+- software-failure transport becomes an explicit requirement;
+- rejected-record retention requirements are established;
+- Increment 002 or Increment 004 changes;
+- persistence or API serialization requirements require a different
+  transport.
+
+None of these conditions is currently claimed.
+
+### Claim Classification
+
+    CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
+        Design choice
+
+    CALGARY_CASE_MAPPING_API:
+        Design choice
+
+    composition precedence:
+        Design choice
+
+    identity rejection short-circuit:
+        Design choice
+
+    RejectedIdentity reuse:
+        Design choice
+
+    Accepted CaseId reuse:
+        Design choice
+
+    unexpected software failure boundary:
+        Design choice
+
+    planned tests:
+        not Engineering observations
+
+    existing component behavior:
+        prior Engineering observations
+
+This documentation-only step produces no new External evidence, research
+result, or research conclusion.
+
+### Prior-Boundary Preservation
+
+The generic `Case` remains `case_id` only. `CalgaryMappedCase` remains exactly
+`case` plus `source_status`. `map_calgary_source_status` and
+`admit_calgary_source_identity` remain unchanged.
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`. `created_at` and `canonical_status`
+remain `DEFER_MAPPING`. DQ7-DQ11 remain `RETAIN_SOURCE_NATIVE`, and their
+physical container remains `NOT_DEFINED`. DQ13 remains `DEFER_MAPPING`.
+
+`REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION` remain
+`NOT_DEFINED`. No complete source-contract realization is claimed.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
