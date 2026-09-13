@@ -3517,6 +3517,257 @@ All Increment 004 decisions remain unchanged. This minimal `Case` decision
 introduces no optional-field mapping, evidence-state assignment, or
 source-native retention container.
 
+## Implementation Record 006 - Minimal Case Identity Core
+
+### Objective
+
+Implement the committed minimal Python `Case` representation containing only
+the structured `CaseId` identity core.
+
+### Files
+
+    src/support_operations_intelligence/case.py
+    tests/test_case.py
+
+### Implemented
+
+    Case
+
+Case shape:
+
+```python
+case_id: CaseId
+```
+
+Case immutability:
+
+    frozen dataclass
+
+Duplicate identity components:
+
+    none
+
+`Case` preserves the supplied `CaseId` object. `source_system` and
+`source_case_id` remain accessible only through `Case.case_id`; neither is
+duplicated as a `Case` field.
+
+Source status:
+
+    not physically included
+    DQ5 remains ACCEPT_MAPPING
+    omission is neither UNAVAILABLE nor DEFER_MAPPING
+
+Created time:
+
+    created_at not included
+    requested_date -> created_at remains DEFER_MAPPING
+
+Canonical status:
+
+    canonical_status not included
+    remains DEFER_MAPPING
+
+Source-native evidence container:
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+Decision Question 12:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS remains unchanged
+
+Third-party dependencies:
+
+    none
+
+No field-evidence wrapper, Calgary field assignment, source-native retained
+field, Decision Question 13 field, validator, method, serialization behavior,
+persistence behavior, framework, or full adapter behavior is implemented.
+
+### Expected Pre-Implementation Failure
+
+Executed after the structural test was created and before
+`support_operations_intelligence.case` existed:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case.py' \
+      -v
+
+Observed discovery result:
+
+    tests reported: 1 failed test module
+    tests run: 1
+    failures: 0
+    errors: 1
+    result: FAILED (errors=1)
+
+Error type:
+
+    ImportError
+
+Underlying reason:
+
+    ModuleNotFoundError: No module named
+    'support_operations_intelligence.case'
+
+This expected red result is an Engineering observation. The focused test
+could not import a module that had not yet been implemented. It is test-first
+evidence, not a product defect.
+
+### Focused Post-Implementation Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### `CaseId` Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_case_id.py' \
+      -v
+
+Observed result:
+
+    tests run: 6
+    failures: 0
+    errors: 0
+    result: OK
+
+### Identity-Result Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_identity_admission_result.py' \
+      -v
+
+Observed result:
+
+    tests run: 10
+    failures: 0
+    errors: 0
+    result: OK
+
+### Calgary Identity-Admission Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_calgary_identity_admission.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### Field-Evidence Regression Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover \
+      -s tests \
+      -p 'test_field_evidence.py' \
+      -v
+
+Observed result:
+
+    tests run: 12
+    failures: 0
+    errors: 0
+    result: OK
+
+### Full-Suite Result
+
+Executed command:
+
+    PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+
+Observed result:
+
+    tests run: 53
+    failures: 0
+    errors: 0
+    result: OK
+
+### Direct Structure Verification
+
+The direct repository-local Python verification observed:
+
+    is_dataclass = True
+    fields = ['case_id']
+    case_id_same_object = True
+    source_system = 'city_of_calgary_311'
+    source_case_id = ' 001AbC-09 '
+    has_source_system_field = False
+    has_source_case_id_field = False
+    has_source_status = False
+    has_created_at = False
+    has_canonical_status = False
+
+This verifies the exact field shape, supplied-`CaseId` object preservation,
+nested access to both source identity components, exact lexical preservation,
+absence of duplicate identity fields, and absence of the three optional
+fields from the current minimal shape.
+
+### Direct Immutability Verification
+
+The direct repository-local Python verification observed:
+
+    mutation_exception = FrozenInstanceError
+
+### Optional-Field and Evidence Boundaries
+
+The absence of `source_status` means only that it is outside the current
+minimal physical `Case`; it does not mean `UNAVAILABLE` or `DEFER_MAPPING`.
+Increment 004 DQ5 remains `ACCEPT_MAPPING`.
+
+`created_at` and `canonical_status` remain absent and retain their committed
+`DEFER_MAPPING` statuses. The `Case` module imports no field-evidence type and
+creates no field-evidence assignment. Decision Question 12 remains
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`.
+
+The DQ7-DQ11 source-native fields remain outside `Case` while their
+`RETAIN_SOURCE_NATIVE` decisions remain unchanged. Their physical container
+remains `NOT_DEFINED`. All seven DQ13 fields remain outside `Case` and
+`DEFER_MAPPING`.
+
+### Claim Classification and Boundary
+
+The minimal `Case` is a Design implementation. The expected red result,
+focused result, regression results, full-suite result, direct structure
+verification, and direct immutability verification are Engineering
+observations.
+
+The minimal `Case` implementation conforms to the currently tested Increment
+005 identity-core physical representation under the repository-local Python
+execution boundary.
+
+This step does not establish the final Case schema, `source_status`
+implementation, optional canonical-field correctness, full Calgary adapter
+correctness, source-native evidence-retention correctness, ingestion
+correctness, dataset validity, persistence correctness, portability,
+production readiness, External evidence, a research result, or a research
+conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
