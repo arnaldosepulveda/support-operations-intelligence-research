@@ -3095,6 +3095,428 @@ correctness, persistence correctness, provenance-lineage completeness,
 portability, production readiness, External evidence, a research result, or a
 research conclusion.
 
+## Minimal Python Case Representation Decision
+
+### Decision Question
+
+What is the smallest Python `Case` representation that faithfully realizes
+the already-required canonical identity core without duplicating identity
+components or prematurely resolving optional canonical or source-native
+fields?
+
+### Decision
+
+    CASE_PYTHON_REPRESENTATION:
+        FROZEN_IDENTITY_CORE_DATACLASS
+
+The planned representation is:
+
+```python
+@dataclass(frozen=True)
+class Case:
+    case_id: CaseId
+```
+
+This is a Design choice. The class is not implemented by this documentation
+task. This decision resolves the current `CASE_PYTHON_REPRESENTATION` status;
+earlier `NOT_DEFINED` entries remain historical records of the boundary that
+existed before this decision.
+
+### Identity-Core Correspondence
+
+The logical canonical identity requirements remain:
+
+- `case_id`;
+- `source_system`;
+- `source_case_id`.
+
+Their physical correspondence is:
+
+    Case.case_id
+        -> CaseId
+
+    Case.case_id.source_system
+        -> source_system
+
+    Case.case_id.source_case_id
+        -> source_case_id
+
+The required source identity components therefore remain available through
+the structured `CaseId`. This physical representation does not remove either
+`source_system` or `source_case_id` from the canonical contract.
+
+For Calgary, the already-established identity remains:
+
+    Case.case_id.source_system
+        -> city_of_calgary_311
+
+    Case.case_id.source_case_id
+        -> service_request_id
+
+### Identity-Component Storage
+
+    CASE_IDENTITY_COMPONENT_STORAGE:
+        STRUCTURED_CASE_ID_ONLY
+
+The following shape is rejected:
+
+```python
+@dataclass(frozen=True)
+class Case:
+    case_id: CaseId
+    source_system: str
+    source_case_id: str
+```
+
+It would create two physical representations of the same identity components
+and permit contradictions such as:
+
+    case.case_id.source_system
+        !=
+    case.source_system
+
+or:
+
+    case.case_id.source_case_id
+        !=
+    case.source_case_id
+
+The already-established `CaseId` is the sole physical carrier of those
+components in the minimal `Case` representation.
+
+### Case Immutability
+
+`Case` is planned as a frozen standard-library dataclass. Case identity should
+not be silently reassigned after Python object construction within this
+bounded implementation.
+
+This object-level Design choice does not establish:
+
+- database immutability;
+- distributed immutability;
+- event-sourcing semantics;
+- persistence immutability;
+- source immutability.
+
+### `source_status` Remains Authorized but Is Not Yet Included
+
+Increment 004 Decision Question 5 remains:
+
+    status_description -> source_status:
+        ACCEPT_MAPPING
+
+This decision neither reverses nor weakens that accepted mapping.
+
+    SOURCE_STATUS_CASE_FIELD_INCLUSION:
+        NOT_DEFINED_BY_THIS_DECISION
+
+The canonical contract treats `source_status` as an optional concept rather
+than part of the universal identity core. Before physically adding it to
+`Case`, Increment 005 requires a separate decision about:
+
+- its evidence-wrapper type;
+- its row-level missing or invalid behavior;
+- whether a missing value permits Case emission;
+- whether any justified `UNAVAILABLE` state can apply;
+- how that behavior interacts with current Decision Question 12.
+
+None of these questions is resolved here.
+
+Not including `source_status` in this minimal representation does not mean:
+
+    source_status = UNAVAILABLE
+
+It also does not mean:
+
+    source_status = DEFER_MAPPING
+
+DQ5 already selected `ACCEPT_MAPPING`. The omission is only an
+implementation-scope boundary for the identity-core representation, not a new
+source-contract status.
+
+### `created_at` Remains Outside the Minimal Case
+
+    created_at:
+        not included
+
+The Calgary mapping remains:
+
+    requested_date -> created_at:
+        DEFER_MAPPING
+
+This decision adds neither `created_at: UnavailableEvidence(...)` nor
+`created_at: None` and does not reinterpret `requested_date`.
+
+### `canonical_status` Remains Outside the Minimal Case
+
+    canonical_status:
+        not included
+
+The Calgary mapping remains:
+
+    canonical_status:
+        DEFER_MAPPING
+
+This decision neither normalizes Calgary status values nor invents a
+canonical status vocabulary.
+
+### DQ7-DQ11 Source-Native Evidence Remains Outside the Minimal Case
+
+The minimal `Case` does not include:
+
+- `source`;
+- `service_name`;
+- `agency_responsible`;
+- `updated_date`;
+- `closed_date`.
+
+Their Increment 004 treatments remain `RETAIN_SOURCE_NATIVE`. Omitting them
+from this minimal `Case` does not discard or reverse those retention choices.
+Their physical retention mechanism remains a separate design problem.
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+### DQ13 Remains Outside the Minimal Case
+
+The minimal `Case` does not include:
+
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+All seven mapping statuses remain `DEFER_MAPPING`.
+
+### Field-Evidence Types Remain Available but Unused Here
+
+The already-implemented `ObservedEvidence`, `DerivedEvidence`,
+`SimulatedEvidence`, `UnavailableEvidence`, and `FieldEvidence` types are not
+fields of this minimal `Case` representation.
+
+This does not make those types unnecessary. They remain available for later
+optional canonical fields after field-specific semantics are separately
+justified.
+
+### DQ12 Boundary
+
+Increment 004 remains:
+
+    NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+The minimal `Case` identity core emits no `UnavailableEvidence` and creates no
+new canonical unavailable assignment.
+
+### Alternatives Rejected for This Step
+
+#### A. Mutable Dataclass
+
+    RESULT:
+        REJECT_FOR_CURRENT_CASE_CORE
+
+A mutable dataclass would allow silent Case identity reassignment.
+
+#### B. Dictionary or Free-Form Mapping Case
+
+    RESULT:
+        REJECT_FOR_CURRENT_CASE_CORE
+
+A free-form mapping would weaken the explicit identity invariant and permit
+arbitrary fields.
+
+#### C. Duplicated Identity Components
+
+Shape:
+
+    case_id
+    source_system
+    source_case_id
+
+    RESULT:
+        REJECT_FOR_CURRENT_CASE_CORE
+
+This shape permits contradictory physical identity representations.
+
+#### D. Add `source_status` Now
+
+    RESULT:
+        DEFER_PHYSICAL_INCLUSION
+
+DQ5 authorizes the mapping, but row-level physical and evidence behavior has
+not yet been separately defined. `DEFER_PHYSICAL_INCLUSION` is
+implementation-design wording only; it is not the canonical source-contract
+term `DEFER_MAPPING`.
+
+#### E. Add `created_at` Now
+
+    RESULT:
+        REJECT_FOR_CURRENT_CASE_CORE
+
+The underlying canonical mapping remains `DEFER_MAPPING`.
+
+#### F. Add Source-Native Retained Fields Now
+
+    RESULT:
+        DEFER_TO_SOURCE_NATIVE_CONTAINER_DESIGN
+
+Their retention is authorized, but their physical container has not been
+designed.
+
+### Planned Module Location
+
+The planned implementation location is:
+
+    src/support_operations_intelligence/case.py
+
+Planned imports are limited to:
+
+- `dataclass`;
+- `CaseId`.
+
+No evidenced need currently justifies a general `models.py`, ORM models,
+Pydantic, database entities, an inheritance hierarchy, or abstract base
+classes.
+
+### Planned Implementation Shape
+
+```python
+from dataclasses import dataclass
+
+from support_operations_intelligence.identity import CaseId
+
+
+@dataclass(frozen=True)
+class Case:
+    case_id: CaseId
+```
+
+Nothing else is included. This is a planned implementation shape, not an
+executed result.
+
+### Planned Structural Tests
+
+Future structural tests should verify:
+
+1. `Case` is a dataclass.
+2. `Case` is frozen.
+3. `Case` contains exactly one field: `case_id`.
+4. `case_id` is preserved exactly.
+5. `case_id.source_system` remains accessible.
+6. `case_id.source_case_id` remains accessible.
+7. `Case` has no duplicate `source_system` field.
+8. `Case` has no duplicate `source_case_id` field.
+9. `Case` has no `source_status` field.
+10. `Case` has no `created_at` field.
+11. `Case` has no `canonical_status` field.
+12. Ordinary mutation of `case_id` raises `FrozenInstanceError`.
+
+These are planned tests only. No test is created or executed by this
+documentation task.
+
+The absence checks for `source_status`, `created_at`, and `canonical_status`
+establish only the bounded current physical shape. They do not establish that
+those concepts are permanently forbidden from `Case`. Future increments may
+extend the representation after the corresponding semantics are justified.
+
+### Failure Conditions
+
+A future implementation violates this decision if it:
+
+- duplicates `source_system` outside `CaseId`;
+- duplicates `source_case_id` outside `CaseId`;
+- permits mutable `case_id` reassignment;
+- adds arbitrary dictionary metadata;
+- adds `source_status` before its physical and evidence semantics are decided;
+- treats omission of `source_status` as `UNAVAILABLE`;
+- treats omission of `source_status` as `DEFER_MAPPING`;
+- adds `created_at` while its mapping remains deferred;
+- adds `canonical_status` while its mapping remains deferred;
+- adds Decision Question 13 fields;
+- silently inserts Decision Question 7 through 11 values into `Case`;
+- changes Increment 004 semantics;
+- creates a new canonical unavailable assignment;
+- introduces dependency or framework machinery without need.
+
+### Revision Conditions
+
+This representation should be revisited when separately justified
+requirements establish, for example:
+
+- optional canonical field inclusion;
+- `source_status` row-level evidence semantics;
+- a source-native retained-evidence container;
+- persistence identity requirements;
+- a source-independent identifier distinct from structured source identity;
+- entity resolution across sources;
+- canonical Case relationships;
+- revised Increment 002 Case semantics.
+
+None of these requirements is currently claimed.
+
+### Claim Classification
+
+    CASE_PYTHON_REPRESENTATION:
+        Design choice
+
+    CASE_IDENTITY_COMPONENT_STORAGE:
+        Design choice
+
+    Case immutability:
+        Design choice
+
+    source_status physical inclusion:
+        unresolved implementation design
+
+    Increment 004 DQ5:
+        prior Design choice
+
+    created_at / canonical_status deferrals:
+        prior Design choices
+
+    planned tests:
+        planned tests, not Engineering observations
+
+This documentation step produces no new Engineering observation, External
+evidence, research result, or research conclusion.
+
+### Prior-Decision Preservation
+
+The following decisions remain unchanged:
+
+    CASE_ID_PHYSICAL_REPRESENTATION:
+        STRUCTURED_SOURCE_IDENTITY
+
+    CASE_ID_PYTHON_CONTAINER:
+        FROZEN_DATACLASS
+
+    CALGARY_SOURCE_CASE_ID_ADMISSIBILITY:
+        REQUIRE_PRESENT_NONBLANK_STRING
+
+    IDENTITY_REJECTION_TRANSPORT:
+        EXPLICIT_RESULT_VARIANTS
+
+    IDENTITY_ADMISSION_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+    FIELD_EVIDENCE_PHYSICAL_REPRESENTATION:
+        EXPLICIT_VARIANTS
+
+    DQ12:
+        NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+All Increment 004 decisions remain unchanged. This minimal `Case` decision
+introduces no optional-field mapping, evidence-state assignment, or
+source-native retention container.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
