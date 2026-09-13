@@ -1,10 +1,10 @@
 # Increment 005 - Executable Calgary Case Adapter
 
-Status: Planned
+Status: Complete
 
 Opened: 2026-09-12
 
-Completed: Not completed
+Completed: 2026-09-13
 
 ## Objective
 
@@ -7335,6 +7335,317 @@ implementation, DQ13 implementation, temporal semantic validity, analytical
 metric validity, persistence correctness, dataset-wide validation,
 production readiness, portability, or a research conclusion.
 
+## Implementation Record 013 - Increment 005 Closure
+
+### Objective
+
+Determine whether Increment 005 satisfies its own committed acceptance
+criteria, failure conditions, semantic boundaries, non-goals, and evidence
+requirements, and record closure only if the retained repository evidence
+supports it.
+
+### Closure Review Type
+
+    CLOSURE REVIEW TYPE:
+        read-only repository closure review
+
+    CLOSURE REVIEW HEAD:
+        add085c3d8f912ca0b0fc93535da583aa47b14e6
+
+    CLOSURE REVIEW DATE:
+        2026-09-13
+
+The closure review modified no source file, no test file, and no project
+metadata. It inspected the committed increment document as a whole (not
+only Implementation Records 010-012), the committed source under
+`src/support_operations_intelligence/`, the committed tests under `tests/`,
+and re-executed the full test suite directly rather than citing prior
+results.
+
+### Closure Determination
+
+    CLOSURE DETERMINATION:
+        INCREMENT_005_READY_FOR_CLOSURE_RECORD
+
+### Acceptance-Criteria Review
+
+    ACCEPTANCE CRITERIA:
+        18 found
+        18 SATISFIED
+        0 DEFERRED
+        0 UNSATISFIED
+        0 UNSUPPORTED
+
+Each of the 18 committed acceptance criteria was checked directly against
+committed source and committed tests, not inferred from Implementation
+Record prose alone. All 18 were found `SATISFIED` with specific
+implementation symbols and test evidence. None required weakening to
+`DEFERRED`, `UNSATISFIED`, or `UNSUPPORTED`.
+
+### Failure-Condition Review
+
+    FAILURE CONDITIONS:
+        zero observed
+
+Every committed Increment 005 failure condition was checked individually
+against the committed implementation. None was observed. No failure
+condition was weakened or reinterpreted to reach this result.
+
+### Fresh Full-Suite Result From Closure Review
+
+The closure review independently re-executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 125 tests in 0.003s
+OK
+```
+
+0 failures, 0 errors. This is a fresh Engineering observation obtained
+during the closure review itself, not a repeated citation of a prior
+Implementation Record's result.
+
+### Git Diff Check From Closure Review
+
+    GIT DIFF CHECK:
+        passed
+        no output
+
+### Core Executable Chain Verified
+
+The closure review confirmed committed evidence supports:
+
+```text
+parsed Mapping
+    -> identity admission
+    -> RejectedIdentity
+       OR
+    -> CalgaryMappedCase
+    -> CalgarySourceNativeEvidence
+    -> CalgaryAdaptedCase
+    -> CalgaryAdapterResult
+```
+
+The review separately verified, with distinct implementation symbols and
+distinct tests for each:
+
+1. identity rejection;
+2. source-status mapping;
+3. Case construction;
+4. DQ7-DQ11 lexical retention;
+5. structural binding;
+6. top-level accepted composition;
+7. rejection short-circuit;
+8. unexpected software-failure propagation.
+
+This chain establishes conformance for exercised in-memory parsed-record
+inputs only. It does not establish dataset-wide ingestion behavior.
+
+### Increment 004 Accepted-Record Realization Boundary
+
+    INCREMENT_004_ACCEPTED_RECORD_PHYSICAL_REALIZATION:
+        IMPLEMENTED_FOR_CURRENT_TESTED_BOUNDARY
+
+For accepted records, the current executable boundary physically
+represents:
+
+    DQ2:
+        source_system
+
+    DQ3:
+        source_case_id
+
+    DQ5:
+        source_status
+
+    DQ7-DQ11:
+        retained source-native evidence
+
+Preserved deferrals:
+
+    DQ4:
+        created_at
+        DEFER_MAPPING
+
+    DQ6:
+        canonical_status
+        DEFER_MAPPING
+
+    DQ13:
+        DEFER_MAPPING
+
+    DQ12:
+        contract-level NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS remains
+        preserved; justified row-level UnavailableEvidence remains
+        possible only on concepts that are actually mapped.
+
+This does NOT reopen or redefine Increment 004. Increment 004 was already
+`Complete` before Increment 005 began.
+
+This does NOT claim dataset-wide realization, persistence realization,
+production realization, or resolution of deferred concepts.
+
+### Rejected-Record Boundary
+
+    REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    REJECTED_SOURCE_RECORD_RETENTION:
+        NOT_DEFINED
+
+The closure review determined these remain `NOT_DEFINED` and that this is
+a permitted boundary under Increment 005's committed scope and acceptance
+criteria, not a closure failure: no acceptance criterion requires rejected
+raw-value or rejected source-record retention, and persistence is an
+explicit Non-Goal. Rejected source evidence is not durably retained by
+this increment.
+
+### Deferred Field Boundaries
+
+    created_at:
+        DEFER_MAPPING
+
+    canonical_status:
+        DEFER_MAPPING
+
+    DQ13:
+        DEFER_MAPPING
+
+Their absence is part of the closed Increment 005 boundary and must not
+later be interpreted as accidental omission. Any future mapping of
+`created_at`, `canonical_status`, or a DQ13 field requires a separately
+justified increment or contract revision; it is not authorized by this
+closure.
+
+### Semantic Non-Strengthening Closure Verification
+
+The closure review found no implementation that strengthened:
+
+- `source` into `source_system`;
+- `service_name` into workflow, queue, root cause, or resolution taxonomy;
+- `agency_responsible` into assignment, ownership, resolver group, or
+  worker;
+- `updated_date` into canonical `updated_at`, active-work, or
+  transition time;
+- `closed_date` into resolution, final closure, terminality, or
+  successful outcome.
+
+Nonblank mapped source-native strings remain lexical evidence; no
+timestamp parsing was introduced anywhere in the committed source.
+
+### Evidence-State Policy Closure Verification
+
+The closure review confirmed the DQ7-DQ11 row-level behavior remains:
+
+    missing / None / empty / whitespace-only
+        -> VALUE_ABSENT
+
+    non-string
+        -> EVIDENCE_INDETERMINATE
+
+    valid nonblank string
+        -> ObservedEvidence(exact original string)
+
+The closure review found no use of `DerivedEvidence`, `SimulatedEvidence`,
+or `CONCEPT_ABSENT` for these mappings.
+
+### Expected Limitations Retained at Closure
+
+The following remain `EXPECTED BOUNDARIES`, not closure blockers:
+
+- in-memory parsed `Mapping` boundary only;
+- no CSV parsing or source-file access;
+- no dataset-wide adapter execution;
+- no persistence;
+- no serialization contract;
+- no rejected raw-record retention;
+- `created_at` remains deferred;
+- `canonical_status` remains deferred;
+- DQ13 remains deferred;
+- Calgary temporal precision, timezone, and lifecycle semantics remain
+  unresolved;
+- no portability evidence;
+- no production-readiness evidence.
+
+### Criterion 15 Residual Limitation
+
+Acceptance criterion 15 was judged `SATISFIED` based on:
+
+- deterministic exact `CaseId` construction;
+- equality tests for identical identity components;
+- inequality tests for differing `source_system`/`source_case_id`;
+- inspection of the deterministic consuming path.
+
+However, there is no separate end-to-end test that calls
+`adapt_calgary_record` twice with the same record and compares the
+resulting `case_id` values.
+
+    CRITERION 15 RESIDUAL LIMITATION:
+        NON-BLOCKING TEST-COVERAGE LIMITATION
+
+This limitation is retained as-is. Criterion 15 remains `SATISFIED`; this
+is not a reason to reclassify it as `UNSATISFIED` or `UNSUPPORTED`, and no
+new test was added by this closure record.
+
+### Claim Classification
+
+    Design choices:
+        representations, mappings, evidence-state rules, result transports,
+        composition order, semantic boundaries
+
+    Engineering observations:
+        red-test results
+        green-test results
+        direct runtime checks
+        object-preservation checks
+        fresh closure-review 125-test result
+        git diff --check result
+
+    External evidence:
+        none added by the Increment 005 implementation or closure review
+
+    Internal evaluation result:
+        none claimed from ordinary unit-test execution
+
+    Research conclusion:
+        none
+
+### Allowed Closure Claim
+
+> Increment 005 establishes and tests a minimal in-memory Calgary adapter
+> boundary for already-parsed records. For exercised inputs, the adapter
+> admits or explicitly rejects source identity, constructs the currently
+> implemented canonical Case slice, retains DQ7-DQ11 as source-native
+> evidence without semantic strengthening, structurally binds accepted
+> evidence, and preserves explicit deferrals and failure boundaries.
+
+This closure does not claim:
+
+- Calgary ingestion is complete;
+- the full Calgary source record is modeled;
+- dataset-wide adapter correctness is established;
+- persistence is implemented;
+- temporal semantics are validated;
+- analytics are validated;
+- the Case abstraction is universally portable;
+- production readiness is established;
+- Increment 005 is external validation;
+- Increment 005 is a research conclusion.
+
+### Historical-Record Preservation
+
+This closure record is appended evidence. Implementation Records 001-012,
+every retained red-test failure, every planned-test description, every
+earlier unresolved decision, historical status evidence, negative results,
+and prior claim classifications remain unmodified and unrewritten. No
+planned material was retroactively rewritten as if it had been known
+before execution.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
@@ -7350,6 +7661,14 @@ Likely later work remains outside Increment 005, including:
 - a ServiceNow adapter;
 - cross-source portability testing.
 
+Increment 005 is `Complete` as of the closure review recorded in
+Implementation Record 013. None of the items above is authorized or
+started by this closure. The next work item must be selected and justified
+as a separate increment; this closure does not pre-select, pre-number, or
+begin CSV ingestion, PostgreSQL, analytics, duration calculations,
+`created_at` mapping, `canonical_status` mapping, DQ13 mapping, a
+ServiceNow adapter, or AI/LLM/RAG/agent behavior.
+
 ## Planned Artifact
 
 The planned implementation artifact is the smallest executable and tested
@@ -7362,10 +7681,23 @@ planning record.
 
 ## Current Status
 
-Increment 005 remains:
+Increment 005 is now:
 
-    Status: Planned
-    Completed: Not completed
+    Status: Complete
+    Completed: 2026-09-13
 
-No observed implementation result exists. No test is claimed to have run, and
-no dependency is claimed to have been installed.
+This closure follows the read-only closure review recorded in
+Implementation Record 013. That review re-executed the full test suite
+directly (`Ran 125 tests in 0.003s`, `OK`, 0 failures, 0 errors), confirmed
+`git diff --check` passed, checked all 18 committed acceptance criteria
+against committed source and tests (18 `SATISFIED`, 0 `DEFERRED`, 0
+`UNSATISFIED`, 0 `UNSUPPORTED`), and found zero committed failure
+conditions observed.
+
+This status reflects only that Increment 005's own committed acceptance
+criteria, failure conditions, and claim boundaries are satisfied by the
+retained repository evidence for the exercised in-memory parsed-record
+inputs. It does not claim dataset-wide validation, persistence, CSV
+ingestion, temporal semantic validity, portability, or production
+readiness. See Implementation Record 013 for the complete closure
+evidence and claim boundary.
