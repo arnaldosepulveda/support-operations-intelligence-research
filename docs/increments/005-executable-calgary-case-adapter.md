@@ -6978,6 +6978,363 @@ rejected-record retention, temporal semantic validity, persistence
 correctness, dataset-wide validation, portability, production readiness, or
 a research conclusion.
 
+## Implementation Record 012 - Calgary Top-Level Record Adapter
+
+### Objective
+
+Implement the committed top-level composition from a parsed Calgary record
+to either a structurally bound accepted result or the expected identity
+rejection.
+
+### Files
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_record_adapter.py`.
+
+### Implemented
+
+    IMPLEMENTED:
+        CalgaryAdapterResult
+        adapt_calgary_record
+
+    RESULT TRANSPORT:
+        CalgaryAdaptedCase | RejectedIdentity
+
+    SUCCESS:
+        CalgaryAdaptedCase
+
+    EXPECTED DOMAIN REJECTION:
+        RejectedIdentity
+
+    COMPOSITION:
+        map_calgary_case
+        -> rejection short-circuit
+        -> map_calgary_source_native_evidence
+        -> CalgaryAdaptedCase
+
+    REJECTION SHORT-CIRCUIT:
+        yes
+
+    REJECTED OBJECT PRESERVATION:
+        existing RejectedIdentity returned directly
+
+    ACCEPTED MAPPED CASE PRESERVATION:
+        mapped CalgaryMappedCase reused directly
+
+    SOURCE-NATIVE PRESERVATION:
+        mapped CalgarySourceNativeEvidence reused directly
+
+    UNAVAILABLE SOURCE-NATIVE EVIDENCE:
+        remains successful accepted result
+
+    UNEXPECTED SOFTWARE FAILURE:
+        not caught or reclassified
+
+    INPUT MUTATION:
+        forbidden
+        none observed
+
+    CREATED_AT:
+        not included
+        DEFER_MAPPING
+
+    CANONICAL_STATUS:
+        not included
+        DEFER_MAPPING
+
+    DQ13:
+        not included
+        DEFER_MAPPING
+
+    REJECTED RAW VALUE RETENTION:
+        NOT_DEFINED
+
+    REJECTED SOURCE RECORD RETENTION:
+        NOT_DEFINED
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The implementation adds only the committed result alias and composition
+function. It does not add a broad exception handler, a generic
+`Result`/`Either` abstraction, another accepted or rejected wrapper, raw
+record capture, rejected-record storage, logging, or persistence. The
+successful path reuses the `CalgaryMappedCase` returned by `map_calgary_case`
+and the `CalgarySourceNativeEvidence` returned by
+`map_calgary_source_native_evidence` directly, without reconstruction.
+
+### Expected Pre-Implementation Failure
+
+After the twelve focused top-level adapter tests were created and before
+`CalgaryAdapterResult` and `adapt_calgary_record` were added, this command
+was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_record_adapter.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported:
+
+```text
+ImportError: cannot import name 'CalgaryAdapterResult' from 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.001s
+OK
+```
+
+The focused tests verified:
+
+1. a valid record returns `CalgaryAdaptedCase`;
+2. the output is structurally bound through `result.mapped_case`, a
+   `CalgaryMappedCase`, with the exact lexical `source_case_id` preserved;
+3. all five DQ7-DQ11 evidence values are present through
+   `result.source_native` with exact lexical values;
+4. invalid identity (missing `service_request_id`) returns
+   `RejectedIdentity` with `MISSING_SOURCE_CASE_ID`, and not
+   `CalgaryAdaptedCase`;
+5. identity rejection short-circuits source-native mapping
+   (`map_calgary_source_native_evidence` not called);
+6. a specific `RejectedIdentity` object returned by a patched
+   `map_calgary_case` is reused exactly, and the source-native mapper is
+   not called;
+7. missing DQ7-DQ11 fields produce `VALUE_ABSENT` source-native evidence
+   without rejecting the accepted Case;
+8. a non-string DQ7-DQ11 field produces `EVIDENCE_INDETERMINATE`
+   source-native evidence without rejecting the accepted Case;
+9. raw `source` does not alter canonical `source_system`
+   (`city_of_calgary_311`), while `result.source_native.source.value`
+   retains the raw supplied string;
+10. the input `Mapping` is not mutated;
+11. an unexpected exception raised by a patched
+    `map_calgary_source_native_evidence` propagates as `RuntimeError` and
+    is not converted;
+12. DQ13 values supplied in the record do not enter the adapted output;
+    `CalgaryAdaptedCase` and `CalgarySourceNativeEvidence` retain their
+    exact committed field sets.
+
+This result is an Engineering observation for the exercised in-memory
+parsed records under the repository-local Python execution boundary.
+
+### Component Regression Results
+
+Each existing focused component suite was executed independently:
+
+```text
+test_calgary_adapted_case.py: 12 tests, OK
+test_calgary_source_native_evidence.py: 12 tests, OK
+test_calgary_case_mapping.py: 12 tests, OK
+test_calgary_mapped_case.py: 12 tests, OK
+test_calgary_source_status.py: 12 tests, OK
+```
+
+Every suite completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 125 tests in 0.003s
+OK
+```
+
+The suite completed with zero failures and zero errors, growing from the
+prior 113 tests by exactly the 12 new focused tests. This result is an
+Engineering observation for the current repository state and execution
+environment.
+
+### Direct Success-Path Verification
+
+Direct execution against a padded valid record reported:
+
+```text
+type = CalgaryAdaptedCase
+source_system = 'city_of_calgary_311'
+source_case_id = ' 001AbC-09 '
+source_status = ' Closed '
+source_native_source = ' Mobile App '
+agency_responsible = ' Roads '
+```
+
+This verifies the exercised success representation, fixed source-system
+namespace, lexical source-identity preservation, and exact source-native
+value preservation.
+
+### Direct Identity-Rejection Verification
+
+Direct execution reported, in decision-precedence order:
+
+```text
+RejectedIdentity MISSING_SOURCE_CASE_ID
+RejectedIdentity NULL_SOURCE_CASE_ID
+RejectedIdentity NON_STRING_SOURCE_CASE_ID
+RejectedIdentity EMPTY_SOURCE_CASE_ID
+RejectedIdentity WHITESPACE_ONLY_SOURCE_CASE_ID
+```
+
+No additional rejection reason or wrapper was observed.
+
+### Direct Object-Preservation and Short-Circuit Verification
+
+Using standard-library mocks, direct execution reported:
+
+```text
+rejection_reused = True
+source_native_mapper_called = False
+mapped_case_reused = True
+source_native_reused = True
+```
+
+The exercised composition returned the exact `RejectedIdentity` supplied by
+a patched `map_calgary_case` without calling the source-native mapper, and
+reused the exact `CalgaryMappedCase` and `CalgarySourceNativeEvidence`
+objects supplied by patched `map_calgary_case` and
+`map_calgary_source_native_evidence`. These are in-memory Python
+object-preservation results and do not establish persistence identity.
+
+### Unexpected Software-Failure Verification
+
+With `map_calgary_source_native_evidence` configured to raise
+`RuntimeError("synthetic unexpected failure")`, direct execution reported:
+
+```text
+propagated_exception = RuntimeError: synthetic unexpected failure
+```
+
+The unexpected exception propagated and was not converted to
+`RejectedIdentity`, `UnavailableEvidence`, `None`, or another result. This
+is an Engineering observation of the designed software-failure boundary.
+
+### Input-Immutability Verification
+
+Direct execution reported:
+
+```text
+input_unchanged = True
+```
+
+No input mutation was observed for the exercised valid record.
+
+### Result-Alias Inspection
+
+Direct type-argument inspection reported:
+
+```text
+args = ['CalgaryAdaptedCase', 'RejectedIdentity']
+```
+
+The alias contains exactly the committed success and expected-rejection
+representations. This is a static/documented transport contract; it does
+not enforce return types at runtime.
+
+### Preserved Boundaries
+
+Generic `Case`, `CalgaryMappedCase`, `CalgarySourceNativeEvidence`,
+`CalgaryAdaptedCase`, `CalgaryCaseMappingResult`, `map_calgary_case`,
+`map_calgary_source_native_evidence`, `map_calgary_source_status`,
+`admit_calgary_source_identity`, `CaseId`, and evidence types remain
+unchanged (confirmed by `git diff -- case.py identity.py evidence.py`
+producing no output; the `calgary_adapter.py` diff is additive only, adding
+`CalgaryAdapterResult` and `adapt_calgary_record` after the existing code).
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`, and DQ12 remains unchanged.
+`created_at` and `canonical_status` remain `DEFER_MAPPING` and absent from
+`adapt_calgary_record`'s output. DQ13 fields remain `DEFER_MAPPING` and
+absent.
+
+`REJECTED_RAW_VALUE_RETENTION` and `REJECTED_SOURCE_RECORD_RETENTION`
+remain `NOT_DEFINED`. `adapt_calgary_record` adds no raw-record capture,
+rejected-record storage, logging, or persistence.
+
+### Increment 004 Accepted-Record Realization Observation
+
+    INCREMENT_004_ACCEPTED_RECORD_PHYSICAL_REALIZATION:
+        IMPLEMENTED_FOR_CURRENT_TESTED_BOUNDARY
+
+For accepted records, the executable adapter now physically represents:
+
+    DQ2:
+        source_system
+
+    DQ3:
+        source_case_id
+
+    DQ5:
+        source_status
+
+    DQ7-DQ11:
+        retained source-native evidence
+
+while preserving the explicit deferrals:
+
+    DQ4:
+        created_at
+        DEFER_MAPPING
+
+    DQ6:
+        canonical_status
+        DEFER_MAPPING
+
+    DQ13:
+        DEFER_MAPPING
+
+This is an Engineering observation about the implemented accepted-record
+boundary only. It is not proof that Increment 004 itself should close, not
+dataset-wide verification, not persistence evidence, not production
+readiness, and not proof that deferred concepts were resolved. Whether
+Increment 005 can close must be evaluated separately against its full
+acceptance criteria after this implementation is reviewed and committed.
+
+### Claim Classification and Boundary
+
+`CalgaryAdapterResult` and `adapt_calgary_record` implement prior Design
+choices. The expected red result, focused and regression results,
+full-suite result, direct success, rejection, object-preservation and
+short-circuit, exception-propagation, input-immutability, and alias checks
+are Engineering observations.
+
+Allowed interpretation:
+
+> `adapt_calgary_record` conforms to the tested Increment 005 top-level
+> composition semantics for exercised in-memory parsed-record inputs under
+> the repository-local Python execution boundary. For exercised accepted
+> inputs, the implementation physically binds the currently implemented
+> canonical slice with retained DQ7-DQ11 source-native evidence.
+
+This implementation does not establish complete raw-record representation,
+rejected-record retention, `created_at` implementation, `canonical_status`
+implementation, DQ13 implementation, temporal semantic validity, analytical
+metric validity, persistence correctness, dataset-wide validation,
+production readiness, portability, or a research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:

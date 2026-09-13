@@ -119,3 +119,22 @@ def map_calgary_case(
         case=case,
         source_status=source_status,
     )
+
+
+CalgaryAdapterResult = CalgaryAdaptedCase | RejectedIdentity
+
+
+def adapt_calgary_record(
+    record: Mapping[str, object],
+) -> CalgaryAdapterResult:
+    mapped_result = map_calgary_case(record)
+
+    if isinstance(mapped_result, RejectedIdentity):
+        return mapped_result
+
+    source_native = map_calgary_source_native_evidence(record)
+
+    return CalgaryAdaptedCase(
+        mapped_case=mapped_result,
+        source_native=source_native,
+    )
