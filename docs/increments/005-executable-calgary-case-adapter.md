@@ -3768,6 +3768,340 @@ correctness, dataset validity, persistence correctness, portability,
 production readiness, External evidence, a research result, or a research
 conclusion.
 
+## Calgary Source Status Evidence Mapping Decision
+
+### Decision Question
+
+Given one already-parsed Calgary record, how should `status_description` be
+represented as row-level canonical `source_status` evidence without
+normalizing the native status or rejecting an otherwise identity-valid Case
+merely because optional `source_status` evidence is unusable?
+
+### Mapping API Decision
+
+    SOURCE_STATUS_EVIDENCE_API:
+        CALGARY_RECORD_MAPPING_FUNCTION
+
+Planned callable:
+
+```python
+map_calgary_source_status(
+    record: Mapping[str, object],
+) -> ObservedEvidence[str] | UnavailableEvidence
+```
+
+This is a Design choice. No mapping function is implemented by this
+documentation task.
+
+### Source Field
+
+    CALGARY_SOURCE_STATUS_FIELD:
+        status_description
+
+The mapper reads only `status_description` when establishing
+`source_status`. It must not derive `source_status` from:
+
+- `canonical_status`;
+- `service_name`;
+- `agency_responsible`;
+- `source`;
+- timestamps;
+- any other field.
+
+### Allowed Result Variants
+
+Increment 004 Decision Question 5 authorizes a direct source-native mapping:
+
+    status_description -> source_status:
+        ACCEPT_MAPPING
+
+The mapper may therefore produce only:
+
+- `ObservedEvidence[str]`;
+- `UnavailableEvidence`.
+
+It must not emit `DerivedEvidence` or `SimulatedEvidence`. No transformation
+or simulation has been authorized.
+
+### Row-Level Decision Order
+
+The mapper applies this deterministic precedence:
+
+1. **Field absent.** If `status_description` is absent, return:
+
+   ```python
+   UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+   ```
+
+2. **Null.** If `status_description is None`, return:
+
+   ```python
+   UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+   ```
+
+3. **Non-string.** If `status_description` is not a `str`, return:
+
+   ```python
+   UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)
+   ```
+
+   A value exists at the parsed-record boundary, but it cannot be used as the
+   authorized textual native status without coercion.
+
+4. **Empty string.** If `status_description == ""`, return:
+
+   ```python
+   UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+   ```
+
+5. **Whitespace-only string.** If `status_description` contains only
+   whitespace, return:
+
+   ```python
+   UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+   ```
+
+6. **Otherwise.** Return `ObservedEvidence(value)` with the exact lexical
+   source string preserved.
+
+Missing and present-with-`None` are separate decision branches even though
+both use the canonical `VALUE_ABSENT` reason.
+
+### Native Lexical Preservation
+
+Every nonblank string is accepted as source-native observed evidence. Values
+such as:
+
+- `"Closed"`;
+- `"Open"`;
+- `"Duplicate (Closed)"`;
+- `"Some Future Native Status"`;
+
+are preserved exactly when supplied. The mapper does not:
+
+- lowercase;
+- uppercase;
+- casefold;
+- strip;
+- map to `canonical_status`;
+- validate against a closed vocabulary;
+- infer terminality;
+- infer resolution;
+- infer closure finality.
+
+`source_status` records what the source says. It does not decide what that
+status means canonically.
+
+The padded value `" Closed "` contains non-whitespace characters and is
+represented as:
+
+```python
+ObservedEvidence(" Closed ")
+```
+
+not as `ObservedEvidence("Closed")`. The mapper may inspect whitespace to
+identify whitespace-only values but must not transform accepted values.
+
+### No Coercion
+
+A non-string value such as `123` must not become
+`ObservedEvidence("123")`. It produces:
+
+```python
+UnavailableEvidence(
+    UnavailableReason.EVIDENCE_INDETERMINATE,
+)
+```
+
+No `str(value)` coercion is authorized.
+
+### Optional Field and Case-Emission Boundary
+
+    SOURCE_STATUS_FAILURE_CASE_EFFECT:
+        DOES_NOT_BY_ITSELF_REJECT_IDENTITY_VALID_CASE
+
+`source_status` is not part of the mandatory Case identity core. An unusable
+`source_status` value does not invalidate an already-admitted Case identity.
+This decision does not implement the full Case adapter or Case emission.
+
+### DQ12 Interpretation
+
+The Increment 004 source-contract decision remains:
+
+    DQ12:
+        NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+This means the source contract did not statically classify a Calgary
+canonical field as always `UNAVAILABLE`.
+
+The row-level mapper may nevertheless produce `UnavailableEvidence` when an
+individual parsed record lacks usable evidence and one of the canonical
+reasons actually applies. The two levels remain:
+
+    contract-level:
+        source_status mapping remains ACCEPT_MAPPING
+
+    row-level:
+        a particular Case may later carry VALUE_ABSENT or
+        EVIDENCE_INDETERMINATE evidence when justified
+
+This does not convert any `DEFER_MAPPING` decision into `UNAVAILABLE`.
+
+### Unavailable Reasons Used and Not Used
+
+This mapper uses only:
+
+- `VALUE_ABSENT` for an absent, `None`, empty, or whitespace-only value;
+- `EVIDENCE_INDETERMINATE` for a present non-string value that cannot be used
+  as textual native status without coercion.
+
+It does not currently use `CONCEPT_ABSENT`, because the
+`status_description`/`source_status` source concept is established.
+
+It does not use `TRANSFORMATION_NOT_APPLIED` or
+`TRANSFORMATION_UNRESOLVED`, because DQ5 is a direct mapping rather than a
+transformation.
+
+### Relationship to Increment 003
+
+Increment 003 recorded the Engineering observation that the retained Calgary
+artifact had:
+
+    blank status_description values: 0
+    whitespace-only status_description values: 0
+
+That observation means the retained artifact did not exercise the blank-value
+branches during the Increment 003 inspection. It does not mean:
+
+- blank values can never occur;
+- future snapshots are guaranteed identical;
+- defensive row-level semantics are unnecessary.
+
+This design task does not claim that any newly planned mapping branch was
+observed in the dataset and performs no new dataset inspection.
+
+### Rejected Raw-Value Retention Boundary
+
+For a non-string or otherwise unusable value, `UnavailableEvidence` retains
+only the canonical unavailable reason.
+
+    SOURCE_STATUS_REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+This decision does not resolve retention of the rejected raw status value and
+adds no `raw_value`, record, payload, or free-text error field.
+
+### Case Physical Inclusion Remains Unimplemented
+
+    SOURCE_STATUS_CASE_FIELD_INCLUSION:
+        STILL_NOT_IMPLEMENTED_BY_THIS_DECISION
+
+The mapping semantics are designed independently before physical inclusion.
+The current `Case` remains:
+
+```python
+@dataclass(frozen=True)
+class Case:
+    case_id: CaseId
+```
+
+A later step may decide how `source_status` evidence enters `Case` after the
+mapping semantics are stable. This decision does not modify the current Case
+shape.
+
+### Planned Test Matrix
+
+Future tests should verify:
+
+1. Missing `status_description` returns
+   `UnavailableEvidence(VALUE_ABSENT)`.
+2. `None` returns `UnavailableEvidence(VALUE_ABSENT)`.
+3. An integer or other non-string returns
+   `UnavailableEvidence(EVIDENCE_INDETERMINATE)`.
+4. An empty string returns `UnavailableEvidence(VALUE_ABSENT)`.
+5. A spaces-only string returns `UnavailableEvidence(VALUE_ABSENT)`.
+6. A tab/newline-only string returns `UnavailableEvidence(VALUE_ABSENT)`.
+7. `"Closed"` returns `ObservedEvidence("Closed")`.
+8. `"Duplicate (Closed)"` is preserved exactly.
+9. `" Closed "` is preserved exactly.
+10. An unknown nonblank native status returns `ObservedEvidence` with the
+    exact supplied value.
+11. The mapper does not mutate the input mapping.
+12. The mapper never emits `DerivedEvidence` or `SimulatedEvidence`.
+
+These are planned tests only. No test is created or executed by this
+documentation task.
+
+### Failure Conditions
+
+A future implementation violates this decision if it:
+
+- rejects the whole identity-valid Case solely because `source_status` is
+  unusable;
+- coerces a non-string status to `str`;
+- strips or normalizes a valid status string;
+- maps `source_status` into `canonical_status`;
+- validates against an invented exhaustive status vocabulary;
+- emits `DerivedEvidence`;
+- emits `SimulatedEvidence`;
+- uses `CONCEPT_ABSENT` without new justification;
+- uses a transformation-related unavailable reason for this direct mapping;
+- mutates the input mapping;
+- silently retains rejected raw values;
+- changes Increment 004 DQ5;
+- converts any `DEFER_MAPPING` field into `UNAVAILABLE`.
+
+### Revision Conditions
+
+This mapping should be revisited if later evidence establishes:
+
+- authoritative Calgary status-vocabulary constraints;
+- an upstream parsing guarantee for a stronger status type;
+- authoritative source semantics for blanks distinct from absence;
+- legitimate status semantics for non-string source values;
+- revised canonical `source_status` semantics;
+- a requirement to retain rejected raw values;
+- changed Increment 002 or Increment 004 semantics.
+
+None of these conditions is currently claimed.
+
+### Claim Classification
+
+    SOURCE_STATUS_EVIDENCE_API:
+        Design choice
+
+    row-level decision precedence:
+        Design choice
+
+    ObservedEvidence direct mapping:
+        implementation plan for prior DQ5 Design choice
+
+    row-level unavailable handling:
+        Design choice using prior canonical unavailable vocabulary
+
+    Increment 003 zero-blank result:
+        prior Engineering observation
+
+    planned tests:
+        planned tests, not Engineering observations
+
+This documentation step produces no new External evidence, research result,
+or research conclusion.
+
+### Prior-Boundary Preservation
+
+The current `Case` remains `case_id` only. Increment 004 DQ5 remains
+`ACCEPT_MAPPING`. `created_at` and `canonical_status` remain
+`DEFER_MAPPING`. DQ7-DQ11 remain `RETAIN_SOURCE_NATIVE`, and DQ13 remains
+`DEFER_MAPPING`. The Decision Question 12 source-contract decision remains
+unchanged.
+
+    FIELD_EVIDENCE_PHYSICAL_REPRESENTATION:
+        EXPLICIT_VARIANTS
+
+No Calgary field other than `source_status` receives mapping semantics from
+this decision, and `source_status` is not yet physically included in `Case`.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
