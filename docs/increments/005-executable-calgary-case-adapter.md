@@ -4316,6 +4316,469 @@ correctness, ingestion correctness, real-dataset coverage of defensive
 branches, production readiness, portability, External evidence, or a research
 conclusion.
 
+## Calgary Mapped Case Physical Carriage Decision
+
+### Decision Question
+
+How should the bounded Calgary adapter physically carry its justified
+`source_status` evidence without making `source_status` a universal required
+field of the generic canonical `Case`?
+
+### Selected Representation
+
+    CALGARY_MAPPED_CASE_REPRESENTATION:
+        FROZEN_COMPANION_DATACLASS
+
+The planned representation is:
+
+```python
+@dataclass(frozen=True)
+class CalgaryMappedCase:
+    case: Case
+    source_status: ObservedEvidence[str] | UnavailableEvidence
+```
+
+This is a Design choice. `CalgaryMappedCase` is not implemented by this
+documentation-only step.
+
+### Generic Case Remains Unchanged
+
+    GENERIC_CASE_SOURCE_STATUS_INCLUSION:
+        NOT_SELECTED
+
+The current generic representation remains:
+
+```python
+@dataclass(frozen=True)
+class Case:
+    case_id: CaseId
+```
+
+Increment 002 establishes only the identity core as universally required.
+Adding `source_status` as a required generic `Case` constructor field would
+physically require an optional canonical concept for every Case
+representation. That would strengthen the current canonical contract beyond
+what has been justified.
+
+### Conceptual and Physical Distinction
+
+Conceptually, `source_status` remains an optional canonical Case concept.
+Physically, in this bounded Calgary implementation, its evidence is planned
+to be carried alongside the identity-core `Case` in `CalgaryMappedCase`.
+
+This physical split does not redefine `source_status` as:
+
+- non-canonical;
+- source-native-only auxiliary metadata;
+- unrelated to Case;
+- globally external to the canonical model.
+
+It is an implementation-representation decision that preserves the weaker
+universal `Case` contract.
+
+### Why a Calgary-Specific Companion
+
+Current evidence justifies:
+
+- Calgary Case identity;
+- the Calgary `source_status` mapping;
+- row-level `source_status` evidence behavior.
+
+It does not yet justify:
+
+- a generic optional-field framework;
+- making `source_status` physically mandatory for every source;
+- a universal `CaseEvidence` abstraction;
+- arbitrary canonical-field dictionaries;
+- a generic extension mechanism.
+
+The smallest currently justified representation is therefore the
+source-specific companion needed by the bounded Calgary adapter.
+
+### Exact Fields
+
+`CalgaryMappedCase` has exactly:
+
+1. `case`;
+2. `source_status`.
+
+Their exact planned types are:
+
+    case:
+        Case
+
+    source_status:
+        ObservedEvidence[str] | UnavailableEvidence
+
+The representation does not include:
+
+- `created_at`;
+- `canonical_status`;
+- `source`;
+- `service_name`;
+- `agency_responsible`;
+- `updated_date`;
+- `closed_date`;
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`;
+- `raw_record`;
+- metadata;
+- errors;
+- warnings.
+
+### Narrow Source-Status Physical Type
+
+    CALGARY_SOURCE_STATUS_PHYSICAL_TYPE:
+        OBSERVED_OR_UNAVAILABLE_ONLY
+
+The physical field uses exactly:
+
+```python
+ObservedEvidence[str] | UnavailableEvidence
+```
+
+It does not use `FieldEvidence[str]`. The committed Calgary direct mapping
+permits only directly observed evidence or justified unavailable evidence.
+The broader `FieldEvidence` union would physically permit
+`DerivedEvidence` and `SimulatedEvidence`, even though this mapping explicitly
+prohibits both. This narrow type is a bounded implementation Design choice.
+
+### Object Preservation
+
+The companion should retain its supplied objects directly. Given:
+
+```python
+mapped = CalgaryMappedCase(
+    case=case,
+    source_status=status_evidence,
+)
+```
+
+the planned object-container behavior is:
+
+```python
+mapped.case is case
+mapped.source_status is status_evidence
+```
+
+No reconstruction, normalization, or copying is required by this container.
+This is object-container behavior only. Python object identity does not imply
+persistence identity or semantic equivalence.
+
+### Immutability Boundary
+
+`CalgaryMappedCase` is planned as a frozen standard-library dataclass. This
+establishes only Python object-level resistance to field reassignment. It does
+not establish:
+
+- immutable source records;
+- persistence immutability;
+- database immutability;
+- distributed immutability;
+- event-sourcing semantics.
+
+### Row-Level Unavailable Evidence
+
+The companion may contain:
+
+```python
+UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+```
+
+or:
+
+```python
+UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)
+```
+
+when produced by the committed row-level mapper. This does not change:
+
+    DQ5:
+        ACCEPT_MAPPING
+
+or the source-contract-level decision:
+
+    DQ12:
+        NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS
+
+### No `None` Evidence State
+
+The Calgary-specific mapped result does not use:
+
+```python
+source_status = None
+```
+
+For an already-parsed record, the committed mapper deterministically produces
+either `ObservedEvidence` or `UnavailableEvidence`. Adding `None` would create
+an unclassified third row-level evidence state.
+
+### No `CONCEPT_ABSENT` Default
+
+The companion does not default to:
+
+```python
+source_status = UnavailableEvidence(UnavailableReason.CONCEPT_ABSENT)
+```
+
+Calgary DQ5 establishes `source_status` as an applicable source concept.
+`CONCEPT_ABSENT` is not part of the committed Calgary mapping behavior.
+
+### Source-Native Retained Fields Remain Separate
+
+DQ7-DQ11 remain `RETAIN_SOURCE_NATIVE`, but their fields do not enter
+`CalgaryMappedCase` in this decision.
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+The future physical container for `source`, `service_name`,
+`agency_responsible`, `updated_date`, and `closed_date` remains an independent
+design problem.
+
+### Deferred Canonical Fields Remain Outside
+
+    created_at:
+        DEFER_MAPPING
+        not included
+
+    canonical_status:
+        DEFER_MAPPING
+        not included
+
+Neither concept is represented as `None` or `UnavailableEvidence` by this
+decision.
+
+### DQ13 Remains Outside
+
+The following concepts remain outside `CalgaryMappedCase`:
+
+- `address`;
+- `comm_code`;
+- `comm_name`;
+- `location_type`;
+- `longitude`;
+- `latitude`;
+- `point`.
+
+Their status remains `DEFER_MAPPING`.
+
+### Complete Adapter Result Transport Remains Undefined
+
+    CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
+        NOT_DEFINED
+
+This decision does not define the complete record-to-result API. In
+particular, it does not decide whether an eventual full mapper returns:
+
+```python
+CalgaryMappedCase | RejectedIdentity
+```
+
+or introduces another result type. Combining identity admission with field
+mapping is a larger adapter boundary that must be decided separately.
+
+### Alternatives
+
+#### A. Add `source_status` Directly to Generic `Case`
+
+    RESULT:
+        REJECT_FOR_CURRENT_BOUNDARY
+
+This would make an optional canonical concept physically required by the
+generic `Case` constructor.
+
+#### B. Use `source_status: FieldEvidence[str]`
+
+    RESULT:
+        REJECT_FOR_CALGARY_MAPPED_CASE
+
+This unnecessarily permits `DerivedEvidence` and `SimulatedEvidence`, which
+the committed Calgary mapping prohibits.
+
+#### C. Add `None` to the Source-Status Type
+
+    RESULT:
+        REJECT
+
+This introduces an unclassified third state beyond observed or unavailable
+evidence.
+
+#### D. Use a Free-Form Dictionary of Canonical Fields
+
+    RESULT:
+        REJECT
+
+This weakens the explicit field contract and permits unjustified concepts.
+
+#### E. Introduce a Generic `CaseEvidence` Framework
+
+    RESULT:
+        DEFER
+
+No demonstrated multi-source requirement currently justifies the
+abstraction.
+
+#### F. Add DQ7-DQ11 Source-Native Fields to This Container
+
+    RESULT:
+        DEFER
+
+Their physical retention representation remains independently unresolved.
+
+### Planned Module Location
+
+The planned implementation location is:
+
+```text
+src/support_operations_intelligence/calgary_adapter.py
+```
+
+That module already contains `map_calgary_source_status`. A later bounded
+implementation step may add `CalgaryMappedCase` to the same module. This
+decision does not create another module.
+
+### Planned Implementation Shape
+
+The planned implementation is equivalent to:
+
+```python
+from dataclasses import dataclass
+
+from support_operations_intelligence.case import Case
+from support_operations_intelligence.evidence import (
+    ObservedEvidence,
+    UnavailableEvidence,
+)
+
+
+@dataclass(frozen=True)
+class CalgaryMappedCase:
+    case: Case
+    source_status: ObservedEvidence[str] | UnavailableEvidence
+```
+
+This documentation task does not implement the dataclass or alter the
+existing mapper.
+
+### Planned Structural Tests
+
+Future tests should verify:
+
+1. `CalgaryMappedCase` is a dataclass.
+2. `CalgaryMappedCase` is frozen.
+3. Its fields are exactly `case` and `source_status`.
+4. The supplied `Case` object is preserved exactly.
+5. Supplied `ObservedEvidence` is preserved exactly.
+6. Supplied `UnavailableEvidence` is preserved exactly.
+7. Nested Case identity remains accessible.
+8. No `created_at` field exists.
+9. No `canonical_status` field exists.
+10. No DQ7-DQ11 source-native field exists.
+11. No DQ13 field exists.
+12. Reassignment of `case` or `source_status` raises
+    `FrozenInstanceError`.
+
+These tests are planned only. No structural test is created or executed by
+this documentation step.
+
+### Structural Test Boundary
+
+The planned structural tests establish only the current bounded physical
+shape. They do not establish:
+
+- full Calgary adapter correctness;
+- correct identity-rejection integration;
+- source-native evidence retention;
+- a final canonical `Case` schema;
+- persistence behavior;
+- multi-source portability.
+
+### Failure Conditions
+
+A future implementation violates this decision if it:
+
+- modifies generic `Case` to require `source_status`;
+- allows `DerivedEvidence` for Calgary `source_status`;
+- allows `SimulatedEvidence` for Calgary `source_status`;
+- uses `None` as an additional `source_status` evidence state;
+- defaults Calgary `source_status` to `CONCEPT_ABSENT`;
+- normalizes or reconstructs `source_status` evidence;
+- embeds DQ7-DQ11 fields;
+- embeds DQ13 fields;
+- adds `created_at` while it remains deferred;
+- adds `canonical_status` while it remains deferred;
+- introduces arbitrary metadata;
+- introduces a generic evidence framework without demonstrated need;
+- silently defines the complete adapter result transport;
+- changes Increment 004 semantics.
+
+### Revision Conditions
+
+This decision may be revisited if:
+
+- Increment 002 changes the generic `Case` contract;
+- multiple sources demonstrate a common optional-field representation need;
+- actual adapters justify a generic Case evidence envelope;
+- `source_status` semantics broaden beyond observed/unavailable;
+- persistence requirements require a different physical representation;
+- source-native evidence integration changes the preferred adapter result;
+- full adapter-result transport requirements establish a better boundary.
+
+None of these conditions is currently claimed.
+
+### Claim Classification
+
+    CALGARY_MAPPED_CASE_REPRESENTATION:
+        Design choice
+
+    GENERIC_CASE_SOURCE_STATUS_INCLUSION:
+        Design choice
+
+    CALGARY_SOURCE_STATUS_PHYSICAL_TYPE:
+        Design choice
+
+    frozen companion dataclass:
+        Design choice
+
+    planned structural tests:
+        planned tests, not Engineering observations
+
+    existing mapper results:
+        prior Engineering observations
+
+    Increment 002 optional source_status semantics:
+        prior contract Design choice
+
+This documentation-only step produces no new External evidence, research
+result, or research conclusion.
+
+### Prior-Decision Preservation
+
+The generic `Case` remains `case_id` only. Increment 004 DQ5 remains
+`ACCEPT_MAPPING`, and `map_calgary_source_status` remains unchanged. DQ12
+remains the source-contract-level `NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS`
+decision.
+
+`created_at` and `canonical_status` remain `DEFER_MAPPING`. DQ7-DQ11 remain
+`RETAIN_SOURCE_NATIVE`, and their physical container remains:
+
+    CALGARY_SOURCE_NATIVE_EVIDENCE_CONTAINER:
+        NOT_DEFINED
+
+DQ13 remains `DEFER_MAPPING`.
+
+    SOURCE_STATUS_REJECTED_RAW_VALUE_RETENTION:
+        NOT_DEFINED
+
+    CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
+        NOT_DEFINED
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
