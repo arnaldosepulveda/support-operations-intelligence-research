@@ -4102,6 +4102,220 @@ unchanged.
 No Calgary field other than `source_status` receives mapping semantics from
 this decision, and `source_status` is not yet physically included in `Case`.
 
+## Implementation Record 007 - Calgary Source Status Evidence Mapper
+
+### Objective
+
+Implement the committed row-level `status_description -> source_status`
+evidence mapping independently of Case inclusion.
+
+### Files
+
+Created:
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_source_status.py`.
+
+Modified to record implementation evidence:
+
+- `docs/increments/005-executable-calgary-case-adapter.md`.
+
+### Implemented
+
+    IMPLEMENTED:
+        map_calgary_source_status
+
+    SOURCE FIELD:
+        status_description
+
+    OUTPUT VARIANTS:
+        ObservedEvidence[str]
+        UnavailableEvidence
+
+    UNAVAILABLE REASONS USED:
+        VALUE_ABSENT
+        EVIDENCE_INDETERMINATE
+
+    NORMALIZATION:
+        none
+
+    COERCION:
+        none
+
+    CASE MODIFICATION:
+        none
+
+    SOURCE_STATUS_CASE_FIELD_INCLUSION:
+        still not implemented
+
+    DQ5:
+        ACCEPT_MAPPING unchanged
+
+    DQ12:
+        contract-level decision unchanged;
+        justified row-level unavailable evidence implemented
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The mapper reads only `status_description`. It returns
+`UnavailableEvidence(UnavailableReason.VALUE_ABSENT)` when the field is
+missing, `None`, empty, or whitespace-only. It returns
+`UnavailableEvidence(UnavailableReason.EVIDENCE_INDETERMINATE)` when the
+value is present but is not a string. Every other string becomes
+`ObservedEvidence(value)` with the exact original value preserved.
+
+### Expected Pre-Implementation Failure
+
+After the twelve focused tests were created and before the mapper module was
+created, this command was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_source_status.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported:
+
+```text
+ModuleNotFoundError: No module named 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.000s
+OK
+```
+
+All twelve planned behaviors passed with zero failures and zero errors:
+
+1. missing field -> `VALUE_ABSENT`;
+2. `None` -> `VALUE_ABSENT`;
+3. non-string -> `EVIDENCE_INDETERMINATE`;
+4. empty string -> `VALUE_ABSENT`;
+5. spaces-only string -> `VALUE_ABSENT`;
+6. tab/newline-only string -> `VALUE_ABSENT`;
+7. `"Closed"` -> exact `ObservedEvidence`;
+8. `"Duplicate (Closed)"` -> exact `ObservedEvidence`;
+9. `" Closed "` -> exact padded `ObservedEvidence`;
+10. `"Future Native Status"` -> exact `ObservedEvidence`;
+11. input mapping remains unchanged;
+12. representative results are never `DerivedEvidence` or
+    `SimulatedEvidence`.
+
+These focused results are Engineering observations for the exercised test
+inputs under the repository-local Python execution boundary.
+
+### Regression Results
+
+Each required regression module was executed independently:
+
+```text
+test_case.py: 12 tests, OK
+test_case_id.py: 6 tests, OK
+test_identity_admission_result.py: 10 tests, OK
+test_calgary_identity_admission.py: 12 tests, OK
+test_field_evidence.py: 12 tests, OK
+```
+
+Each command completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete standard-library test suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 65 tests in 0.001s
+OK
+```
+
+The full suite completed with zero failures and zero errors. This result is
+an Engineering observation for the current repository state and execution
+environment.
+
+### Direct Mapping Verification
+
+Direct execution produced:
+
+```text
+{} -> UnavailableEvidence(reason=<UnavailableReason.VALUE_ABSENT: 'VALUE_ABSENT'>)
+{'status_description': None} -> UnavailableEvidence(reason=<UnavailableReason.VALUE_ABSENT: 'VALUE_ABSENT'>)
+{'status_description': 123} -> UnavailableEvidence(reason=<UnavailableReason.EVIDENCE_INDETERMINATE: 'EVIDENCE_INDETERMINATE'>)
+{'status_description': ''} -> UnavailableEvidence(reason=<UnavailableReason.VALUE_ABSENT: 'VALUE_ABSENT'>)
+{'status_description': '   '} -> UnavailableEvidence(reason=<UnavailableReason.VALUE_ABSENT: 'VALUE_ABSENT'>)
+{'status_description': 'Closed'} -> ObservedEvidence(value='Closed')
+{'status_description': 'Duplicate (Closed)'} -> ObservedEvidence(value='Duplicate (Closed)')
+{'status_description': ' Closed '} -> ObservedEvidence(value=' Closed ')
+{'status_description': 'Future Native Status'} -> ObservedEvidence(value='Future Native Status')
+```
+
+The direct immutability check reported that the input mapping remained equal
+to its shallow copy after the call and that the accepted value remained
+exactly `" Closed "`. Representative results were all instances of
+`ObservedEvidence` or `UnavailableEvidence` and none was an instance of
+`DerivedEvidence` or `SimulatedEvidence`.
+
+These direct results are Engineering observations for the exercised values.
+
+### Case and Source-Contract Boundaries
+
+The mapper does not construct or modify `Case`. The current `Case` remains a
+frozen dataclass containing only `case_id`; it has no `source_status`,
+`created_at`, or `canonical_status` field.
+
+Increment 004 DQ5 remains `ACCEPT_MAPPING`. DQ12 remains
+`NO_CANONICAL_UNAVAILABLE_ASSIGNMENTS` at the source-contract level. The
+implementation emits row-level unavailable evidence only when an applicable
+record actually presents a `VALUE_ABSENT` or `EVIDENCE_INDETERMINATE`
+condition. No `DEFER_MAPPING` concept receives an unavailable assignment.
+
+`SOURCE_STATUS_REJECTED_RAW_VALUE_RETENTION` remains `NOT_DEFINED`. The
+implementation retains no rejected raw status value.
+
+### Claim Classification and Boundary
+
+The mapper behavior implements the prior Design choice for Calgary
+`source_status` row-level evidence semantics. The expected red result,
+focused result, regression results, full-suite result, and direct behavior
+checks are Engineering observations.
+
+Allowed interpretation:
+
+> The Calgary `source_status` mapper conforms to the currently tested
+> Increment 005 row-level evidence semantics for the exercised parsed-record
+> inputs under the repository-local Python execution boundary.
+
+This implementation does not establish `source_status` Case-field inclusion,
+full Calgary adapter correctness, exhaustive Calgary status-vocabulary
+correctness, canonical-status correctness, source-native evidence-retention
+correctness, ingestion correctness, real-dataset coverage of defensive
+branches, production readiness, portability, External evidence, or a research
+conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
