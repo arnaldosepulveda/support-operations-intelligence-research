@@ -4779,6 +4779,266 @@ DQ13 remains `DEFER_MAPPING`.
     CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
         NOT_DEFINED
 
+## Implementation Record 008 - Calgary Mapped Case Companion
+
+### Objective
+
+Implement the committed bounded `CalgaryMappedCase` physical carrier without
+strengthening generic `Case` or defining complete adapter transport.
+
+### Files
+
+- `src/support_operations_intelligence/calgary_adapter.py`;
+- `tests/test_calgary_mapped_case.py`.
+
+### Implemented
+
+    IMPLEMENTED:
+        CalgaryMappedCase
+
+    SHAPE:
+        case: Case
+        source_status: ObservedEvidence[str] | UnavailableEvidence
+
+    IMMUTABILITY:
+        frozen dataclass
+
+    OBJECT PRESERVATION:
+        supplied Case retained directly
+        supplied source_status evidence retained directly
+
+    GENERIC CASE MODIFICATION:
+        none
+
+    SOURCE_STATUS MAPPER MODIFICATION:
+        none semantically
+
+    CREATED_AT:
+        not included
+        DEFER_MAPPING
+
+    CANONICAL_STATUS:
+        not included
+        DEFER_MAPPING
+
+    SOURCE-NATIVE CONTAINER:
+        NOT_DEFINED
+
+    FULL ADAPTER RESULT TRANSPORT:
+        NOT_DEFINED
+
+    THIRD-PARTY DEPENDENCIES:
+        none
+
+The implementation adds only the frozen two-field companion dataclass and
+the standard-library and existing-domain imports it requires. It adds no
+defaults, validator, `__post_init__`, factory, custom constructor, method,
+metadata, raw record, serialization behavior, source-native field, result
+union, or adapter orchestration.
+
+### Expected Pre-Implementation Failure
+
+After the twelve structural tests were created and before
+`CalgaryMappedCase` was added, this command was executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover \
+  -s tests \
+  -p 'test_calgary_mapped_case.py' \
+  -v
+```
+
+Actual result:
+
+```text
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The loader reported an `ImportError` because the symbol did not yet exist:
+
+```text
+ImportError: cannot import name 'CalgaryMappedCase' from 'support_operations_intelligence.calgary_adapter'
+```
+
+This expected red result is an Engineering observation from the test-first
+boundary. It is not classified as a product defect.
+
+### Focused Post-Implementation Result
+
+The same focused command was executed after implementation.
+
+Actual result:
+
+```text
+Ran 12 tests in 0.000s
+OK
+```
+
+The tests verified:
+
+1. `CalgaryMappedCase` is a dataclass;
+2. it is frozen;
+3. fields are exactly `case` and `source_status`;
+4. the supplied `Case` object is preserved directly;
+5. supplied `ObservedEvidence` is preserved directly;
+6. supplied `UnavailableEvidence` is preserved directly;
+7. nested Case identity remains accessible;
+8. no `created_at` field exists;
+9. no `canonical_status` field exists;
+10. no DQ7-DQ11 source-native field exists;
+11. no DQ13 field exists;
+12. ordinary reassignment of both fields raises `FrozenInstanceError`.
+
+This focused result is an Engineering observation for the exercised
+in-memory objects under the repository-local Python execution boundary.
+
+### Source-Status Mapper Regression Result
+
+The existing focused mapper suite was executed independently:
+
+```text
+test_calgary_source_status.py: 12 tests, OK
+```
+
+It completed with zero failures and zero errors. The implementation diff adds
+the companion and required imports without changing the existing
+`map_calgary_source_status` body or semantics. This result is an Engineering
+observation.
+
+### Other Regression Results
+
+Each required regression module was executed independently:
+
+```text
+test_case.py: 12 tests, OK
+test_case_id.py: 6 tests, OK
+test_identity_admission_result.py: 10 tests, OK
+test_calgary_identity_admission.py: 12 tests, OK
+test_field_evidence.py: 12 tests, OK
+```
+
+Each completed with zero failures and zero errors. These results are
+Engineering observations.
+
+### Full-Suite Result
+
+The complete suite was executed with:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Actual result:
+
+```text
+Ran 77 tests in 0.001s
+OK
+```
+
+The suite completed with zero failures and zero errors. This result is an
+Engineering observation for the current repository state and execution
+environment.
+
+### Direct Structure and Observed-Evidence Verification
+
+Direct execution reported:
+
+```text
+is_dataclass = True
+fields = ['case', 'source_status']
+case_same_object = True
+status_same_object = True
+source_system = 'city_of_calgary_311'
+source_case_id = 'ABC-123'
+status_value = ' Closed '
+```
+
+This directly verified the dataclass shape, exact two-field order, supplied
+Case-object preservation, supplied observed-evidence preservation, nested
+identity access, and exact lexical status preservation for the exercised
+objects.
+
+### Unavailable-Evidence Preservation Verification
+
+Direct execution with `UnavailableEvidence(VALUE_ABSENT)` reported:
+
+```text
+case_same_object = True
+status_same_object = True
+reason = VALUE_ABSENT
+```
+
+The supplied unavailable-evidence object and Case object were retained
+directly.
+
+### Direct Immutability Verification
+
+Ordinary assignment to each field reported:
+
+```text
+case = FrozenInstanceError
+source_status = FrozenInstanceError
+```
+
+No deliberate frozen-dataclass bypass was used. This verifies Python
+object-level field-reassignment resistance only; it does not establish
+persistence, database, distributed, source-record, or event-sourcing
+immutability.
+
+### Annotation Inspection
+
+Direct annotation inspection reported:
+
+```text
+{'case': <class 'support_operations_intelligence.case.Case'>, 'source_status': typing.Union[support_operations_intelligence.evidence.ObservedEvidence[str], support_operations_intelligence.evidence.UnavailableEvidence]}
+source_status_args = ['ObservedEvidence', 'UnavailableEvidence']
+```
+
+The `source_status` annotation contains only `ObservedEvidence[str]` and
+`UnavailableEvidence`. It is not widened to `FieldEvidence`, `object`, or an
+optional type containing `None`.
+
+This inspection establishes the static/documented annotation boundary. A
+plain dataclass annotation does not enforce runtime types. No validator or
+test claims runtime rejection of `DerivedEvidence`, `SimulatedEvidence`,
+`None`, or arbitrary objects.
+
+### Preserved Contract Boundaries
+
+Generic `Case` remains unchanged and contains only `case_id`.
+`map_calgary_source_status` remains semantically unchanged. `created_at` and
+`canonical_status` remain `DEFER_MAPPING` and absent from the companion.
+DQ7-DQ11 remain `RETAIN_SOURCE_NATIVE`, their source-native container remains
+`NOT_DEFINED`, and all DQ13 fields remain deferred and absent.
+
+No function or result type composes `admit_calgary_source_identity` with
+`map_calgary_source_status`. No union equivalent to
+`CalgaryMappedCase | RejectedIdentity` is introduced.
+
+    CALGARY_CASE_MAPPING_RESULT_TRANSPORT:
+        NOT_DEFINED
+
+### Claim Classification and Boundary
+
+The physical `CalgaryMappedCase` representation implements a prior Design
+choice. The expected red result, focused result, mapper regression, other
+regressions, full-suite result, direct structure checks, evidence-preservation
+checks, immutability check, and annotation inspection are Engineering
+observations.
+
+Allowed interpretation:
+
+> The `CalgaryMappedCase` implementation conforms to the currently tested
+> Increment 005 companion representation for the exercised in-memory Python
+> objects under the repository-local execution boundary.
+
+This implementation does not establish runtime enforcement of type
+annotations, full Calgary adapter correctness, identity-rejection
+integration, a final generic `Case` schema, source-native evidence retention,
+persistence correctness, dataset validity, portability, production readiness,
+External evidence, or a research conclusion.
+
 ## Follow-On Boundary
 
 Likely later work remains outside Increment 005, including:
