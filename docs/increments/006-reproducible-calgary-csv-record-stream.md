@@ -611,3 +611,268 @@ No implementation has occurred. No source file was read during Increment
 Increment 006 planning. No test has been written or executed for
 Increment 006. No dependency has been installed. No design choice in this
 document is presented as an Engineering observation.
+
+## Implementation Record 001 - CSV Record-Stream Boundary and Structural Failure Semantics
+
+Classification:
+
+    Design choice / planned decision
+
+This record freezes a planned parser interface and its expected structural-
+failure semantics before implementation. No implementation has occurred. The
+decisions below are not Engineering observations, External evidence, Internal
+evaluation results, or Research conclusions.
+
+### Parser Mechanism
+
+Decision:
+
+    USE_STANDARD_LIBRARY_CSV_READER_WITH_EXPLICIT_WIDTH_VALIDATION
+
+The planned implementation will use `csv.reader`, not `csv.DictReader`.
+`csv.DictReader` can represent malformed row widths through `None` keys for
+extra cells or missing values for absent cells. That representation risks
+silently normalizing the exact extra-column and missing-column conditions that
+this increment requires to fail explicitly. Reading rows as sequences keeps
+structural validation separate from mapping construction.
+
+The parser must:
+
+1. read the header first;
+2. compare it exactly and positionally with the committed 15-field header;
+3. reject a mismatch before yielding any record;
+4. read each subsequent row as a sequence of source strings;
+5. require exactly 15 cells;
+6. reject fewer than 15 cells;
+7. reject more than 15 cells; and
+8. construct a mapping only after width validation succeeds.
+
+This record specifies planned behavior only; it does not claim that the
+behavior is implemented.
+
+### Planned Public Input and Return Boundary
+
+The planned public boundary is:
+
+```python
+def iter_calgary_csv_records(
+    path: Path,
+) -> Iterator[Mapping[str, str]]:
+    ...
+```
+
+`path` must be supplied explicitly as a `Path`. The Calgary artifact path must
+not be hard-coded or supplied through an implicit default.
+
+`Iterator[Mapping[str, str]]` is the narrow truthful return representation:
+every structurally valid cell at this parser boundary is source text, including
+an empty string. `Mapping[str, str]` is compatible with the existing
+`adapt_calgary_record(record: Mapping[str, object])` input boundary because
+string values are objects and the mapping is read-only at the declared
+boundary.
+
+The earlier `Iterator[Mapping[str, object]]` wording under Planned Execution
+Boundary remains retained as planning evidence. This record deliberately
+refines that earlier conceptual representation to the narrower
+`Iterator[Mapping[str, str]]`; it does not silently rewrite the earlier plan.
+
+### Text Opening Boundary
+
+The planned file-opening boundary is:
+
+```python
+path.open(
+    mode="r",
+    encoding="utf-8",
+    newline="",
+)
+```
+
+The encoding must not depend on a platform default. `newline=""` is the
+documented Python `csv`-module text boundary. Increment 003's observation that
+the retained artifact was ASCII-compatible makes UTF-8 a bounded compatible
+choice for this planned parser. This decision does not claim that UTF-8 is
+correct for every possible future Calgary artifact.
+
+### Exact Header Boundary
+
+The implementation will define one source-specific constant containing this
+exact 15-field header in this exact order:
+
+```text
+service_request_id
+requested_date
+updated_date
+closed_date
+status_description
+source
+service_name
+agency_responsible
+address
+comm_code
+comm_name
+location_type
+longitude
+latitude
+point
+```
+
+The header comparison is exact and positional. An empty file or absent header
+and any renamed, added, removed, or reordered header field must fail before the
+generator yields a record. This constant is Calgary-source-specific and must
+not be generalized into a cross-source schema framework.
+
+### Expected Structural Failure Transport
+
+Expected violations of the Calgary CSV structural contract will cross the
+parser boundary as a narrow source-specific exception:
+
+    CalgaryCsvStructureError
+
+The exception will carry an explicit reason enum with these minimum reasons:
+
+    EMPTY_FILE_OR_MISSING_HEADER
+    HEADER_MISMATCH
+    ROW_WIDTH_MISMATCH
+
+One `ROW_WIDTH_MISMATCH` reason is sufficient because expected and actual
+counts distinguish missing from extra cells without creating unnecessary
+taxonomy. A row-width failure must preserve enough context to reconstruct the
+violation, at minimum:
+
+- logical data-record number;
+- expected column count; and
+- actual column count.
+
+The logical data-record number is not a physical text line number. CSV fields
+may legally contain quoted newlines, so the two concepts must not be confused.
+
+Logical data-record numbering follows this explicit convention:
+
+- the CSV header is not a data record;
+- the first CSV record successfully returned by `csv.reader` after the header
+  is logical data-record 1;
+- each subsequent parsed CSV record increments the logical data-record number
+  by exactly one;
+- a record with malformed width still occupies its encountered logical
+  data-record position and `ROW_WIDTH_MISMATCH` reports that number;
+- the logical data-record number remains distinct from the physical text line
+  number; and
+- `csv.reader.line_num` must not be used as the logical data-record number,
+  because a quoted CSV field may legally contain embedded newlines.
+
+For example:
+
+```text
+header
+record A
+record B
+malformed record C
+```
+
+means:
+
+```text
+record A -> logical data-record 1
+record B -> logical data-record 2
+malformed record C -> ROW_WIDTH_MISMATCH at logical data-record 3
+```
+
+Structural failures must not be represented by returning `None`, silently
+skipping malformed rows, yielding partial mappings, converting them into
+`RejectedIdentity`, or introducing a generic catch-all `Result` abstraction.
+
+### Non-Structural Failure Boundary
+
+Increment 006 must not convert unrelated environmental or software failures
+into `CalgaryCsvStructureError`. Unless a later explicit design decision
+changes the boundary, failures such as these normally propagate in their
+native form:
+
+- `FileNotFoundError`;
+- `PermissionError`;
+- `UnicodeDecodeError`;
+- `csv.Error`; and
+- unexpected software exceptions.
+
+`CalgaryCsvStructureError` means that a source record violates Increment 006's
+structural contract; it does not mean merely that file access or software
+execution failed. The implementation must not add a broad
+`try/except Exception` conversion.
+
+### Empty Cells and Lexical Fidelity
+
+An empty CSV cell remains `""` at the record-stream boundary. It is not
+converted here to `None`, `VALUE_ABSENT`, or `UnavailableEvidence`. The existing
+Increment 005 mapper owns semantic evidence-state handling after the parsed
+mapping crosses the boundary:
+
+```text
+CSV structure layer:
+    empty source cell -> ""
+
+Adapter layer:
+    "" -> existing Increment 005 evidence policy where applicable
+```
+
+After explicit width validation, row construction is conceptually equivalent
+to:
+
+```python
+dict(zip(EXPECTED_HEADER, row, strict=True))
+```
+
+An explicit validated equivalent is also permitted, but width must already
+have been checked. The record-stream boundary must not introduce `strip()`,
+case conversion, numeric conversion, datetime conversion, timezone conversion,
+or missing-value interpretation.
+
+### Laziness and Resource Lifetime
+
+The function will be generator-based and lazy. File opening and row consumption
+occur within generator execution. The file remains open only while iteration is
+active, and normal generator exhaustion closes it through the context-manager
+boundary. Bounded consumers may use `itertools.islice`; the implementation must
+not materialize the whole file as a list or tuple. A production limit parameter
+will not be introduced merely to support bounded smoke use.
+
+### Planned Test Implications
+
+Later implementation must be falsifiable through planned tests covering at
+least:
+
+- exact valid header;
+- empty file or missing header;
+- reordered header;
+- changed header field;
+- valid one-row iteration;
+- valid multiple-row iteration;
+- empty-cell lexical preservation;
+- whitespace lexical preservation;
+- extra-column failure;
+- missing-column failure;
+- first data record after the header is numbered 1;
+- a malformed third data record reports logical data-record 3;
+- quoted embedded newlines do not redefine logical data-record numbering;
+- laziness and bounded consumption;
+- explicit `Path` input;
+- composition with `adapt_calgary_record`;
+- native `FileNotFoundError` propagation; and
+- no normalization.
+
+These are planned tests only. No tests were created or executed, and no test
+count or passing result is claimed by this record.
+
+### Claim Boundary
+
+This design checkpoint establishes only a planned parser interface and expected
+structural-failure semantics. It does not establish:
+
+- implementation correctness;
+- CSV parsing correctness;
+- local artifact readability;
+- digest match;
+- bounded real-artifact execution;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.
