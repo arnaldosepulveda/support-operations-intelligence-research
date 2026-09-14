@@ -3,6 +3,7 @@ import unittest
 from collections.abc import Mapping
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from support_operations_intelligence.calgary_csv import (
     EXPECTED_CALGARY_HEADER,
@@ -34,6 +35,30 @@ EXPECTED_HEADER = (
 def _write_synthetic_csv(path: Path, rows: list[tuple[str, ...]]) -> None:
     with path.open(mode="w", encoding="utf-8", newline="") as csv_file:
         csv.writer(csv_file).writerows(rows)
+
+
+class _LineLimitedTextStream:
+    def __init__(self, csv_file, *, maximum_lines: int) -> None:
+        self._csv_file = csv_file
+        self._maximum_lines = maximum_lines
+        self.lines_read = 0
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback) -> None:
+        self._csv_file.close()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.lines_read >= self._maximum_lines:
+            raise AssertionError("CSV stream was consumed beyond the prefix")
+
+        line = next(self._csv_file)
+        self.lines_read += 1
+        return line
 
 
 class CalgaryCsvRecordStreamTests(unittest.TestCase):
@@ -216,6 +241,81 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
             self.assertEqual(captured.exception.logical_data_record_number, 2)
             self.assertEqual(captured.exception.expected_column_count, 15)
             self.assertEqual(captured.exception.actual_column_count, 14)
+
+    def test_multiple_valid_records_preserve_source_order_and_values(self):
+        rows = [
+            tuple(["synthetic-001", *[f"first-{index}" for index in range(14)]]),
+            tuple([" synthetic-002 ", *[f"second-{index}" for index in range(14)]]),
+            tuple(["synthetic-003", *[f"third-{index}" for index in range(14)]]),
+        ]
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "multiple-records.csv"
+            _write_synthetic_csv(path, [EXPECTED_HEADER, *rows])
+
+            records = list(iter_calgary_csv_records(path))
+
+        self.assertEqual(len(records), 3)
+        self.assertEqual(
+            [record["service_request_id"] for record in records],
+            ["synthetic-001", " synthetic-002 ", "synthetic-003"],
+        )
+        self.assertEqual(
+            [tuple(record.values()) for record in records],
+            rows,
+        )
+
+    def test_empty_cell_remains_empty_string(self):
+        row = tuple(["synthetic-001", *[f"value-{index}" for index in range(14)]])
+        row = (*row[:7], "", *row[8:])
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "empty-cell.csv"
+            _write_synthetic_csv(path, [EXPECTED_HEADER, row])
+
+            record = next(iter_calgary_csv_records(path))
+
+        self.assertEqual(record["agency_responsible"], "")
+        self.assertIsInstance(record["agency_responsible"], str)
+        self.assertIsNotNone(record["agency_responsible"])
+
+    def test_bounded_consumption_does_not_read_beyond_first_record(self):
+        rows = [
+            tuple([f"synthetic-{record}", *[f"value-{index}" for index in range(14)]])
+            for record in range(1, 4)
+        ]
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "bounded-consumption.csv"
+            _write_synthetic_csv(path, [EXPECTED_HEADER, *rows])
+            csv_file = path.open(mode="r", encoding="utf-8", newline="")
+            limited_stream = _LineLimitedTextStream(
+                csv_file,
+                maximum_lines=2,
+            )
+
+            with patch.object(Path, "open", return_value=limited_stream):
+                iterator = iter_calgary_csv_records(path)
+                first_record = next(iterator)
+                self.assertEqual(
+                    first_record["service_request_id"],
+                    "synthetic-1",
+                )
+                self.assertEqual(limited_stream.lines_read, 2)
+                iterator.close()
+
+    def test_missing_path_raises_native_file_not_found_error(self):
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "does-not-exist.csv"
+
+            iterator = iter_calgary_csv_records(path)
+            with self.assertRaises(FileNotFoundError) as captured:
+                next(iterator)
+
+        self.assertNotIsInstance(
+            captured.exception,
+            CalgaryCsvStructureError,
+        )
 
 
 if __name__ == "__main__":

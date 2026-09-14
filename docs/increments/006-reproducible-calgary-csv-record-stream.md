@@ -1136,3 +1136,117 @@ This verification slice does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 004 - Stream Mechanics and Native File-Access Verification
+
+### Objective
+
+Provide dedicated executable verification for already-implemented stream
+behavior and native `FileNotFoundError` propagation.
+
+### Starting Checkpoint and History
+
+The production behavior already existed at:
+
+    ae5b5d8f18f5872a12980160074bbefff9372191
+
+This was not a RED-to-GREEN implementation cycle. The production behavior
+already existed before these dedicated tests. No RED state was inferred or
+fabricated for this verification slice.
+
+### Classification Before Execution
+
+Test definitions:
+
+    Planned test design before execution
+
+Observed executions, once available, will be classified as Engineering
+observations.
+
+### Tested Scope
+
+- multiple valid records preserve source order;
+- an empty CSV cell remains `""`;
+- bounded consumption does not require whole-file materialization; and
+- a nonexistent `Path` propagates `FileNotFoundError` unchanged.
+
+### Execution Results
+
+Classification:
+
+    Engineering observation
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 12 tests in 0.003s
+OK
+failures: 0
+errors: 0
+```
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 137 tests in 0.005s
+OK
+failures: 0
+errors: 0
+```
+
+The dedicated tests passed against production behavior that already existed at
+the starting checkpoint. No RED state occurred or is inferred for this slice,
+and no production source change was required.
+
+### Updated Verification Status
+
+```text
+Multiple-record iteration:
+    DEDICATEDLY_VERIFIED
+
+Source-order preservation across multiple records:
+    DEDICATEDLY_VERIFIED
+
+Lexical-value preservation across multiple records:
+    DEDICATEDLY_VERIFIED
+
+Empty-cell lexical preservation:
+    DEDICATEDLY_VERIFIED
+
+Bounded lazy consumption:
+    DEDICATEDLY_VERIFIED
+
+FileNotFoundError propagation:
+    DEDICATEDLY_VERIFIED
+```
+
+### Claim Boundary
+
+This verification slice does not establish:
+
+- `PermissionError` propagation;
+- `UnicodeDecodeError` propagation;
+- `csv.Error` propagation;
+- all possible generator resource-lifetime behavior;
+- adapter composition;
+- digest correctness;
+- real Calgary artifact readability;
+- real-artifact smoke execution;
+- full-file correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.
