@@ -1025,3 +1025,114 @@ committed structural-safety boundary. Its extra-column behavior, missing-column
 behavior, logical data-record-number evidence, and embedded-newline numbering
 behavior have not yet been verified by executable tests and are not claimed
 green by this record.
+
+## Implementation Record 003 - Row-Width and Logical-Record Verification
+
+### Objective
+
+Provide dedicated executable verification for the already-implemented
+`ROW_WIDTH_MISMATCH` and logical data-record numbering behavior.
+
+### Starting State and History
+
+The implementation already existed at:
+
+    d9ab8fba51d36148955d6d80fd9056c665365ef7
+
+This is not a RED-to-GREEN implementation cycle. The production behavior
+existed before these dedicated tests were added.
+
+### Classification Before Execution
+
+    Planned test design
+
+The test definitions are planned test design before execution. Actual execution
+results, once observed, will be recorded separately as Engineering
+observations.
+
+### Tested Scope
+
+- extra-column failure;
+- missing-column failure;
+- logical data-record 1 for the first record after the header;
+- malformed third record reported as logical data-record 3;
+- embedded newline does not distort logical data-record numbering; and
+- expected and actual column-count context.
+
+### Execution Results
+
+Classification:
+
+    Engineering observation
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 8 tests in 0.001s
+OK
+failures: 0
+errors: 0
+```
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 133 tests in 0.005s
+OK
+failures: 0
+errors: 0
+```
+
+The dedicated tests passed against the implementation that already existed at
+the starting checkpoint. No RED state occurred or is inferred for this slice,
+and no production source change was required.
+
+### Updated Verification Status
+
+```text
+ROW_WIDTH_MISMATCH implementation:
+    IMPLEMENTED
+
+Extra-column behavior:
+    DEDICATEDLY_VERIFIED
+
+Missing-column behavior:
+    DEDICATEDLY_VERIFIED
+
+Logical data-record numbering:
+    DEDICATEDLY_VERIFIED
+
+Embedded-newline logical numbering:
+    DEDICATEDLY_VERIFIED
+```
+
+### Claim Boundary
+
+This verification slice does not establish:
+
+- native `FileNotFoundError` propagation verification;
+- `PermissionError` verification;
+- `UnicodeDecodeError` verification;
+- `csv.Error` verification;
+- adapter composition;
+- digest correctness;
+- real Calgary artifact readability;
+- real-artifact smoke success;
+- full-file correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.
