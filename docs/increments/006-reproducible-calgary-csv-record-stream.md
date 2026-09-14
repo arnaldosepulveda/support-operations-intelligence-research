@@ -876,3 +876,152 @@ structural-failure semantics. It does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 002 - Initial CSV Record-Stream RED Tests
+
+### Objective
+
+Establish the first executable tests for the committed parser design before
+production implementation.
+
+### Classification Before Execution
+
+    Planned test design
+
+The test definitions below are planned test design until executed. The actual
+RED execution result, once observed, will be recorded separately as an
+Engineering observation. It will not be classified as a product defect,
+External evidence, or a Research conclusion.
+
+### Scope
+
+- exact header constant;
+- valid one-record iteration;
+- lexical preservation;
+- empty-file structural rejection; and
+- header-mismatch structural rejection.
+
+### Planned Public Symbols
+
+The first implementation slice deliberately plans these public names:
+
+- `EXPECTED_CALGARY_HEADER`;
+- `CalgaryCsvStructureError`;
+- `CalgaryCsvStructureErrorReason`; and
+- `iter_calgary_csv_records`.
+
+### Out of Scope
+
+- row-width implementation;
+- logical-record-number implementation;
+- embedded-newline behavior;
+- native environmental-failure propagation;
+- adapter composition;
+- artifact digest verification;
+- real-artifact smoke;
+- persistence; and
+- analytics.
+
+### RED Execution Result
+
+Classification:
+
+    Engineering observation
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result:
+
+```text
+exit code: 1
+test_calgary_csv_record_stream
+    (unittest.loader._FailedTest.test_calgary_csv_record_stream) ... ERROR
+ModuleNotFoundError:
+    No module named 'support_operations_intelligence.calgary_csv'
+Ran 1 test in 0.000s
+FAILED (errors=1)
+```
+
+The test module could not be imported because the deliberately planned
+production module does not yet exist. `unittest` represented that loader
+failure as one `_FailedTest`; none of the four authored test methods executed.
+This is the expected RED state at this test-first boundary, not a product
+defect, External evidence, or a Research conclusion. No production parser was
+implemented and no test was made green in this step.
+
+### Initial Implementation and GREEN Results
+
+Classification:
+
+    Engineering observation
+
+Implemented:
+
+- `EXPECTED_CALGARY_HEADER`;
+- `CalgaryCsvStructureErrorReason`;
+- `CalgaryCsvStructureError`; and
+- `iter_calgary_csv_records`.
+
+Source file:
+
+    src/support_operations_intelligence/calgary_csv.py
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 4 tests in 0.001s
+OK
+failures: 0
+errors: 0
+```
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 129 tests in 0.005s
+OK
+failures: 0
+errors: 0
+```
+
+The retained evidence sequence is:
+
+```text
+RED import failure
+    -> minimal production implementation
+    -> focused and regression GREEN results
+```
+
+The GREEN result verifies only the exercised first slice:
+
+- exact expected header constant;
+- one valid synthetic record;
+- lexical whitespace preservation;
+- empty-file structural rejection; and
+- header-mismatch structural rejection.
+
+The implementation includes a `ROW_WIDTH_MISMATCH` branch to preserve the
+committed structural-safety boundary. Its extra-column behavior, missing-column
+behavior, logical data-record-number evidence, and embedded-newline numbering
+behavior have not yet been verified by executable tests and are not claimed
+green by this record.
