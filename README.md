@@ -1,216 +1,347 @@
 # Support Operations Intelligence
 
-Support Operations Intelligence is an evolving operational decision system for investigating Support and service-operation problems from evidence through intervention and outcome evaluation.
+Support Operations Intelligence (SOI) is a research-engineering project for
+building a defensible evidence chain from operational source records toward
+analysis and, eventually, justified intervention decisions.
 
-The project is designed as one progressively more capable system, not as a collection of disconnected portfolio demonstrations.
+The project emphasizes explicit contracts, reproducible execution, retained
+negative evidence, and bounded claims.
 
-## Core Objective
+SOI is not currently an operational analytics platform.
 
-The system is intended to support a reasoning path from operational evidence to a defensible intervention:
+## Current Project Boundary
 
-    Understand the operation
-            |
-            v
-    Define the problem
-            |
-            v
-    Establish the evidence
-            |
-            v
-    Determine the mechanism
-            |
-            v
-    Select the intervention
-            |
-            v
-    Build or integrate
-            |
-            v
-    Evaluate
-            |
-            v
-    Measure the outcome
+The current repository establishes a reproducible source-record boundary for a
+Calgary 311 case study.
 
-Technology selection follows the problem.
+At the current publication checkpoint, the implemented evidence chain is:
 
-Applied AI is an available intervention class, not a default requirement.
+```text
+SOURCE
+    ->
+SEMANTIC CONTRACT
+    ->
+EXECUTABLE CONFORMANCE
+    ->
+REPRODUCIBLE SOURCE-RECORD BOUNDARY
+```
 
-A valid project result may therefore be:
+Later stages remain future work:
 
-- process change;
-- data-quality correction;
-- deterministic software;
-- routing or workflow change;
-- search;
-- retrieval;
-- AI assistance;
-- bounded automation;
-- no intervention yet;
-- AI not warranted.
+```text
+ANALYTICAL CONTRACT
+    ->
+OPERATIONAL BASELINE
+    ->
+DIAGNOSIS
+    ->
+INTERVENTION SELECTION
+    ->
+IMPLEMENTATION + EVALUATION
+```
 
-## Intended System Direction
+The repository does not currently claim to implement those later stages.
 
-The current architectural direction is:
+## What Is Implemented
 
-    Operational data
-            |
-            v
-    Canonical case / event model
-            |
-            v
-    Operational analytics
-            |
-            v
-    Workflow / process analysis
-            |
-            v
-    Forecasting
-            |
-            v
-    WFM / capacity analysis
-            |
-            v
-    Business analysis
-            |
-            v
-    Intervention selection
-            |
-            v
-    Business case / benefit realization
-            |
-            v
-    Retrieval / applied AI where warranted
-            |
-            v
-    Evaluation
-            |
-            v
-    Operational outcome measurement
+### Canonical Case contract
 
-This sequence is directional rather than frozen. Later increments should be driven by evidence and architectural need.
+The repository defines a bounded canonical `Case` contract covering:
 
-## Evidence and Claim Discipline
+- source identity;
+- admission criteria;
+- deterministic source identity behavior;
+- canonical versus source-native evidence boundaries;
+- observed, derived, simulated, and unavailable evidence states;
+- explicit unavailable-reason semantics.
 
-Project findings distinguish:
+Only the identity core is treated as universal.
 
-- **OBSERVED**: directly present in source data or directly observed system state;
-- **DERIVED**: deterministic computation from observed values;
-- **ASSUMPTION**: introduced by the analysis;
-- **HYPOTHESIS**: possible explanation requiring additional evidence;
-- **SIMULATION**: artificial or model-generated scenario;
-- **RECOMMENDATION**: decision based on evidence plus explicit assumptions.
+Other fields remain source-dependent unless independently justified.
 
-Synthetic data must not be presented as observed operational data.
+### Calgary source contract
 
-Internal evaluation is not independent validation.
+The Calgary case study defines explicit source-specific mappings for the
+locally characterized Calgary 311 source artifact.
 
-A functioning prototype does not establish production readiness.
+The contract distinguishes:
 
-Association does not establish causation.
+- fields accepted into the canonical representation;
+- source-native evidence retained without canonical reinterpretation;
+- fields whose mapping remains deferred;
+- semantics that the available evidence does not justify.
 
-Technical success does not by itself establish workflow, operational, business, or financial value.
+Deferred concepts are not silently converted into canonical meaning.
 
-## Engineering Approach
+### Executable Calgary adapter
 
-Canonical work proceeds through:
+The repository contains an executable Calgary adapter that:
 
-    docs/increments/NNN-*.md
+- admits or rejects records using the established identity boundary;
+- preserves exact source identity;
+- emits the canonical `Case` identity core;
+- retains selected Calgary source-native evidence;
+- represents unavailable evidence explicitly;
+- does not fabricate values when evidence is absent or indeterminate.
 
-Meaningful changes should preserve, where applicable:
+### Calgary CSV record stream
+
+The repository contains a Calgary-specific standard-library CSV record stream
+that:
+
+- accepts an explicit `Path`;
+- validates the exact ordered 15-field source header;
+- rejects tested header drift;
+- rejects tested row-width mismatch;
+- preserves tested lexical source values;
+- yields `Mapping[str, str]` records;
+- tracks logical CSV data-record position;
+- handles quoted embedded newlines through Python's CSV parser;
+- streams lazily rather than materializing the complete artifact before
+  yielding records.
+
+### Artifact identity gate
+
+The Calgary source boundary includes an incremental SHA-256 verification gate.
+
+For tested synthetic inputs:
+
+- a matching expected digest returns the observed digest;
+- a mismatching expected digest raises a blocking
+  `CalgaryCsvArtifactDigestMismatch`;
+- the mismatch retains both expected and observed digest evidence.
+
+This is function-level artifact identity behavior.
+
+It is not authoritative source provenance and does not prove that every future
+caller will invoke the gate correctly.
+
+### Parser-to-adapter composition
+
+Synthetic verification establishes that:
+
+- a parser-emitted record can be passed directly to the existing Calgary
+  adapter;
+- selected identity and status semantics are preserved;
+- for one independently constructed equivalent synthetic fixture, the parser
+  path and hand-built mapping path produce equal complete deterministic adapter
+  results.
+
+This does not establish universal equivalence across every possible Calgary
+record.
+
+### Bounded real-artifact execution
+
+A local Calgary artifact matching the previously retained size and SHA-256 was
+exercised through the CSV record-stream boundary for a bounded prefix of three
+logical records.
+
+That smoke execution verified the tested prefix only.
+
+It is not a full-file or dataset-wide validation.
+
+## Completed Engineering Increments
+
+| Increment | Scope | Status |
+| --- | --- | --- |
+| 001 | Repository foundation | Complete |
+| 002 | Canonical Case contract | Complete |
+| 003 | Calgary source evidence validation | Complete |
+| 004 | Calgary source contract | Complete |
+| 005 | Executable Calgary Case adapter | Complete |
+| 006 | Reproducible Calgary CSV record stream and artifact identity gate | Complete |
+
+Increment 006 closed with:
+
+- 17 of 17 acceptance criteria satisfied;
+- 17 of 17 defined failure conditions not triggered;
+- 21 of 21 planned verification checks executed passing;
+- 17 focused CSV-boundary tests passing;
+- 142 repository regression tests passing.
+
+Those counts describe the Increment 006 closure checkpoint. They are not a
+claim of exhaustive correctness or production readiness.
+
+## What Is Not Established
+
+The repository does not currently establish:
+
+- complete Calgary dataset structural validity through the current parser;
+- absence of malformed records outside the bounded smoke prefix;
+- authoritative City of Calgary provenance;
+- immutable upstream source-version identity;
+- licence binding from local artifact identity;
+- persistent storage;
+- PostgreSQL ingestion;
+- database schema or migration behavior;
+- dataset-wide loading correctness;
+- analytical contracts;
+- operational metrics;
+- request-to-closure analysis;
+- operational diagnosis;
+- causal conclusions;
+- intervention selection;
+- intervention effectiveness;
+- AI suitability;
+- AI, RAG, or agent behavior;
+- production deployment;
+- production readiness;
+- portability of the Calgary implementation to other sources.
+
+These are separate engineering or research questions and require separate
+evidence before corresponding claims can be made.
+
+## Source Artifact
+
+The Calgary source artifact used for local engineering and verification is not
+distributed by this repository.
+
+Historical increment records deliberately retain local filesystem paths where
+those paths were part of actual execution evidence.
+
+For example, a record may refer to a path such as:
+
+```text
+/data/repos/Public Datasets/calgary_311.csv
+```
+
+These references are retained for reconstructability of the engineering
+record. They are not installation instructions and do not mean the external
+artifact is stored in this repository.
+
+External source artifacts remain subject to their own provenance, licensing,
+and distribution terms.
+
+Repository licensing does not grant rights to external datasets.
+
+## Reproducibility Boundary
+
+The project preserves, where available:
+
+- repository checkpoints;
+- Python runtime information;
+- source-contract decisions;
+- expected structural contracts;
+- synthetic fixtures;
+- automated-test commands;
+- actual observed test results;
+- negative and malformed-input evidence;
+- source-artifact identity observations;
+- remediation history.
+
+Not every historical execution detail is recoverable.
+
+For example, Increment 006 explicitly records that the exact command used for
+the bounded real-artifact smoke was not retained. The artifact identity,
+logical-record bound, records consumed, structural observations, and observed
+smoke outcome were retained.
+
+Missing evidence is recorded as missing rather than reconstructed after the
+fact.
+
+## Running the Tests
+
+The Increment 006 closure environment used Python 3.12.3 with the
+repository-local virtual environment.
+
+The project currently declares no third-party Python dependencies:
+
+```text
+dependencies = []
+```
+
+Run the complete test suite from the repository root with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+At the Increment 006 closure checkpoint:
+
+```text
+Ran 142 tests
+OK
+```
+
+The focused Calgary CSV record-stream suite can be run with:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+At Increment 006 closure:
+
+```text
+Ran 17 tests
+OK
+```
+
+## Research-Engineering Method
+
+Meaningful changes are developed through increment records under:
+
+```text
+docs/increments/
+```
+
+An increment may retain, where applicable:
 
 - objective;
 - scope and non-goals;
-- starting state;
+- starting checkpoint;
 - assumptions;
-- source or data contract;
-- baseline;
+- source or semantic contract;
 - planned implementation;
 - planned tests;
+- acceptance criteria;
 - failure criteria;
 - observed results;
-- failures and negative results;
+- negative results;
 - claim classification;
 - threats to validity;
-- reproducibility notes;
-- artifacts;
-- commit identity.
+- reproducibility evidence;
+- commit lineage.
 
-Planned tests are not observed results.
+Planned tests are not reported as observed evidence until they execute.
 
-Failures that materially affect interpretation should be retained.
+Passing internal tests are Engineering observations. They are not independent
+external validation.
 
-## Current State
+A working implementation is not treated as evidence of universality,
+production readiness, or portability.
 
-The repository is currently in its foundation increment.
+## Current Direction
 
-Implemented so far:
+The next research-engineering question is whether the complete digest-verified
+Calgary artifact can traverse the established parser and adapter boundary and
+support a narrowly predeclared descriptive baseline.
 
-- repository initialization on `main`;
-- Increment 001 engineering record;
-- repository-local Python 3.12 virtual environment;
-- minimal `.gitignore` excluding `.venv/`;
-- minimal `pyproject.toml` project metadata.
+That work has not yet been implemented or claimed by this repository.
 
-Not implemented yet:
+Persistence should be introduced only if later analytical or reproducibility
+requirements justify it.
 
-- source adapters;
-- source contracts;
-- canonical `Case` or `CaseEvent` models;
-- persistence;
-- PostgreSQL;
-- SQL analytics;
-- operational metric definitions;
-- APIs;
-- dashboards;
-- workflow analysis;
-- forecasting;
-- WFM or capacity modeling;
-- intervention-selection logic;
-- retrieval;
-- RAG;
-- LLM workflows;
-- agents;
-- outcome evaluation.
+No persistence architecture is currently established.
 
-No operational capability is claimed yet.
+## Repository Positioning
 
-## Current Python Contract
+This repository is a public portfolio and research-engineering artifact.
 
-Current project metadata declares:
+Its purpose is to make the engineering method, evidence chain, boundaries,
+failures, and reasoning inspectable.
 
-    Python >=3.12,<3.13
+It should not be interpreted as:
 
-No project dependencies are currently declared.
+- a supported production library;
+- an operational analytics platform;
+- a commercial analytics product;
+- a complete operational-intelligence system.
 
-No Python package or build backend has been established yet.
+## License
 
-## Repository Boundaries
+Repository licensing will be stated separately.
 
-This repository is independent from existing experimental projects including:
-
-- `support-escalation-lab`;
-- `applied-ai-case-studies`.
-
-Those repositories retain their own purposes, evidence, and engineering histories.
-
-Governed Execution is also a separate research program. A later integration may be evaluated if this platform eventually proposes consequential external actions, but that is not a current implementation priority.
-
-## Development Principle
-
-Evidence before assumption.
-
-Problem before technology.
-
-Baseline before intervention.
-
-Observed before inferred.
-
-Simple baseline before sophisticated model.
-
-Deterministic mechanism before AI where appropriate.
-
-AI only when warranted.
-
-Negative results preserved.
-
-Claims bounded to evidence.
+External datasets and source artifacts are not included and are not covered by
+the repository's eventual code or documentation licenses.
