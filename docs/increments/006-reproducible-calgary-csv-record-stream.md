@@ -1,10 +1,10 @@
 # Increment 006 - Reproducible Calgary CSV Record Stream
 
-Status: Planned
+Status: Complete
 
 Opened: 2026-09-13
 
-Completed: Not completed
+Completed: 2026-09-15
 
 ## Objective
 
@@ -604,13 +604,20 @@ implementation objective.
 
 Increment 006 is:
 
-    Status: Planned
+    Status: Complete
 
-No implementation has occurred. No source file was read during Increment
-006 planning. No current SHA-256 verification was performed during
-Increment 006 planning. No test has been written or executed for
-Increment 006. No dependency has been installed. No design choice in this
-document is presented as an Engineering observation.
+The Calgary-specific CSV record stream and exact ordered 15-field structural
+validation are implemented. Lexical preservation, lazy stream behavior,
+parser-to-adapter composition, and complete deterministic equality with one
+independently constructed equivalent fixture are verified. The Calgary-
+specific incremental SHA-256 artifact gate is implemented, and its synthetic
+match and mismatch behavior is verified. A bounded, digest-gated local-
+artifact smoke covering three logical records is retained. The focused and
+regression suites passed at final closure review, the engineering acceptance
+contract is satisfied, and Increment 006 is complete.
+
+This status does not establish full-dataset ingestion, persistence, analytics,
+production readiness, or authoritative provenance.
 
 ## Implementation Record 001 - CSV Record-Stream Boundary and Structural Failure Semantics
 
@@ -2341,3 +2348,398 @@ This verification does not establish:
 - analytical validity;
 - production readiness; or
 - portability to other sources.
+
+## Final Closure Review
+
+Closure review checkpoint:
+
+    54fb00cd3b29055598ce4b47afad54ed88e32fe3
+
+Closure review date:
+
+    2026-09-15
+
+Classification:
+
+    Engineering closure assessment based on retained implementation,
+    verification, and repository evidence.
+
+This closure assessment is not External evidence or a Research conclusion.
+
+### Acceptance-Criteria Disposition
+
+| Criterion | Disposition | Concise evidence |
+| --- | --- | --- |
+| AC1 | SATISFIED | Explicit `Path` Calgary record-stream boundary; Records 001-004 |
+| AC2 | SATISFIED | Exact ordered 15-field header tests; Records 002 and 008 |
+| AC3 | SATISFIED | Lazy `Mapping[str, str]` iteration and adapter composition; Records 002, 004, and 005 |
+| AC4 | SATISFIED | Lexical-value, whitespace, and empty-cell tests; Records 002 and 004 |
+| AC5 | SATISFIED | Generator implementation and bounded-consumption test; Record 004 |
+| AC6 | SATISFIED | Explicit extra-column rejection; Record 003 |
+| AC7 | SATISFIED | Explicit missing-column rejection; Record 003 |
+| AC8 | SATISFIED | Changed and reordered-header rejection; Records 002 and 008 |
+| AC9 | SATISFIED | Automated tests use temporary synthetic fixtures |
+| AC10 | SATISFIED | Direct composition and equivalent-fixture equality; Records 005 and 012 |
+| AC11 | SATISFIED | Standard library only; `dependencies = []` |
+| AC12 | SATISFIED | Local size and SHA-256 identity check before smoke; Record 006 |
+| AC13 | SATISFIED | Matching artifact supported a bounded three-record smoke; Record 007 |
+| AC14 | SATISFIED | Synthetic mismatch raises a blocking exception; Records 009-011 |
+| AC15 | SATISFIED | Increment 004/005 semantics and adapter remained unchanged |
+| AC16 | SATISFIED | Final focused and regression suites passed |
+| AC17 | SATISFIED | Final `git diff --check` passed with no output |
+
+Final totals:
+
+```text
+SATISFIED:
+    17
+
+PARTIALLY_SATISFIED:
+    0
+
+UNSATISFIED:
+    0
+
+NOT_APPLICABLE:
+    0
+```
+
+Each disposition remains bounded by the claim boundaries in the applicable
+Implementation Records. In particular, AC13 covers only three prefix records,
+and AC14 establishes function-level mismatch blocking rather than universal
+caller enforcement.
+
+### Failure-Criteria Disposition
+
+| Criterion | Disposition | Concise evidence |
+| --- | --- | --- |
+| FC1 | NOT_TRIGGERED | No hard-coded Calgary path in application logic |
+| FC2 | NOT_TRIGGERED | Changed and reordered headers are rejected; Records 002 and 008 |
+| FC3 | NOT_TRIGGERED | Extra and missing row widths are rejected; Record 003 |
+| FC4 | NOT_TRIGGERED | Tested source strings retain exact lexical values |
+| FC5 | NOT_TRIGGERED | Parser yields strings without timestamp or numeric conversion |
+| FC6 | NOT_TRIGGERED | Lazy generator and bounded-consumption evidence retained |
+| FC7 | NOT_TRIGGERED | Automated tests use temporary files, not the local artifact |
+| FC8 | NOT_TRIGGERED | Tested mismatch raises a blocking exception, not a warning; Record 011 |
+| FC9 | NOT_TRIGGERED | No persistence layer entered scope |
+| FC10 | NOT_TRIGGERED | No analytics or metrics entered scope |
+| FC11 | NOT_TRIGGERED | Deferred canonical semantics were not silently mapped |
+| FC12 | NOT_TRIGGERED | No generic ingestion framework was introduced |
+| FC13 | NOT_TRIGGERED | Bounded smoke remains explicitly bounded, not dataset-wide |
+| FC14 | NOT_TRIGGERED | Local digest match is not described as authoritative provenance |
+| FC15 | NOT_TRIGGERED | No new dependency was introduced |
+| FC16 | NOT_TRIGGERED | Final automated suites passed |
+| FC17 | NOT_TRIGGERED | Final `git diff --check` passed |
+
+Final totals:
+
+```text
+NOT_TRIGGERED:
+    17
+
+TRIGGERED_AND_RESOLVED:
+    0
+
+TRIGGERED_AND_UNRESOLVED:
+    0
+
+NOT_EVALUATED:
+    0
+```
+
+FC8's disposition is limited to the tested digest-gate function boundary. It
+does not prove that every possible caller invokes the gate.
+
+### Planned-Test Disposition
+
+Original consolidated planned checks:
+
+    21
+
+| Check | Disposition | Evidence |
+| --- | --- | --- |
+| 1. Exact valid header | EXECUTED_PASSING | Record 002 |
+| 2. Empty or missing header | EXECUTED_PASSING | Record 002 |
+| 3. Changed header | EXECUTED_PASSING | Record 002 |
+| 4. Reordered header | EXECUTED_PASSING | Record 008 |
+| 5. Valid one-row iteration | EXECUTED_PASSING | Record 002 |
+| 6. Valid multi-row iteration | EXECUTED_PASSING | Record 004 |
+| 7. Empty-cell preservation | EXECUTED_PASSING | Record 004 |
+| 8. Whitespace preservation | EXECUTED_PASSING | Record 002 |
+| 9. Punctuation preservation | EXECUTED_PASSING | Complete synthetic row-value assertions |
+| 10. No normalization or type conversion | EXECUTED_PASSING | Records 002 and 004 |
+| 11. Extra-column rejection | EXECUTED_PASSING | Record 003 |
+| 12. Missing-column rejection | EXECUTED_PASSING | Record 003 |
+| 13. First logical-record numbering | EXECUTED_PASSING | Record 003 |
+| 14. Malformed third logical-record numbering | EXECUTED_PASSING | Record 003 |
+| 15. Embedded-newline logical numbering | EXECUTED_PASSING | Record 003 |
+| 16. Bounded lazy consumption | EXECUTED_PASSING | Record 004 |
+| 17. Explicit `Path` input | EXECUTED_PASSING | Records 002 and 004 |
+| 18. Equivalent hand-built adapter fixture | EXECUTED_PASSING | Record 012 |
+| 19. Native `FileNotFoundError` | EXECUTED_PASSING | Record 004 |
+| 20. Synthetic digest match and mismatch | EXECUTED_PASSING | Record 011 |
+| 21. Digest-gated real-artifact smoke | EXECUTED_PASSING | Records 006-007 |
+
+Final totals:
+
+```text
+EXECUTED_PASSING:
+    21
+
+EXECUTED_FAILING:
+    0
+
+SUPERSEDED_WITH_JUSTIFICATION:
+    0
+
+NOT_EXECUTED:
+    0
+```
+
+### Final Observed Results
+
+Focused command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed:
+
+```text
+17 tests
+0 failures
+0 errors
+OK
+```
+
+Regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed:
+
+```text
+142 tests
+0 failures
+0 errors
+OK
+```
+
+Repository whitespace check:
+
+```text
+git diff --check:
+    PASS
+    no output
+```
+
+Runtime:
+
+```text
+Python:
+    3.12.3
+
+Repository-local interpreter:
+    /data/repos/personal/support-operations-intelligence/.venv/bin/python
+
+Shell VIRTUAL_ENV:
+    unset
+```
+
+Elapsed times are not used as evidence beyond successful execution.
+
+#### Artifact-Identity Evidence
+
+Record 006 retains the local artifact path and the matching expected and
+observed size and SHA-256 values. This establishes byte identity to the
+previously hashed local artifact. Record 007 retains the subsequent bounded
+three-logical-record smoke after that identity match. Records 009-011 retain
+executable synthetic digest-gate match and mismatch evidence, including the
+blocking exception's expected and observed digest values.
+
+Byte identity to a previously hashed local artifact is not authoritative City
+of Calgary provenance, immutable upstream version identity, or licence
+binding.
+
+#### Parser-to-Adapter Evidence
+
+Record 005 retains direct parser-to-adapter composition with selected identity
+and status assertions. Record 012 adds an independently constructed equivalent
+mapping path and complete deterministic adapter-result equality for one
+synthetic fixture.
+
+```text
+Acceptance Criterion 10:
+    SATISFIED
+
+Original equivalent-fixture planned test:
+    EXECUTED_PASSING
+```
+
+This evidence does not establish universal adapter equivalence.
+
+### Final Claim Classification
+
+```text
+Design choices:
+    Calgary-specific CSV record boundary;
+    structural validation;
+    artifact digest-gate boundary;
+    fail-closed mismatch transport.
+
+Engineering observations:
+    passing synthetic parser tests;
+    malformed-input behavior;
+    lazy-consumption verification;
+    parser-adapter composition;
+    equivalent-fixture equality;
+    synthetic digest match/mismatch;
+    bounded real-artifact smoke;
+    final passing suites.
+
+Prior internal artifact evidence:
+    Increment 003 characterization and recorded expected digest values.
+
+External evidence:
+    NONE newly established by Increment 006.
+
+Research conclusions:
+    NONE.
+
+Production validation:
+    NONE.
+
+Portability conclusion:
+    NONE.
+```
+
+### Final Supported Claim
+
+A deterministic, lazy, Calgary-specific standard-library CSV record-stream
+boundary validates the committed ordered 15-field structure, preserves tested
+lexical values, rejects tested structural drift, and composes with the
+unchanged Calgary adapter for tested synthetic inputs, including complete
+deterministic equality with one independently constructed equivalent fixture.
+
+The Increment also provides a Calgary-specific incremental SHA-256 artifact-
+identity gate whose tested synthetic match path returns the observed digest
+and whose tested mismatch path fails closed with expected and observed digest
+evidence.
+
+A local artifact matching the previously recorded size and SHA-256 was
+successfully exercised through the record-stream boundary for a bounded prefix
+of three logical records.
+
+### Unsupported Claims at Closure
+
+Increment 006 does not establish:
+
+- complete Calgary dataset validation;
+- full-file correctness;
+- absence of malformed rows after the tested prefix;
+- authoritative City of Calgary provenance;
+- immutable upstream source or version identity;
+- licence binding;
+- universal digest-gate invocation;
+- universal parser-to-adapter equivalence;
+- arbitrary `Mapping` compatibility;
+- production ingestion correctness;
+- persistence correctness;
+- analytical correctness;
+- temporal-semantic correctness;
+- portability to other sources; or
+- production readiness.
+
+### Threats to Validity
+
+The following are retained as limitations, not failed acceptance criteria:
+
+1. Real-artifact execution covered only three prefix records.
+2. Increment 006 did not perform a full-file parser execution.
+3. Equivalent-fixture equality covers one synthetic fixture.
+4. Digest mismatch establishes function-level blocking, not universal caller-
+   side enforcement.
+5. Local digest identity is not authoritative external provenance.
+6. Lexical preservation does not establish source semantic correctness.
+7. Synthetic malformed cases are representative, not exhaustive.
+
+### Final Reproducibility Summary
+
+Retained:
+
+- implementation lineage in Git;
+- Python version 3.12.3;
+- repository-local interpreter path:
+  `/data/repos/personal/support-operations-intelligence/.venv/bin/python`;
+- `dependencies = []`;
+- parser design decisions;
+- expected ordered 15-field header;
+- synthetic fixtures in committed tests;
+- automated test commands;
+- automated test results;
+- real-artifact path;
+- expected SHA-256;
+- observed SHA-256 match;
+- records consumed: 3;
+- smoke outcome;
+- malformed and negative evidence; and
+- RED-to-GREEN digest remediation lineage.
+
+Exact bounded-smoke command:
+
+    NOT_RETAINED
+
+Preserved instead:
+
+- starting checkpoint;
+- byte-identity gate;
+- artifact path;
+- logical-record bound;
+- actual records consumed;
+- structural observations;
+- smoke PASS outcome; and
+- claim boundary.
+
+The missing exact bounded-smoke command is a reproducibility limitation. No
+plausible command has been reconstructed or fabricated.
+
+Closure commit:
+
+    SELF - the commit that first records Increment 006 Status = Complete.
+
+Exact SHA:
+
+    determined at commit creation and verifiable directly from Git history.
+
+Starting parent checkpoint:
+
+    54fb00cd3b29055598ce4b47afad54ed88e32fe3
+
+### Closure Determination
+
+```text
+ENGINEERING_GAPS = NONE
+
+CLOSURE_DOCUMENTATION_GAPS = NONE after this closure update
+
+Final determination:
+    INCREMENT_006_COMPLETE
+```
+
+This determination is supported by:
+
+- 17 of 17 acceptance criteria satisfied;
+- 17 of 17 failure conditions not triggered;
+- 21 of 21 consolidated planned checks executed passing;
+- 17 of 17 focused tests passing;
+- 142 of 142 regression tests passing;
+- `git diff --check` passing;
+- non-goals remaining preserved; and
+- remaining limitations being retained explicitly.
+
+No subsequent project stage is started by this closure.
