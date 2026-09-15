@@ -1869,3 +1869,135 @@ This design does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 010 - Artifact Digest Gate RED Verification
+
+### Objective
+
+Establish executable failing tests for the predeclared Increment 006 digest
+verification gate before production implementation.
+
+### Starting Checkpoint
+
+    419b09aa22f0cff337362145d1f6668380aed3b2
+
+### Planned Tests
+
+The test definitions derive from committed Implementation Record 009 and add
+exactly:
+
+1. synthetic digest match; and
+2. synthetic digest mismatch with blocking exception evidence.
+
+### RED Execution Result
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Actual output summary:
+
+```text
+test_calgary_csv_record_stream
+    (unittest.loader._FailedTest.test_calgary_csv_record_stream) ... ERROR
+
+ImportError: cannot import name 'CalgaryCsvArtifactDigestMismatch' from
+    'support_operations_intelligence.calgary_csv'
+
+Ran 1 test in 0.000s
+FAILED (errors=1)
+failures: 0
+errors: 1
+```
+
+Authored digest tests:
+
+    2
+
+Digest test methods executed:
+
+    0
+
+Pre-existing parser test methods executed:
+
+    0 of 14
+
+Reason:
+
+    module import failed because the planned production exception does not
+    yet exist
+
+The import stopped at the first missing symbol,
+`CalgaryCsvArtifactDigestMismatch`. The planned
+`verify_calgary_csv_artifact_sha256` production function is also absent at the
+starting checkpoint, but this run did not independently surface that second
+missing import because module loading had already failed.
+
+The result is not represented as two failed test methods. `unittest` reported
+one loader `_FailedTest`, and neither newly authored digest test method ran.
+
+### RED Classification
+
+Test definitions:
+
+    Design implementation derived from Record 009
+
+Observed failing execution:
+
+    Engineering observation
+
+Production implementation:
+
+    NOT_STARTED in this Record
+
+GREEN evidence:
+
+    NONE
+
+### RED Interpretation
+
+The RED run demonstrates that the committed repository does not yet provide
+the artifact digest verification capability required by Record 009. It does
+not demonstrate that the planned implementation will be correct. This is not
+a product defect, External evidence, or a Research conclusion.
+
+### Acceptance and Failure Status
+
+```text
+Acceptance Criterion 12:
+    unchanged; supported by Record 006
+
+Acceptance Criterion 13:
+    unchanged; supported by Record 007
+
+Acceptance Criterion 14:
+    NOT YET SATISFIED
+
+Failure Criterion 8:
+    NOT YET EVALUATED by passing executable mismatch behavior
+```
+
+The failing test is preparation for closing these requirements, not closure
+evidence itself.
+
+### Claim Boundary
+
+This RED evidence does not establish:
+
+- successful digest computation;
+- correct incremental hashing;
+- match success;
+- mismatch blocking behavior;
+- exception evidence correctness;
+- real-artifact verification;
+- provenance;
+- parser correctness;
+- adapter correctness;
+- full-file correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.

@@ -1,6 +1,7 @@
 import csv
 import unittest
 from collections.abc import Mapping
+from hashlib import sha256
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -11,9 +12,11 @@ from support_operations_intelligence.calgary_adapter import (
 )
 from support_operations_intelligence.calgary_csv import (
     EXPECTED_CALGARY_HEADER,
+    CalgaryCsvArtifactDigestMismatch,
     CalgaryCsvStructureError,
     CalgaryCsvStructureErrorReason,
     iter_calgary_csv_records,
+    verify_calgary_csv_artifact_sha256,
 )
 from support_operations_intelligence.evidence import ObservedEvidence
 from support_operations_intelligence.identity import RejectedIdentity
@@ -71,6 +74,39 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
     def test_expected_header_is_exact_immutable_tuple(self):
         self.assertIsInstance(EXPECTED_CALGARY_HEADER, tuple)
         self.assertEqual(EXPECTED_CALGARY_HEADER, EXPECTED_HEADER)
+
+    def test_synthetic_artifact_digest_match_returns_observed_digest(self):
+        synthetic_bytes = b"synthetic Calgary digest gate fixture\n"
+        expected_sha256 = sha256(synthetic_bytes).hexdigest()
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "digest-match.csv"
+            path.write_bytes(synthetic_bytes)
+
+            observed_sha256 = verify_calgary_csv_artifact_sha256(
+                path,
+                expected_sha256,
+            )
+
+        self.assertEqual(observed_sha256, expected_sha256)
+
+    def test_synthetic_artifact_digest_mismatch_fails_closed(self):
+        synthetic_bytes = b"synthetic Calgary digest gate fixture\n"
+        actual_sha256 = sha256(synthetic_bytes).hexdigest()
+        expected_sha256 = "0" * 64
+        self.assertNotEqual(expected_sha256, actual_sha256)
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "digest-mismatch.csv"
+            path.write_bytes(synthetic_bytes)
+
+            with self.assertRaises(
+                CalgaryCsvArtifactDigestMismatch
+            ) as captured:
+                verify_calgary_csv_artifact_sha256(path, expected_sha256)
+
+        self.assertEqual(captured.exception.expected_sha256, expected_sha256)
+        self.assertEqual(captured.exception.observed_sha256, actual_sha256)
 
     def test_one_valid_data_record_preserves_lexical_values(self):
         row = (
