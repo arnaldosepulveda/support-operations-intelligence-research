@@ -428,6 +428,55 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
             ObservedEvidence(" Synthetic Open "),
         )
 
+    def test_parsed_record_matches_equivalent_hand_built_adapter_fixture(self):
+        row = (
+            " fixture-equivalence-id-937 ",
+            "requested::2026-03-04T05:06:07Z",
+            "updated::2026-04-05T06:07:08Z",
+            "closed::2026-05-06T07:08:09Z",
+            " status::fixture-equivalence::open ",
+            " source::fixture-equivalence::mobile ",
+            " service::fixture-equivalence::roadway ",
+            " agency::fixture-equivalence::transport ",
+            "937 Fixture Equivalence Avenue",
+            "FX9",
+            "Fixture Equivalence Community",
+            "fixture-equivalence-location-type",
+            "-113.9370",
+            "50.9370",
+            "POINT (-113.9370 50.9370)",
+        )
+        hand_built_mapping = {
+            "service_request_id": " fixture-equivalence-id-937 ",
+            "requested_date": "requested::2026-03-04T05:06:07Z",
+            "updated_date": "updated::2026-04-05T06:07:08Z",
+            "closed_date": "closed::2026-05-06T07:08:09Z",
+            "status_description": " status::fixture-equivalence::open ",
+            "source": " source::fixture-equivalence::mobile ",
+            "service_name": " service::fixture-equivalence::roadway ",
+            "agency_responsible": " agency::fixture-equivalence::transport ",
+            "address": "937 Fixture Equivalence Avenue",
+            "comm_code": "FX9",
+            "comm_name": "Fixture Equivalence Community",
+            "location_type": "fixture-equivalence-location-type",
+            "longitude": "-113.9370",
+            "latitude": "50.9370",
+            "point": "POINT (-113.9370 50.9370)",
+        }
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "equivalent-adapter-fixture.csv"
+            _write_synthetic_csv(path, [EXPECTED_HEADER, row])
+
+            iterator = iter_calgary_csv_records(path)
+            parsed_mapping = next(iterator)
+            parsed_result = adapt_calgary_record(parsed_mapping)
+            iterator.close()
+
+        hand_built_result = adapt_calgary_record(hand_built_mapping)
+
+        self.assertEqual(parsed_result, hand_built_result)
+
 
 if __name__ == "__main__":
     unittest.main()

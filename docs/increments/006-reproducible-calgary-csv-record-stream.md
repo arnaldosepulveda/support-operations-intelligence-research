@@ -2182,3 +2182,162 @@ This GREEN slice does not establish:
 - analytical validity;
 - portability to other sources; or
 - production readiness.
+
+## Implementation Record 012 - Equivalent Adapter Fixture Comparison Verification
+
+### Objective
+
+Execute the explicitly planned Increment 006 comparison showing that a
+parser-emitted synthetic row and an independently constructed equivalent
+`dict` produce the same complete deterministic result when passed to the
+unchanged Increment 005 Calgary adapter.
+
+### Starting Checkpoint
+
+    69257dd67b44c91e80b3182e47e107721768beeb
+
+### History / Classification
+
+The parser and adapter behavior under test already existed before this slice.
+
+This was not a RED-to-GREEN implementation cycle.
+
+No RED state was inferred or fabricated.
+
+```text
+Test definition:
+    execution of an explicitly predeclared Increment 006 planned test
+
+Observed execution:
+    Engineering observation
+
+Production implementation:
+    unchanged
+```
+
+### Exact Test Proposition
+
+The test compares:
+
+```text
+adapt_calgary_record(parser_emitted_mapping)
+```
+
+with:
+
+```text
+adapt_calgary_record(independently_constructed_equivalent_dict)
+```
+
+using complete result equality.
+
+The hand-built `dict` was constructed independently from the known synthetic
+fixture values. It was not copied from the parser mapping and was not created
+with `dict(parsed_mapping)`.
+
+The parser-emitted mapping was obtained from a temporary synthetic CSV file
+through `iter_calgary_csv_records(path)`. Both mappings contained the same
+exact 15 lexical field values and were passed separately to the unchanged
+`adapt_calgary_record` function.
+
+### Actual Execution
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 17 tests in 0.003s
+OK
+failures: 0
+errors: 0
+```
+
+Quiet regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Regression result observed:
+
+```text
+Ran 142 tests in 0.005s
+OK
+failures: 0
+errors: 0
+```
+
+Because the production behavior already existed and the new test passed on
+its first execution, the passing execution is classified as an Engineering
+observation. No RED state was fabricated.
+
+### Verification Status
+
+```text
+Equivalent hand-built adapter fixture comparison:
+    DEDICATEDLY_VERIFIED
+
+Complete deterministic adapter-result equality:
+    DEDICATEDLY_VERIFIED
+
+Parser-to-adapter complete-result equivalence for the tested synthetic row:
+    DEDICATEDLY_VERIFIED
+```
+
+These statuses apply only to the one tested synthetic fixture.
+
+### Relationship to Existing Composition Evidence
+
+Existing Record 005 composition evidence established:
+
+- parser `Mapping` passes directly into `adapt_calgary_record`;
+- accepted result; and
+- selected identity/status semantics.
+
+Record 012 adds:
+
+- an independently constructed equivalent `dict` path;
+- complete deterministic adapter-result equality; and
+- source-native adapted evidence participating in the equality comparison
+  rather than remaining unasserted.
+
+Record 005 remains sufficient evidence for Acceptance Criterion 10; Record
+012 executes the separately predeclared, stronger fixture-comparison test.
+
+### Acceptance / Planned-Test Effect
+
+```text
+Acceptance Criterion 10:
+    remains SATISFIED
+
+Original planned equivalent-fixture comparison:
+    EXECUTED_PASSING
+```
+
+The original planned comparison is no longer `NOT_EXECUTED` and does not need
+`SUPERSEDED_WITH_JUSTIFICATION`. This closes the specific planned-test gap
+identified during the closure review. It does not perform or replace the full
+Increment 006 closure matrix.
+
+### Claim Boundary
+
+This verification does not establish:
+
+- equivalence for every possible Calgary row;
+- malformed-row adapter behavior;
+- every `RejectedIdentity` path;
+- arbitrary `Mapping` implementation compatibility;
+- real-artifact parser-to-adapter equivalence;
+- dataset-wide composition correctness;
+- semantic correctness of Calgary source data;
+- persistence correctness;
+- analytical validity;
+- production readiness; or
+- portability to other sources.
