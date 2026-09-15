@@ -1655,3 +1655,217 @@ This dedicated test does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 009 - Artifact Digest Verification Gate Design
+
+### Classification
+
+    Design choice / planned decision
+
+No source or test execution occurs in this record. Nothing in this record is
+classified as an Engineering observation.
+
+### Objective
+
+Define the smallest Calgary-specific executable boundary needed to verify a
+file's SHA-256 before bounded real-artifact execution and to ensure that a
+digest mismatch fails closed. This design closes a design ambiguity discovered
+during the Increment 006 closure-readiness review.
+
+### Placement
+
+Decision:
+
+    src/support_operations_intelligence/calgary_csv.py
+
+The digest-verification mechanism belongs adjacent to the Calgary CSV source
+boundary because Increment 006 is Calgary-specific, no reusable digest or
+artifact framework currently exists, and no demonstrated cross-source
+requirement justifies a generic artifact-identity subsystem. Keeping this
+mechanism source-specific avoids unnecessary architectural expansion. No new
+generic utility framework will be introduced.
+
+### Planned Public API
+
+```python
+def verify_calgary_csv_artifact_sha256(
+    path: Path,
+    expected_sha256: str,
+) -> str:
+    ...
+```
+
+`path` is explicit; no Calgary artifact path is hard-coded.
+`expected_sha256` is supplied explicitly by the caller. The function computes
+the observed SHA-256 incrementally. If the observed digest equals the expected
+digest, it returns the observed SHA-256 string. The returned string is the
+lowercase hexadecimal digest produced by Python's standard-library SHA-256
+implementation. If the digests differ, the function raises a dedicated
+blocking exception.
+
+This boundary does not introduce a generic `Result` or `Either` abstraction.
+
+### Planned Mismatch Exception
+
+The planned exception is:
+
+    CalgaryCsvArtifactDigestMismatch
+
+It exposes at minimum:
+
+    expected_sha256
+    observed_sha256
+
+`CalgaryCsvArtifactDigestMismatch` is distinct from
+`CalgaryCsvStructureError`:
+
+```text
+CalgaryCsvStructureError:
+    CSV structural-contract failure
+
+CalgaryCsvArtifactDigestMismatch:
+    artifact identity/precondition failure
+```
+
+A digest mismatch is not a warning and is not returned as `False` in a way
+that could allow execution to continue accidentally. The exception is the
+fail-closed transport for this Increment 006 boundary.
+
+### Match Semantics
+
+Given a synthetic file whose expected digest is correct,
+`verify_calgary_csv_artifact_sha256(...)` returns the observed digest. This
+means the identity precondition succeeded. It does not itself execute the CSV
+parser or adapter.
+
+### Mismatch Semantics
+
+Given a synthetic file and an intentionally incorrect expected digest,
+`verify_calgary_csv_artifact_sha256(...)` raises
+`CalgaryCsvArtifactDigestMismatch` before any subsequent caller-controlled
+bounded parser execution can be treated as execution against the expected
+artifact. This is the executable blocking behavior required by Acceptance
+Criterion 14.
+
+### Planned Hashing Mechanism
+
+The implementation will use:
+
+- Python's standard library only;
+- `hashlib.sha256`;
+- binary file opening;
+- incremental, chunked reads;
+- no complete-file byte materialization; and
+- no third-party dependency.
+
+The exact internal chunk size is an implementation detail. No public
+chunk-size configuration is planned.
+
+### Expected-Digest Comparison
+
+Comparison is against the explicit expected SHA-256 string supplied by the
+caller. Increment 006 does not introduce a digest registry, provenance lookup,
+remote digest fetching, or inference about which digest should apply. The
+caller owns supplying the expected digest. This boundary does not expand into
+artifact discovery or source provenance.
+
+### Native-Failure Boundary
+
+Unrelated native failures, including `FileNotFoundError`, `PermissionError`,
+and other unexpected file-I/O failures, remain native unless a later explicit
+design decision changes that boundary. The implementation must not use a broad
+`except Exception` to translate unrelated failures into
+`CalgaryCsvArtifactDigestMismatch`.
+
+### Planned Synthetic Tests
+
+Exactly two new synthetic test cases are required for the next implementation
+step.
+
+Test A - Match:
+
+- create a temporary synthetic file;
+- compute its expected SHA-256 independently in the test using standard-
+  library hashing over the known synthetic bytes;
+- call `verify_calgary_csv_artifact_sha256`;
+- assert that the returned digest equals the expected digest; and
+- do not involve the real Calgary artifact.
+
+Test B - Mismatch:
+
+- create a temporary synthetic file;
+- provide an intentionally incorrect expected SHA-256;
+- assert `CalgaryCsvArtifactDigestMismatch`;
+- assert `exception.expected_sha256` equals the supplied expected digest;
+- assert `exception.observed_sha256` equals the actual digest of the synthetic
+  file; and
+- verify that the mismatch interrupts control flow rather than producing a
+  warning or successful gate.
+
+No real-artifact test is planned for this automated slice.
+
+### Planned RED/GREEN History
+
+Production digest-gate code does not exist at the starting checkpoint.
+Therefore the next implementation slice may legitimately use:
+
+```text
+RED
+    ->
+implementation
+    ->
+GREEN
+```
+
+No RED execution has occurred in this record; the sequence is planned only.
+
+### Acceptance and Failure Relationship
+
+```text
+Acceptance Criterion 12:
+    already supported by Record 006 chronology and evidence
+
+Acceptance Criterion 13:
+    already supported by Record 007 bounded smoke
+
+Acceptance Criterion 14:
+    pending executable synthetic mismatch verification
+
+Failure Criterion 8:
+    pending executable evidence that mismatch raises a blocking failure and
+    is not reduced to a warning
+```
+
+The planned two-test slice is intended to close Acceptance Criterion 14 and
+evaluate Failure Criterion 8.
+
+### Non-Goals
+
+- generic artifact governance framework;
+- generic ingestion framework;
+- remote provenance service;
+- manifest registry;
+- signature verification;
+- certificate or PKI verification;
+- content-addressable storage;
+- persistence or database work;
+- analytics; and
+- production deployment.
+
+### Claim Boundary
+
+This design does not establish:
+
+- that any digest computation has been implemented in repository source;
+- that synthetic match behavior has passed;
+- that synthetic mismatch behavior has passed;
+- that the real Calgary artifact has been re-hashed;
+- authoritative provenance;
+- immutable upstream version identity;
+- licence binding;
+- CSV structural correctness;
+- parser correctness;
+- adapter correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.
