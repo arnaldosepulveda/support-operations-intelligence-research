@@ -1359,3 +1359,99 @@ This verification slice does not establish:
 - persistence correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 006 - Local Calgary Artifact Identity Verification
+
+### Objective
+
+Determine whether the local Calgary CSV currently present at the expected
+path is byte-identical to the prospective artifact characterized in Increment
+003 before allowing real-artifact parser execution.
+
+### Evidence Classification
+
+Prior size and digest values:
+
+    Prior internal evidence from Increment 003
+
+Current `stat` and SHA-256 execution:
+
+    Engineering observation
+
+### Starting Checkpoint
+
+    86168b2868de6ab71a1fe5dd912584818b4fcd8e
+
+### Expected Artifact Identity
+
+Expected local path:
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+Expected size:
+
+    1978541467 bytes
+
+Expected SHA-256:
+
+    9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+
+### Current Engineering Observations
+
+File-existence result:
+
+    REGULAR_FILE_EXISTS
+
+Observed size:
+
+    1978541467 bytes
+
+Size comparison:
+
+    SIZE_MATCH
+
+Observed SHA-256:
+
+    9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+
+Digest comparison:
+
+    SHA256_MATCH
+
+### Permitted Interpretation
+
+The local artifact is byte-identical to the prospective artifact identified
+by the recorded size and SHA-256 values.
+
+A matching digest establishes byte identity to the previously hashed local
+artifact. It does not establish authoritative external provenance.
+
+This identity verification does not establish:
+
+- authoritative City of Calgary provenance;
+- immutable upstream version binding;
+- historical publication identity;
+- historical licence binding;
+- semantic correctness;
+- CSV structural correctness;
+- row-count correctness;
+- parser correctness;
+- adapter correctness;
+- real-artifact readability;
+- real-artifact smoke success;
+- full-file correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.
+
+No CSV content was parsed or sampled during this identity verification.
+
+### Real-Artifact Execution Gate
+
+```text
+REAL_ARTIFACT_SMOKE_GATE:
+    IDENTITY_MATCH_CONFIRMED
+```
+
+A later bounded real-artifact parser smoke may proceed against this exact
+artifact. No parser smoke was performed in this task.
