@@ -2001,3 +2001,184 @@ This RED evidence does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 011 - Artifact Digest Gate GREEN Implementation
+
+### Objective
+
+Implement the Record 009 artifact digest verification gate and move the
+committed Record 010 tests from import-level RED to executable GREEN without
+changing the tests.
+
+### Starting Checkpoint
+
+    823f8719d3dc2aeceb45afc152e679ae0b6e7836
+
+### RED Reproduction Before Implementation
+
+Command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Actual result:
+
+```text
+test_calgary_csv_record_stream
+    (unittest.loader._FailedTest.test_calgary_csv_record_stream) ... ERROR
+
+ImportError: cannot import name 'CalgaryCsvArtifactDigestMismatch' from
+    'support_operations_intelligence.calgary_csv'
+
+Ran 1 test in 0.000s
+FAILED (errors=1)
+failures: 0
+errors: 1
+```
+
+The first missing production symbol reported was
+`CalgaryCsvArtifactDigestMismatch`. Module import failed before any authored
+test method executed: zero of the two digest methods and zero of the 14
+pre-existing parser methods ran. This preserves Record 010's actual loader-
+level RED history; it is not rewritten as two failed tests.
+
+### Production Implementation
+
+Production implementation added:
+
+    CalgaryCsvArtifactDigestMismatch
+    verify_calgary_csv_artifact_sha256
+
+Digest-gate implementation classification:
+
+    Design implementation
+
+The verifier:
+
+- accepts an explicit `Path` and caller-supplied `expected_sha256`;
+- opens the file in binary mode;
+- uses standard-library `hashlib.sha256`;
+- hashes incrementally through chunked reads without materializing the entire
+  file as bytes;
+- produces the observed lowercase hexadecimal digest with `hexdigest()`;
+- compares the observed digest exactly with the caller-supplied expected
+  string;
+- returns the observed digest on a match;
+- raises `CalgaryCsvArtifactDigestMismatch` on a mismatch;
+- retains `expected_sha256` and `observed_sha256` on the exception; and
+- leaves unrelated native file failures native.
+
+No expected-digest case normalization, whitespace normalization, length
+validation, hexadecimal-syntax validation, registry lookup, digest discovery,
+or default digest was added. No broad exception translation was added.
+
+### GREEN Execution
+
+Passing synthetic executions are classified as:
+
+    Engineering observations
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 16 tests in 0.004s
+OK
+failures: 0
+errors: 0
+```
+
+Both committed digest tests executed and passed without modification.
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 141 tests in 0.006s
+OK
+failures: 0
+errors: 0
+```
+
+### Updated Verification Status
+
+```text
+Synthetic digest match:
+    DEDICATEDLY_VERIFIED
+
+Synthetic digest mismatch:
+    DEDICATEDLY_VERIFIED
+
+Mismatch blocking behavior:
+    DEDICATEDLY_VERIFIED
+
+Expected/observed mismatch evidence:
+    DEDICATEDLY_VERIFIED
+```
+
+### Acceptance and Failure Effect
+
+```text
+Acceptance Criterion 12:
+    unchanged; previously supported by Record 006
+
+Acceptance Criterion 13:
+    unchanged; previously supported by Record 007
+
+Acceptance Criterion 14:
+    SATISFIED by synthetic executable mismatch-path evidence
+
+Failure Criterion 8:
+    NOT_TRIGGERED under the tested synthetic mismatch case because mismatch
+    raises a blocking exception rather than being ignored or reduced to a
+    warning
+```
+
+This verifies the designed function's mismatch path. It does not establish
+that every possible caller will invoke the gate correctly.
+
+### Strongest Supported Interpretation
+
+For tested synthetic files, the Calgary-specific verifier incrementally
+computes SHA-256, returns the observed digest when it equals the supplied
+expected digest, and raises a blocking exception carrying expected and
+observed digests when they differ.
+
+### Claim Classification
+
+The digest-gate implementation is Design implementation. The passing
+synthetic executions are Engineering observations. Neither is classified as
+External evidence, an Internal evaluation result, or a Research conclusion.
+
+### Claim Boundary
+
+This GREEN slice does not establish:
+
+- authoritative Calgary provenance;
+- immutable source or version identity;
+- licence binding;
+- that every caller invokes the gate before parsing;
+- real-artifact re-verification in this record;
+- parser correctness;
+- adapter correctness;
+- full-file correctness;
+- dataset-wide correctness;
+- persistence correctness;
+- analytical validity;
+- portability to other sources; or
+- production readiness.

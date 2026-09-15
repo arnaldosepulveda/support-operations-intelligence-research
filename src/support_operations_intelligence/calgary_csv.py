@@ -1,6 +1,7 @@
 import csv
 from collections.abc import Iterator, Mapping
 from enum import Enum
+from hashlib import sha256
 from pathlib import Path
 
 
@@ -43,6 +44,39 @@ class CalgaryCsvStructureError(Exception):
         self.logical_data_record_number = logical_data_record_number
         self.expected_column_count = expected_column_count
         self.actual_column_count = actual_column_count
+
+
+class CalgaryCsvArtifactDigestMismatch(Exception):
+    def __init__(
+        self,
+        *,
+        expected_sha256: str,
+        observed_sha256: str,
+    ) -> None:
+        super().__init__(
+            f"expected SHA-256 {expected_sha256}, observed {observed_sha256}"
+        )
+        self.expected_sha256 = expected_sha256
+        self.observed_sha256 = observed_sha256
+
+
+def verify_calgary_csv_artifact_sha256(
+    path: Path,
+    expected_sha256: str,
+) -> str:
+    digest = sha256()
+    with path.open(mode="rb") as artifact_file:
+        while chunk := artifact_file.read(1024 * 1024):
+            digest.update(chunk)
+
+    observed_sha256 = digest.hexdigest()
+    if observed_sha256 != expected_sha256:
+        raise CalgaryCsvArtifactDigestMismatch(
+            expected_sha256=expected_sha256,
+            observed_sha256=observed_sha256,
+        )
+
+    return observed_sha256
 
 
 def iter_calgary_csv_records(
