@@ -1250,3 +1250,112 @@ This verification slice does not establish:
 - dataset-wide correctness;
 - analytical validity; or
 - production readiness.
+
+## Implementation Record 005 - Parser-to-Adapter Composition Verification
+
+### Objective
+
+Verify that the record `Mapping` emitted by the Increment 006 Calgary CSV
+record stream is directly consumable by the Increment 005 Calgary adapter.
+
+### Starting Checkpoint and History
+
+Starting checkpoint:
+
+    a60e041c53427df33b451e0111dcbebd13b7176b
+
+Both production components existed before this test. This was not a
+RED-to-GREEN implementation cycle. No RED state was inferred or fabricated.
+
+### Classification Before Execution
+
+Test definition:
+
+    Planned test design before execution
+
+Observed execution, once available, will be classified as an Engineering
+observation.
+
+### Tested Boundary
+
+```text
+Path
+    ->
+iter_calgary_csv_records
+    ->
+Mapping[str, str]
+    ->
+adapt_calgary_record
+    ->
+existing accepted Calgary adapter result
+```
+
+The parser-emitted mapping is passed directly to `adapt_calgary_record`
+without normalization, translation, casting, or reconstruction.
+
+### Execution Results
+
+Classification:
+
+    Engineering observation
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 13 tests in 0.002s
+OK
+failures: 0
+errors: 0
+```
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 138 tests in 0.005s
+OK
+failures: 0
+errors: 0
+```
+
+The new test passed immediately against both production components that
+already existed at the starting checkpoint. No RED state occurred or was
+inferred or fabricated, and no production source change was required.
+
+### Updated Verification Status
+
+```text
+Parser-to-adapter interface composition:
+    DEDICATEDLY_VERIFIED
+```
+
+This status applies only to the tested one-record synthetic case.
+
+### Claim Boundary
+
+This verification slice does not establish:
+
+- complete adapter correctness;
+- universal `Mapping` compatibility;
+- all source-field semantics;
+- real Calgary artifact readability;
+- digest correctness;
+- real-artifact smoke execution;
+- dataset-wide composition;
+- ingestion correctness;
+- persistence correctness;
+- analytical validity; or
+- production readiness.

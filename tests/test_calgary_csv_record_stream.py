@@ -5,12 +5,18 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
+from support_operations_intelligence.calgary_adapter import (
+    CalgaryAdaptedCase,
+    adapt_calgary_record,
+)
 from support_operations_intelligence.calgary_csv import (
     EXPECTED_CALGARY_HEADER,
     CalgaryCsvStructureError,
     CalgaryCsvStructureErrorReason,
     iter_calgary_csv_records,
 )
+from support_operations_intelligence.evidence import ObservedEvidence
+from support_operations_intelligence.identity import RejectedIdentity
 
 
 EXPECTED_HEADER = (
@@ -315,6 +321,50 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
         self.assertNotIsInstance(
             captured.exception,
             CalgaryCsvStructureError,
+        )
+
+    def test_parsed_record_composes_directly_with_calgary_adapter(self):
+        row = (
+            " synthetic-composition-001 ",
+            "2026-01-01",
+            "2026-01-02",
+            "",
+            " Synthetic Open ",
+            "Synthetic Source",
+            "Synthetic Service",
+            "Synthetic Agency",
+            "123 Synthetic Street",
+            "SYN",
+            "Synthetic Community",
+            "Synthetic Location",
+            "-114.0000",
+            "51.0000",
+            "POINT (-114.0000 51.0000)",
+        )
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "parser-adapter-composition.csv"
+            _write_synthetic_csv(path, [EXPECTED_HEADER, row])
+
+            iterator = iter_calgary_csv_records(path)
+            parsed_record = next(iterator)
+            result = adapt_calgary_record(parsed_record)
+            iterator.close()
+
+        self.assertIsInstance(parsed_record, Mapping)
+        self.assertIsInstance(result, CalgaryAdaptedCase)
+        self.assertNotIsInstance(result, RejectedIdentity)
+        self.assertEqual(
+            result.mapped_case.case.case_id.source_case_id,
+            " synthetic-composition-001 ",
+        )
+        self.assertEqual(
+            result.mapped_case.case.case_id.source_system,
+            "city_of_calgary_311",
+        )
+        self.assertEqual(
+            result.mapped_case.source_status,
+            ObservedEvidence(" Synthetic Open "),
         )
 
 
