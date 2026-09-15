@@ -341,7 +341,17 @@ It should not be interpreted as:
 
 ## License
 
-Repository licensing will be stated separately.
+Source code in this repository is licensed under the Apache License 2.0 unless
+otherwise noted. See `LICENSE`.
 
-External datasets and source artifacts are not included and are not covered by
-the repository's eventual code or documentation licenses.
+Documentation under `docs/` is licensed under the Creative Commons Attribution
+4.0 International license (CC BY 4.0) unless otherwise noted. See
+`docs/LICENSE.md`.
+
+External datasets and source artifacts are not included in this repository and
+are not covered by these repository licenses.
+
+References to external artifacts, local filesystem paths, source attribution,
+hashes, or licensing observations in historical increment records are retained
+as research and reproducibility evidence. Their presence does not redistribute
+or relicense the referenced external material.
