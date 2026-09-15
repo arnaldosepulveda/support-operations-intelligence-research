@@ -1455,3 +1455,88 @@ REAL_ARTIFACT_SMOKE_GATE:
 
 A later bounded real-artifact parser smoke may proceed against this exact
 artifact. No parser smoke was performed in this task.
+
+## Implementation Record 007 - Bounded Real-Artifact Parser Smoke
+
+### Objective
+
+Determine whether the existing Increment 006 parser can successfully consume
+a deliberately bounded prefix of the exact local Calgary artifact whose byte
+identity was confirmed in Record 006.
+
+### Starting Checkpoint
+
+    a65f2af12962000b0946327b697b816d9f03a27d
+
+### Artifact
+
+    /data/repos/Public Datasets/calgary_311.csv
+
+### Artifact Identity Basis
+
+Record 006 established:
+
+```text
+SIZE_MATCH
+SHA256_MATCH
+REAL_ARTIFACT_SMOKE_GATE = IDENTITY_MATCH_CONFIRMED
+```
+
+### Evidence Classification
+
+Current bounded parser execution:
+
+    Engineering observation
+
+### Bound
+
+Requested logical data records:
+
+    3
+
+No full-file iteration was requested or performed.
+
+### Observed Result
+
+The command produced exactly:
+
+```text
+REAL_ARTIFACT_SMOKE=PASS
+records_consumed=3
+expected_columns=15
+all_record_keys_match=True
+all_values_are_strings=True
+```
+
+### Permitted Interpretation
+
+The existing Calgary CSV parser successfully opened the byte-identified local
+artifact and produced three structurally valid record mappings from its
+bounded prefix using the committed 15-field header contract.
+
+Record 006 established byte identity to the previously characterized local
+artifact. This record establishes bounded parser readability of that artifact.
+Neither record establishes authoritative external provenance.
+
+### Claim Boundary
+
+This bounded smoke does not establish:
+
+- authoritative City of Calgary provenance;
+- complete CSV-file structural correctness;
+- validity of records beyond the consumed prefix;
+- row-count correctness;
+- dataset-wide parser correctness;
+- absence of malformed records later in the file;
+- semantic correctness of field values;
+- timestamp correctness;
+- timezone semantics;
+- adapter correctness on real records;
+- dataset-wide parser-to-adapter composition;
+- ingestion correctness;
+- persistence correctness;
+- analytical validity; or
+- production readiness.
+
+No source-row values were printed or semantically inspected during this
+smoke.
