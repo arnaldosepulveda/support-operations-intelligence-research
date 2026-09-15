@@ -1540,3 +1540,118 @@ This bounded smoke does not establish:
 
 No source-row values were printed or semantically inspected during this
 smoke.
+
+## Implementation Record 008 - Reordered Header Rejection Verification
+
+### Objective
+
+Close the remaining dedicated-execution gap for exact positional Calgary
+header validation by verifying that a header containing the correct field
+names in the wrong order is rejected.
+
+### Starting Checkpoint
+
+    eb04f5afaadd59608bf308d368a4cbbcd3494ca5
+
+### History
+
+The positional header-validation implementation already existed.
+
+This was not a RED-to-GREEN implementation cycle. No RED state was inferred
+or fabricated.
+
+### Classification
+
+Test definition:
+
+    Planned test design before execution
+
+Observed execution:
+
+    Engineering observation
+
+### Tested Boundary
+
+```text
+Exact committed field set
+    +
+deliberately reordered positions
+    ->
+CalgaryCsvStructureError(
+    HEADER_MISMATCH
+)
+```
+
+The synthetic header retained all 15 exact committed field names and swapped
+only the adjacent `source` and `service_name` positions. An otherwise-valid
+synthetic data row followed the header. The malformed header was rejected on
+the first request for a source record, before any source record mapping was
+yielded.
+
+### Execution Results
+
+Focused command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Focused result observed:
+
+```text
+Ran 14 tests in 0.003s
+OK
+failures: 0
+errors: 0
+```
+
+Regression command executed:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
+```
+
+Regression result observed:
+
+```text
+Ran 139 tests in 0.006s
+OK
+failures: 0
+errors: 0
+```
+
+### Updated Verification Status
+
+```text
+Reordered-header rejection:
+    DEDICATEDLY_VERIFIED
+
+Exact positional header validation:
+    DEDICATEDLY_VERIFIED
+```
+
+### Acceptance-Criteria Effect
+
+This evidence narrowly addresses the previously identified execution gap for:
+
+- Acceptance Criterion 2: exact 15-field header including field order;
+- Acceptance Criterion 8: wrong-field or reordered-header rejection; and
+- Failure Criterion 2: header drift silently accepted.
+
+The final acceptance-criteria matrix is not updated by this record and remains
+the responsibility of a later closure review.
+
+### Claim Boundary
+
+This dedicated test does not establish:
+
+- arbitrary header corruption coverage;
+- Unicode or encoding correctness;
+- digest mismatch behavior;
+- real-artifact header correctness beyond Record 007's bounded observation;
+- full-file correctness;
+- dataset-wide correctness;
+- analytical validity; or
+- production readiness.

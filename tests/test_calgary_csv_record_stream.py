@@ -136,6 +136,31 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
                 CalgaryCsvStructureErrorReason.HEADER_MISMATCH,
             )
 
+    def test_reordered_header_raises_before_yielding_data(self):
+        reordered_header = list(EXPECTED_HEADER)
+        reordered_header[5], reordered_header[6] = (
+            reordered_header[6],
+            reordered_header[5],
+        )
+        reordered_header = tuple(reordered_header)
+        row = tuple(f"synthetic-{index}" for index in range(15))
+
+        self.assertCountEqual(reordered_header, EXPECTED_HEADER)
+        self.assertNotEqual(reordered_header, EXPECTED_HEADER)
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "reordered-header.csv"
+            _write_synthetic_csv(path, [reordered_header, row])
+
+            iterator = iter_calgary_csv_records(path)
+            with self.assertRaises(CalgaryCsvStructureError) as captured:
+                next(iterator)
+
+            self.assertIs(
+                captured.exception.reason,
+                CalgaryCsvStructureErrorReason.HEADER_MISMATCH,
+            )
+
     def test_extra_column_reports_first_logical_record_context(self):
         row = tuple(f"synthetic-{index}" for index in range(16))
 
