@@ -808,6 +808,466 @@ OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Prospective Full-Run Orchestration Design
+
+```text
+DESIGN CHOICE / PROSPECTIVE
+```
+
+No orchestration implementation or complete-artifact execution has occurred at
+this checkpoint.
+
+### Architecture Decision
+
+Architecture C is selected prospectively:
+
+1. one reusable library full-run orchestration boundary;
+2. one narrow dependency-free package executable/evidence boundary.
+
+The existing parser -> adapter -> aggregator already composes directly. The
+new boundaries are justified by responsibilities that do not belong to those
+existing components:
+
+- enforce digest completion before traversal;
+- own the complete-run lifecycle;
+- validate completed accounting before success;
+- produce deterministic retained evidence;
+- prevent failed execution from appearing as successful baseline evidence;
+- retain bounded success/failure execution context.
+
+The new boundaries are not justified merely to shorten the existing function
+composition.
+
+### Prospective Library Boundary
+
+The prospective library module is:
+
+```text
+src/support_operations_intelligence/calgary_full_artifact_execution.py
+```
+
+Its prospective public function is:
+
+```python
+execute_calgary_full_artifact(
+    path: Path,
+    expected_sha256: str,
+) -> CalgaryFullArtifactExecutionResult
+```
+
+`CalgaryFullArtifactExecutionResult` contains only:
+
+- the verified artifact SHA-256;
+- the existing `CalgaryStatusServiceAggregation`.
+
+The library boundary must not own:
+
+- Git inspection;
+- process `argv`;
+- `sys.version`;
+- `sys.executable`;
+- output-path handling;
+- JSON publication;
+- atomic file promotion;
+- CLI parsing;
+- environment interpretation.
+
+### Digest-Before-Traversal Ordering
+
+The required full-run library order is:
+
+1. complete `verify_calgary_csv_artifact_sha256(...)`;
+2. only after successful digest verification, construct and consume the CSV
+   stream;
+3. adapt every yielded record;
+4. aggregate all resulting `CalgaryAdapterResult` values;
+5. validate completed accounting;
+6. return the successful domain result.
+
+A digest mismatch must prevent CSV traversal.
+
+```text
+FULL_RUN_ARTIFACT_READ_PASSES = 2
+```
+
+A successful execution is expected by design to perform one complete binary
+digest pass and one complete CSV traversal pass. This is a
+`DESIGN CONSEQUENCE / EXPECTED ENGINEERING COST`, not an observed runtime
+measurement.
+
+### Completed Accounting Validation
+
+Before a library execution may return success, it must validate:
+
+```text
+total_logical_records_seen
+==
+total_admitted_records
++
+total_rejected_identity_records
+
+sum(rejection_counts_by_reason.values())
+==
+total_rejected_identity_records
+
+sum(aggregated_counts.values())
+==
+aggregated_record_count
+
+aggregated_record_count
+==
+total_admitted_records
+```
+
+These checks validate completed accounting consistency. They do not turn the
+historical Calgary row count into an invariant.
+
+### Prospective Executable Boundary
+
+The prospective dependency-free executable module is:
+
+```text
+src/support_operations_intelligence/calgary_full_artifact_run.py
+```
+
+Its prospective invocation is:
+
+```text
+python -m support_operations_intelligence.calgary_full_artifact_run
+```
+
+It requires explicit arguments for:
+
+- input artifact path;
+- expected SHA-256;
+- `supplied_code_commit`;
+- success output path;
+- failure output path.
+
+The executable records the code-commit value supplied by the operator. It does
+not prove that `supplied_code_commit` identifies the actual checked-out code
+unless an independent verification mechanism is later added. The term
+`verified_code_commit` must not be used without such verification.
+
+Prospective execution evidence records only:
+
+- schema version;
+- outcome;
+- expected artifact SHA-256;
+- verified artifact SHA-256 when available;
+- `supplied_code_commit`;
+- `sys.version`;
+- `sys.executable`;
+- effective `argv`;
+- elapsed processing seconds;
+- accounting summary;
+- rejection counts;
+- deterministic status/service aggregate rows.
+
+It does not record hostname, username, machine identity, IP address, or other
+unrelated environment data.
+
+### Timing Semantics
+
+For success, timing starts immediately before digest verification and stops
+only after the success artifact has been atomically promoted to the supplied
+success-output path.
+
+For failure, timing starts immediately before digest verification and the
+processing timer stops when the underlying execution failure is caught. The
+subsequent serialization and writing of the failure evidence record is not
+included in the failed-processing duration.
+
+Timing is engineering execution evidence, not a benchmark claim.
+
+### Typed Evidence and Aggregate-Row Representation
+
+Observed evidence has the deterministic machine representation:
+
+```json
+{
+  "kind": "OBSERVED",
+  "value": "<exact source-native string>"
+}
+```
+
+Unavailable evidence has the deterministic machine representation:
+
+```json
+{
+  "kind": "UNAVAILABLE",
+  "reason": "<UnavailableReason value>"
+}
+```
+
+`ObservedEvidence("UNKNOWN")` remains distinct from
+`UnavailableEvidence(VALUE_ABSENT)` and
+`UnavailableEvidence(EVIDENCE_INDETERMINATE)`. Unknown evidence variants must
+fail rather than be silently stringified, collapsed, or encoded as
+placeholders. No normalization may be introduced.
+
+Status/service aggregate entries are represented as rows. Each row contains:
+
+- a status evidence object;
+- a `service_name` evidence object;
+- a count.
+
+Python dataclass representations and tuple representations are not canonical
+evidence encodings.
+
+### Deterministic Ordering and JSON Encoding
+
+Aggregate rows are sorted by:
+
+```text
+(
+    status_kind_rank,
+    status_payload,
+    service_kind_rank,
+    service_payload
+)
+```
+
+The kind ranks are:
+
+```text
+OBSERVED = 0
+UNAVAILABLE = 1
+```
+
+The payload is the exact observed value for `OBSERVED` or the exact enum value
+for `UNAVAILABLE`. Case and whitespace are preserved exactly. Rejection
+reasons are sorted by their exact enum value. Dictionary insertion order alone
+is not a canonical ordering rule.
+
+Prospective retained evidence uses UTF-8 JSON with:
+
+- stable JSON object-key ordering;
+- deterministic aggregate-row ordering;
+- deterministic rejection-reason ordering;
+- a terminating newline.
+
+Execution metadata such as elapsed time and `argv` is intentionally
+run-specific. Byte-identical whole-file output across different executions is
+therefore not the reproducibility criterion. The canonical counts and evidence
+representation must nevertheless be deterministic for a given completed
+domain result.
+
+### Success-Output Safety
+
+For the supplied success-output path:
+
+1. validate the completed domain result;
+2. serialize it to a temporary sibling file;
+3. flush the temporary file;
+4. `fsync` it;
+5. close it;
+6. atomically promote it with `os.replace` only after successful completion.
+
+A failed execution must not create a new success artifact, overwrite an
+existing success artifact, or promote a partial temporary artifact.
+Temporary-file cleanup behavior must be tested prospectively.
+
+### Failure-Output Safety and Classification
+
+The executable requires a distinct explicit `failure_output_path`. It must not
+derive failure output implicitly from the success filename.
+
+On execution failure:
+
+- the success output remains untouched;
+- bounded failure evidence is written atomically to `failure_output_path`;
+- the process exits non-zero.
+
+Failure evidence may include:
+
+- schema version;
+- `outcome = FAILURE`;
+- failure stage;
+- exception type;
+- bounded exception message;
+- elapsed processing seconds;
+- expected digest;
+- verified digest if safely available;
+- `supplied_code_commit`;
+- `sys.version`;
+- `sys.executable`;
+- effective `argv`;
+- logical record position where available;
+- bounded partial accounting only where accurately available.
+
+Failure evidence must not contain raw CSV row contents.
+
+The prospective failure-stage vocabulary is:
+
+```text
+DIGEST
+CSV_STRUCTURE
+ADAPTER
+AGGREGATION
+OUTPUT
+OTHER
+```
+
+Failure-stage classification is execution evidence. It must not replace or
+reinterpret the original underlying exception semantics. Where exceptions are
+wrapped or classified, original exception chaining is preserved where
+practical.
+
+Success-path logical record numbering is not required. For CSV structural
+failure, the existing parser-provided `logical_data_record_number` is retained
+where available. Explicit successful-position tracking for an unexpected
+adapter failure is useful but is not required by the current Increment 007
+contract.
+
+```text
+ADAPTER_FAILURE_POSITION = NICE_TO_HAVE / NOT_REQUIRED_BEFORE_FULL_RUN
+```
+
+This classification must not be strengthened retrospectively.
+
+### Identity-Rejection and Historical-Count Boundaries
+
+Typed `RejectedIdentity` values:
+
+- remain execution/accounting results;
+- are counted by the existing `IdentityRejectionReason`;
+- do not automatically make execution fail;
+- do not enter status/service aggregation.
+
+The executable must not encode `rejection_count > 0` as execution failure.
+Human/research review after execution determines whether observed rejection
+counts and reasons are explained by the frozen adapter contract.
+
+The historical count `7,474,403` remains a comparison from Increment 003. It
+must not become an execution invariant, automatic success criterion,
+automatic failure criterion, or expected parser count hardcoded into
+production code. Comparison belongs to post-run research review.
+
+### Result-Artifact Lifecycle
+
+Initial successful and failure JSON evidence must be written to an
+operator-supplied location outside the tracked repository. An example only is:
+
+```text
+/data/repos/personal/support-operations-intelligence-results/increment-007/
+```
+
+This location must not be hardcoded into production design. Retention into the
+repository, publication, or other canonical artifact storage is a later review
+decision requiring consideration of:
+
+- accounting correctness;
+- unexpected rejection results;
+- sensitivity;
+- licensing;
+- repository size;
+- publication boundary.
+
+### Memory Claim Boundary
+
+The following is `CODE-STRUCTURE ANALYSIS` only:
+
+- CSV iteration is lazy;
+- adapter results may be generated lazily;
+- aggregation retains counts rather than all source rows;
+- expected aggregation memory grows primarily with the number of distinct
+  evidence pairs plus rejection reasons.
+
+No observed memory-complexity or suitability result exists for the real
+artifact.
+
+```text
+OBSERVED_FULL_RUN_MEMORY_BEHAVIOR = NOT_ESTABLISHED
+```
+
+### Prospective Pre-Full-Run Test Scope
+
+Before the complete artifact is executed, synthetic tests prospectively
+require:
+
+1. digest verification completes before traversal begins;
+2. digest mismatch prevents traversal;
+3. a successful synthetic artifact returns a complete domain result;
+4. completed accounting invariants are validated;
+5. typed observed and unavailable evidence serializes distinctly;
+6. deterministic aggregate ordering;
+7. deterministic rejection-reason ordering;
+8. typed identity rejection remains accounting rather than execution failure;
+9. structural failure prevents success promotion;
+10. unexpected adapter failure prevents success promotion;
+11. failed execution preserves success output if one already exists;
+12. successful execution atomically promotes only after completion;
+13. failure output is written separately and atomically;
+14. failure evidence contains no raw source row;
+15. the executable returns non-zero on failed execution;
+16. no external Calgary artifact is required by this test suite.
+
+Lower-level Slice A/B tests should not be duplicated except where necessary to
+verify a new orchestration responsibility.
+
+```text
+PRE_FULL_RUN_REAL_ARTIFACT_PREFIX_SMOKE = NOT_REQUIRED
+```
+
+Rationale:
+
+- Increment 006 already established bounded real-artifact streaming;
+- Slice B established complete parser -> adapter -> aggregation composition on
+  synthetic data;
+- a truncated Calgary copy would be a different artifact and would not satisfy
+  the complete-artifact digest contract;
+- the orchestration boundary should instead be fully exercised using synthetic
+  temporary artifacts before the one complete real-artifact run.
+
+This decision does not mean the real run is low risk.
+
+### Prospective Implementation File Scope
+
+The prospective production files are:
+
+```text
+src/support_operations_intelligence/calgary_full_artifact_execution.py
+src/support_operations_intelligence/calgary_full_artifact_run.py
+```
+
+The prospective test file is:
+
+```text
+tests/test_calgary_full_artifact_execution.py
+```
+
+No `__init__.py` change, `pyproject.toml` change, or third-party dependency is
+currently justified. These are prospective paths, not implemented artifacts.
+
+### Responsibility Ownership
+
+| Component | Owns | Must Not Own |
+| --- | --- | --- |
+| Digest verifier | Exact SHA-256 verification | Parsing or orchestration |
+| CSV parser | Structure validation, lazy parsed mappings, and structural position | Digest, adaptation, or aggregation |
+| Adapter | Identity admission and exact evidence mapping | File access, normalization, or aggregation |
+| Aggregator | Status/service counts, rejection counts, and accounting summary | Environment metadata or output publication |
+| Full-run library orchestration | Digest-before-traversal ordering, complete domain traversal, final accounting validation, and domain result | Git or process metadata, `argv`, or file publication |
+| Executable/evidence boundary | Arguments, execution metadata, timing, deterministic JSON, atomic success/failure publication, and exit status | Evidence interpretation or source normalization |
+
+### Claim Classification
+
+```text
+FULL_RUN_ORCHESTRATION_ARCHITECTURE = DESIGN_CHOICE
+ARCHITECTURE_SELECTION = C
+FULL_RUN_LIBRARY = NOT_IMPLEMENTED
+FULL_RUN_EXECUTABLE = NOT_IMPLEMENTED
+FULL_RUN_TESTS = NOT_IMPLEMENTED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+DIGEST_GATED_FULL_RUN = NOT_PERFORMED
+FULL_RUN_ARTIFACT_READ_PASSES = 2_EXPECTED_BY_DESIGN
+OBSERVED_FULL_RUN_MEMORY_BEHAVIOR = NOT_ESTABLISHED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
