@@ -1733,6 +1733,348 @@ FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
 COUNTER_RESULTS = NOT_OBSERVED
 ```
 
+## Prospective Complete-Artifact Semantic and Reporting Policies
+
+```text
+DESIGN CHOICE / PROSPECTIVE
+```
+
+These policies are frozen before C1 implementation and before any complete
+artifact result is observed. Their purpose is to prevent normalization,
+denominator, grouping, diagnostic, or reporting decisions from being selected
+after seeing the baseline.
+
+### Normalization Policy
+
+```text
+NORMALIZATION = NONE
+```
+
+All observed source-native lexical values remain exact. For example:
+
+```text
+"Closed"
+"Closed "
+"closed"
+```
+
+are three distinct observed labels. Increment 007 performs no stripping, case
+folding, lowercasing, uppercasing, canonicalization, synonym merging, spelling
+repair, or whitespace normalization. If lexical variants prove material after
+the run, that is an observation for a later increment. Increment 007 must not
+retrospectively collapse them.
+
+### Blank Semantics and Presentation
+
+```text
+BLANK_POLICY = RETAIN
+```
+
+Identity-admitted rows with
+`UnavailableEvidence(UnavailableReason.VALUE_ABSENT)` for a grouping dimension
+are not dropped. They remain part of:
+
+- the admitted-record denominator;
+- vocabulary accounting;
+- cross-tab accounting where applicable.
+
+For human reporting only, `VALUE_ABSENT` may be displayed as `(blank)`.
+`(blank)` is a display label, not an evidence encoding. It must not replace the
+internal typed representation
+`UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`.
+
+An observed literal `(blank)`, if present in the source, remains exact observed
+lexical evidence and must not collide with unavailable evidence.
+`EVIDENCE_INDETERMINATE` also remains distinct from `VALUE_ABSENT` and from
+observed strings. Unavailable reasons are not collapsed.
+
+The Step 2 counters remain:
+
+```text
+blank_service_name
+blank_agency_responsible
+blank_status_description
+```
+
+Each is the count of identity-admitted records whose corresponding existing
+evidence state is `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`.
+Whitespace-containing `ObservedEvidence` is not counted as blank. A
+whitespace-only source string is counted only because the existing adapter
+already maps it to `VALUE_ABSENT`. Increment 007 introduces no second
+blankness rule.
+
+### Primary Grouping and Unit Boundary
+
+```text
+PRIMARY_GROUPING_FIELD = service_name
+```
+
+The Increment 007 descriptive cross-tab is:
+
+```text
+service_name x status_description
+```
+
+`agency_responsible` is not another grouping axis in Increment 007 and remains
+limited to its required blankness counter. No service taxonomy or category
+normalization is introduced.
+
+The baseline counts source rows satisfying the frozen admitted-record
+population. Until the Step 2 exact duplicate counters are observed:
+
+```text
+UNIQUE_CASE_DISTRIBUTION = NOT_ESTABLISHED
+```
+
+Cross-tab counts must not use “Cases” as shorthand before duplicate results
+support that wording. The base portfolio denominator for cross-tab percentages
+is `rows_identity_admitted`.
+
+### Raw Counts and Percentages
+
+Every `service_name x status_description` cell retains its exact raw integer
+count. Percentages supplement raw counts and never replace them. Increment 007
+performs no small-denominator suppression, and no cell is hidden merely because
+its count is small.
+
+For each exact `service_name` evidence group `S` and exact status evidence
+group `T`:
+
+```text
+cell_count(S, T)
+```
+
+is the raw cross-tab count, and:
+
+```text
+service_total(S)
+=
+sum over all T of cell_count(S, T)
+```
+
+When `service_total(S) > 0`:
+
+```text
+within_category_percentage(S, T)
+=
+100 * cell_count(S, T) / service_total(S)
+```
+
+This answers only: within this exact `service_name` evidence group, what
+percentage of admitted source rows carry this exact status evidence? It does
+not support operational interpretation or causal comparison between service
+groups.
+
+The portfolio denominator is:
+
+```text
+portfolio_total
+=
+rows_identity_admitted
+```
+
+When `portfolio_total > 0`:
+
+```text
+portfolio_wide_percentage(S, T)
+=
+100 * cell_count(S, T) / portfolio_total
+```
+
+This answers only: what percentage of all identity-admitted source rows belong
+to this exact `service_name x status_description` cell? The denominator
+includes admitted rows with unavailable grouping evidence. Blank or other
+unavailable states must not be silently dropped.
+
+Raw integer counts remain authoritative and are the only accounting inputs.
+Percentages are calculated from raw counts and rounded for presentation only:
+
+```text
+PERCENTAGE_DISPLAY_DECIMAL_PLACES = 4
+```
+
+Later counts must not be derived from displayed percentages.
+
+### Material-Difference Policy
+
+```text
+MATERIAL_DIFFERENCE_THRESHOLD = NOT_DEFINED
+```
+
+Increment 007 must not classify a difference as material, significant,
+meaningful, large, small, concerning, or acceptable using a newly invented
+threshold. Such a decision belongs to a later analytical increment after the
+baseline exists and an explicit analytical question is defined.
+
+### Structural Failure and Diagnostic Policy
+
+```text
+STRUCTURAL_FAILURE_POLICY = ABORT_ON_FIRST_ERROR
+```
+
+The parser remains fail-fast. On the first structural error:
+
+- complete execution aborts;
+- no successful `BaselineResult` is produced;
+- no later rows are processed;
+- the structural rejection belongs to failure evidence rather than a
+  successful baseline.
+
+Skip-and-continue behavior is not permitted.
+
+A structural failure must expose:
+
+- the logical data-record number;
+- the offending raw logical-record content.
+
+This is a prospective requirement. The existing parser already exposes
+`logical_data_record_number` on `CalgaryCsvStructureError`, but retained
+repository evidence does not establish that it exposes the offending raw
+logical-record content.
+
+```text
+RAW_STRUCTURAL_RECORD_DIAGNOSTIC = REQUIRED_BEFORE_COMPLETE_RUN
+CURRENT_RAW_STRUCTURAL_RECORD_SUPPORT = NOT_ESTABLISHED
+```
+
+This checkpoint does not claim current parser support and does not modify the
+parser.
+
+“Raw record content” means offending raw logical-record content sufficient to
+diagnose the structural failure without rerunning the complete artifact. It
+must correspond to the malformed logical CSV record that caused the structural
+exception. Because a CSV logical record may span physical lines, this contract
+does not equate a logical record with one raw physical line.
+
+Exact source characters must be preserved to the extent supported by the
+parser implementation. A normalized or reconstructed cleaned value must not
+be called raw. If the current `csv.reader` architecture cannot preserve exact
+logical-record source text, that gap must be resolved explicitly before the
+complete run rather than silently weakening the policy.
+
+This requirement refines, without weakening, the previously frozen retained
+failure-evidence safety boundary:
+
+```text
+RAW_RECORD_IN_EXCEPTION = REQUIRED
+RAW_RECORD_IN_RETAINED_FAILURE_JSON = PROHIBITED_BY_DEFAULT
+```
+
+The in-process structural exception may carry the offending raw logical record
+for operator diagnosis. The retained C2 structured failure JSON must not
+automatically include raw source-row or record content. It may retain the
+logical record number, exception type, and bounded diagnostic metadata without
+copying the raw Calgary record.
+
+### Grouping and Reporting Representation
+
+The primary report consists of rows containing at least:
+
+- exact typed `service_name` evidence;
+- exact typed `status_description` evidence;
+- raw count;
+- within-category percentage;
+- portfolio-wide percentage.
+
+Machine evidence remains either `OBSERVED` with the exact lexical value or
+`UNAVAILABLE` with the exact reason. For human-readable views only,
+`VALUE_ABSENT` may display as `(blank)`. Presentation labels must not replace
+typed machine evidence.
+
+The complete raw `status_vocabulary` and `service_name_vocabulary` are retained
+as exact count maps or rows. They must not be truncated to top-N, have rare
+values merged, have blanks removed, or have variants normalized. A later human
+review may summarize them, but the `BaselineResult` must retain the complete
+vocabulary evidence required by Step 2.
+
+### Historical Count Treatment
+
+The historical comparison remains:
+
+```text
+7,474,403 logical records
+CONTEXTUAL_COMPARISON_ONLY
+```
+
+After the run, `rows_observed` is compared with `7,474,403`. If equal, only the
+equality is recorded. If different, both counts and the exact arithmetic
+difference are recorded.
+
+```text
+CAUSE_OF_DIFFERENCE = NOT_DETERMINED
+```
+
+Counts must not be adjusted, parser behavior changed, rows filtered,
+denominators redefined, or execution rerun with changed semantics merely to
+force agreement.
+
+### Interpretation and Prospective Claim Boundary
+
+Increment 007 reporting is descriptive evidence only. It must not infer:
+
+- operational quality;
+- service performance;
+- backlog;
+- closure quality;
+- resolution quality;
+- causality;
+- staffing need;
+- queue behavior;
+- intervention need;
+- AI suitability.
+
+It must not rank service categories, identify good or bad statuses, or
+interpret cross-tab differences.
+
+After successful execution, the strongest intended claim is bounded to:
+
+> The current tested parser and adapter traversed the complete digest-verified
+> artifact and produced source-native `service_name x status_description`
+> counts under the predeclared denominator, evidence, and reporting policies.
+
+That claim is not established at this checkpoint.
+
+```text
+TARGET_BASELINE_CLAIM = PROSPECTIVE
+```
+
+The eventual claim remains a source-row baseline unless the observed exact
+duplicate counters establish:
+
+```text
+source_case_ids_appearing_more_than_once == 0
+```
+
+Even then, wording may establish exact source-identifier uniqueness within the
+artifact but must not assert that one row equals one independently managed
+real-world unit of work. That stronger semantic interpretation remains not
+established.
+
+### Claim Classification
+
+```text
+SEMANTIC_POLICY_CONTRACT = DESIGN_CHOICE
+SEMANTIC_POLICY_STATUS = FROZEN_BEFORE_C1_IMPLEMENTATION
+NORMALIZATION = NONE
+BLANK_POLICY = RETAIN
+BLANK_PRESENTATION_LABEL = "(blank)"
+PRIMARY_GROUPING_FIELD = service_name
+WITHIN_CATEGORY_DENOMINATOR = SERVICE_NAME_GROUP_TOTAL
+PORTFOLIO_WIDE_DENOMINATOR = ROWS_IDENTITY_ADMITTED
+RAW_COUNTS_RETAINED = YES
+PERCENTAGE_DISPLAY_DECIMAL_PLACES = 4
+SMALL_DENOMINATOR_SUPPRESSION = NONE
+MATERIAL_DIFFERENCE_THRESHOLD = NOT_DEFINED
+STRUCTURAL_FAILURE_POLICY = ABORT_ON_FIRST_ERROR
+RAW_STRUCTURAL_RECORD_DIAGNOSTIC = REQUIRED_BEFORE_COMPLETE_RUN
+CURRENT_RAW_STRUCTURAL_RECORD_SUPPORT = NOT_ESTABLISHED
+RAW_RECORD_IN_EXCEPTION = REQUIRED
+RAW_RECORD_IN_RETAINED_FAILURE_JSON = PROHIBITED_BY_DEFAULT
+TARGET_BASELINE_CLAIM = PROSPECTIVE
+OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -1741,5 +2083,8 @@ composition checkpoint exist. The Architecture C1 RED test contract and
 observed missing-module RED evidence also exist, while C1 and C2 production
 remain absent. The prospective complete-artifact counter contract is frozen
 before C1 implementation, but no counter results have been observed. No
-complete-artifact execution, descriptive baseline, or closure evidence exists
-yet.
+percentages, vocabularies, or cross-tab values have been observed. The
+complete-artifact semantic and reporting policies are frozen
+prospectively, including an unresolved raw structural-record diagnostic
+implementation requirement. No complete-artifact execution, descriptive
+baseline, or closure evidence exists yet.
