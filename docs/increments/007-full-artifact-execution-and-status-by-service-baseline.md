@@ -1390,11 +1390,356 @@ DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Prospective Complete-Artifact Counter Contract
+
+```text
+DESIGN CHOICE / PROSPECTIVE
+```
+
+These counters are frozen before C1 implementation and before
+complete-artifact execution. They exist because discovering that a required
+counter was omitted after the complete approximately 1.9 GB traversal may
+require another full execution.
+
+This Step 2 contract refines the earlier prospective C1 result boundary. The
+successful C1 domain result must retain the verified artifact SHA-256, the
+existing status/service aggregation, and the domain counters defined below.
+It still must not contain C2 process, environment, timing, or publication
+metadata. The exact dataclass decomposition is an implementation-time detail;
+the counter meanings and reconciliation requirements are frozen here.
+
+### Row-Lifecycle Counters
+
+The complete execution requires:
+
+```text
+rows_observed
+rows_structurally_accepted
+rows_structurally_rejected
+rows_identity_admitted
+rows_identity_rejected
+```
+
+`rows_observed` is the number of logical CSV data records encountered by the
+full execution boundary, including the first structurally invalid logical
+record if one is encountered.
+
+`rows_structurally_accepted` is the number of logical records successfully
+emitted by the existing CSV parser.
+
+`rows_structurally_rejected` is the number of logical records rejected
+structurally by the parser. The existing parser is fail-fast, so a successful
+`BaselineResult` requires:
+
+```text
+rows_structurally_rejected == 0
+```
+
+If a structural error occurs, complete-artifact execution fails, no successful
+`BaselineResult` is produced, and bounded failure evidence may record the one
+first structurally rejected record. This contract does not imply that parsing
+continues after a structural failure.
+
+`rows_identity_admitted` is the number of structurally accepted records for
+which `adapt_calgary_record` returns `CalgaryAdaptedCase`.
+
+`rows_identity_rejected` is the number of structurally accepted records for
+which `adapt_calgary_record` returns `RejectedIdentity`.
+
+### Row Reconciliation
+
+The counters must satisfy:
+
+```text
+rows_observed
+==
+rows_structurally_accepted
++
+rows_structurally_rejected
+
+rows_structurally_accepted
+==
+rows_identity_admitted
++
+rows_identity_rejected
+```
+
+For a successful `BaselineResult`:
+
+```text
+rows_structurally_rejected == 0
+rows_observed == rows_structurally_accepted
+```
+
+A successful result that violates either reconciliation identity is evidence
+of a counting defect and must not be accepted as a baseline. The historical
+`7,474,403` comparison is not part of these equations.
+
+### Exact Source-Identity Duplicate Counters
+
+The complete execution also requires:
+
+```text
+distinct_source_case_ids
+source_case_ids_appearing_more_than_once
+rows_involved_in_duplication
+```
+
+Duplicate analysis applies only to identity-admitted records with a valid
+`source_case_id` under the existing adapter identity contract.
+Identity-rejected rows are not assigned synthetic identifiers and are not
+included in these duplicate counters. They remain separately represented by
+`rows_identity_rejected` and the existing rejection-reason accounting.
+
+Duplicate equality is exact `source_case_id` string equality. It performs no:
+
+- stripping;
+- case normalization;
+- numeric coercion;
+- canonicalization;
+- hashing-as-identity;
+- source-specific cleanup.
+
+For an admitted source identifier occurring `k` times:
+
+- if `k == 1`, it contributes 1 to `distinct_source_case_ids`, 0 to
+  `source_case_ids_appearing_more_than_once`, and 0 to
+  `rows_involved_in_duplication`;
+- if `k >= 2`, it contributes 1 to `distinct_source_case_ids`, 1 to
+  `source_case_ids_appearing_more_than_once`, and `k` to
+  `rows_involved_in_duplication`.
+
+`rows_involved_in_duplication` therefore counts every row participating in a
+repeated identity, not only occurrences after the first. For example:
+
+```text
+A, A, A, B, C, C
+
+distinct_source_case_ids = 3
+source_case_ids_appearing_more_than_once = 2
+rows_involved_in_duplication = 5
+```
+
+### Exact One-Pass Duplicate Algorithm
+
+The prospective exact one-pass algorithm maintains:
+
+```text
+seen_source_case_ids: set[str]
+duplicate_source_case_ids: set[str]
+rows_involved_in_duplication: int
+```
+
+For each identity-admitted `source_case_id`:
+
+```text
+if id not in seen_source_case_ids:
+    add id to seen_source_case_ids
+else if id not in duplicate_source_case_ids:
+    add id to duplicate_source_case_ids
+    rows_involved_in_duplication += 2
+else:
+    rows_involved_in_duplication += 1
+```
+
+At completion:
+
+```text
+distinct_source_case_ids = len(seen_source_case_ids)
+
+source_case_ids_appearing_more_than_once =
+    len(duplicate_source_case_ids)
+```
+
+This provides exact counts without retaining a frequency dictionary for every
+identifier. It is not implemented at this checkpoint.
+
+### Duplicate Memory Policy and Claim Consequence
+
+The preferred implementation is exact Python string sets. These duplicate
+counters determine whether the resulting cross-tab can safely be described as
+one row per source identity or only as a distribution over source rows.
+
+A 32-bit hash must not substitute for the strings, and a probabilistic
+representation must not be introduced silently. If exact identifier tracking
+cannot complete within available memory, the run must not silently downgrade:
+execution must fail clearly, or an explicitly predeclared approximate method
+must be introduced in a later contract revision before another run. A 64-bit
+alternative is not an automatic fallback.
+
+```text
+DUPLICATE_COUNT_METHOD = EXACT
+```
+
+Until the duplicate counters are observed, the status/service baseline is a
+distribution over source rows. It must not be described as a distribution over
+unique Cases.
+
+If `source_case_ids_appearing_more_than_once == 0`, the complete artifact
+provides evidence that admitted source identifiers are unique within that
+artifact under exact lexical equality. If the value is non-zero, the
+cross-tab remains a source-row distribution unless a later increment defines
+and justifies deduplication or another unit-of-analysis policy. Increment 007
+does not automatically deduplicate.
+
+### Source-Field Blank Counters
+
+The required blank-field counters are:
+
+```text
+blank_service_name
+blank_agency_responsible
+blank_status_description
+```
+
+They apply only to identity-admitted records and follow the existing adapter
+contract. A field increments its blank counter when its corresponding adapted
+evidence is `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)`.
+
+Under the current adapter, a missing key, `None`, an empty string, or a
+whitespace-only string maps to `VALUE_ABSENT`. A non-string value maps to
+`EVIDENCE_INDETERMINATE` and is not counted as blank. A string containing at
+least one non-whitespace character remains observed exactly, including its
+original whitespace, and is not counted as blank. No stripping or new
+normalization is introduced.
+
+This counter contract does not define a presentation label for blank evidence.
+
+### Vocabulary and Cross-Tab Counters
+
+The complete execution requires full exact frequency maps:
+
+```text
+status_vocabulary
+service_name_vocabulary
+```
+
+Both cover structurally accepted, identity-admitted records using the same
+exact source-native evidence semantics as the aggregation. Observed lexical
+values remain exact. Unavailable evidence remains typed and distinguishable;
+it is not collapsed into placeholder strings. No lexical normalization is
+introduced.
+
+The required cross-tab is:
+
+```text
+service_name_x_status
+```
+
+It is the existing Slice A status/service aggregation, expressed with
+`service_name` as the primary axis and `status_description` as the secondary
+dimension. Increment 007 adds no `agency_responsible` cross-tab;
+`agency_responsible` blankness is counted only.
+
+### Counter Populations
+
+The frozen counter populations are:
+
+| Counter family | Population |
+| --- | --- |
+| Row lifecycle | All logical records encountered |
+| Identity counters | All structurally accepted records |
+| Duplicate counters | Identity-admitted records with a valid exact `source_case_id` |
+| Blank-field counters | Identity-admitted records |
+| Vocabularies | Identity-admitted records |
+| `service_name_x_status` | Identity-admitted records |
+| Rejection reasons | Identity-rejected records |
+
+These populations preserve existing Slice A behavior: identity rejections are
+counted and reconciled but do not enter admitted-record vocabularies or the
+status/service cross-tab.
+
+### Additional Reconciliation Requirements
+
+A successful `BaselineResult` must also satisfy:
+
+```text
+distinct_source_case_ids
+<=
+rows_identity_admitted
+
+source_case_ids_appearing_more_than_once
+<=
+distinct_source_case_ids
+
+rows_involved_in_duplication
+<=
+rows_identity_admitted
+
+sum(status_vocabulary.values())
+==
+rows_identity_admitted
+
+sum(service_name_vocabulary.values())
+==
+rows_identity_admitted
+
+sum(service_name_x_status.values())
+==
+rows_identity_admitted
+
+sum(identity_rejection_reason_counts.values())
+==
+rows_identity_rejected
+```
+
+Any successful result violating one of these equations must fail validation.
+
+### Execution-Metric Ownership
+
+`wall_clock_seconds` and `peak_rss_bytes` are run-level execution evidence,
+not domain row counters. They belong prospectively to C2 execution evidence
+and must not be placed inside `CalgaryFullArtifactExecutionResult` by C1. The
+final retained `BaselineResult` or evidence artifact may include them in its
+outer execution-metadata envelope.
+
+The eventual complete execution prospectively requires two peak-RSS evidence
+sources:
+
+1. an in-process peak-RSS measurement;
+2. an independent `/usr/bin/time -v` Maximum resident set size observation.
+
+Neither is implemented or observed at this checkpoint. They need not be
+byte-identical. Units must be explicit: in-process platform APIs can report
+platform-specific units, while `/usr/bin/time -v` commonly reports maximum
+resident set size in KiB on Linux. Retained evidence must convert or label
+units explicitly rather than silently compare unlike units.
+
+### Deferred Step 3 Policies
+
+This Step 2 checkpoint does not freeze:
+
+- reporting percentages;
+- a `(blank)` presentation label;
+- raw-line structural-error retention;
+- a `service_name` reporting policy beyond the counter population;
+- a material-difference policy;
+- output interpretation.
+
+Those concerns belong to Step 3.
+
+### Claim Classification
+
+```text
+COUNTER_CONTRACT = DESIGN_CHOICE
+COUNTER_CONTRACT_STATUS = FROZEN_BEFORE_C1_IMPLEMENTATION
+DUPLICATE_COUNT_METHOD = EXACT
+DUPLICATE_POPULATION = IDENTITY_ADMITTED_EXACT_SOURCE_CASE_ID
+UNIT_OF_ANALYSIS_BEFORE_DUPLICATE_RESULT = SOURCE_ROW
+UNIQUE_CASE_DISTRIBUTION = NOT_ESTABLISHED
+ROW_RECONCILIATION = PROSPECTIVE_VALIDATION_REQUIREMENT
+VOCABULARY_RECONCILIATION = PROSPECTIVE_VALIDATION_REQUIREMENT
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+COUNTER_RESULTS = NOT_OBSERVED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
 implementation, observed RED and GREEN checkpoints, and Slice B synthetic
 composition checkpoint exist. The Architecture C1 RED test contract and
 observed missing-module RED evidence also exist, while C1 and C2 production
-remain absent. No complete-artifact execution, descriptive baseline, or
-closure evidence exists yet.
+remain absent. The prospective complete-artifact counter contract is frozen
+before C1 implementation, but no counter results have been observed. No
+complete-artifact execution, descriptive baseline, or closure evidence exists
+yet.
