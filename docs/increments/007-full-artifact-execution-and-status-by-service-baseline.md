@@ -1268,9 +1268,133 @@ OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Architecture C1 RED Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Objective
+
+Freeze the reusable full-artifact library orchestration contract in executable
+tests before the C1 production module exists.
+
+C1 is limited to:
+
+```text
+digest gate
+-> complete parser/adapter/aggregation execution
+-> completed-accounting validation
+-> domain result
+```
+
+The C2 executable/evidence boundary remains unimplemented.
+
+### Observed Environment
+
+- repository commit before this checkpoint:
+  `c1881bc5b685e95a0bfa6d5699b533be1804716d`;
+- Python: `3.12.3`;
+- interpreter:
+  `/data/repos/personal/support-operations-intelligence/.venv/bin/python`.
+
+### Prospective C1 Test Contract
+
+The committed test contract prospectively specifies four C1 behaviors:
+
+1. A successful synthetic artifact uses the real existing digest verifier,
+   parser, adapter, and aggregator. Its three logical records are expected to
+   produce 3 seen, 2 admitted, 1 typed identity rejection, and 2 aggregated.
+   The typed rejection must not fail library execution.
+2. A digest mismatch must propagate the existing
+   `CalgaryCsvArtifactDigestMismatch`, and CSV traversal must never begin.
+3. Digest verification must return successfully before record-stream
+   construction.
+4. An inconsistent completed aggregation must fail C1 with
+   `CalgaryFullArtifactAccountingError`.
+
+These are prospective behaviors in a RED test contract. They are not passing
+behavior observations at this checkpoint.
+
+### Test Source Syntax Check
+
+Command:
+
+```text
+.venv/bin/python -m py_compile \
+  tests/test_calgary_full_artifact_execution.py
+```
+
+Observed result: `PASS`.
+
+This establishes only that the test source parses independently of the
+intentionally missing production module.
+
+### Focused RED Command
+
+Command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_execution \
+  -v
+```
+
+Observed result: `RED / non-zero exit`.
+
+Observed category: `unittest` module-load/import failure.
+
+Observed cause: `ModuleNotFoundError` for
+`support_operations_intelligence.calgary_full_artifact_execution`.
+
+### Interpretation
+
+The C1 test contract exists before its production implementation. The observed
+RED state is caused by the intentionally absent C1 module. This establishes
+test-first chronology only.
+
+### Boundary
+
+The C1 RED checkpoint does not establish:
+
+- C1 correctness;
+- digest-before-stream behavior;
+- successful synthetic orchestration;
+- accounting-validation behavior;
+- complete Calgary traversal;
+- real artifact digest verification;
+- real Calgary row accounting;
+- C2 executable behavior;
+- deterministic JSON;
+- success/failure publication;
+- runtime or memory suitability;
+- a descriptive baseline;
+- operational interpretation;
+- a scientific conclusion.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = C1_RED_TEST_CONTRACT_AND_EVIDENCE
+ARCHITECTURE_SLICE = C1_LIBRARY_ORCHESTRATION
+C1_TEST_CONTRACT = IMPLEMENTED
+C1_PRODUCTION_IMPLEMENTATION = ABSENT
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FOCUSED_TEST_STATE = RED
+RED_CAUSE = MISSING_C1_PRODUCTION_MODULE
+C1_RED_CHECKPOINT = ENGINEERING_OBSERVATION
+C1_BEHAVIOR = NOT_YET_ESTABLISHED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
 implementation, observed RED and GREEN checkpoints, and Slice B synthetic
-composition checkpoint exist. No complete-artifact execution, descriptive
-baseline, or closure evidence exists yet.
+composition checkpoint exist. The Architecture C1 RED test contract and
+observed missing-module RED evidence also exist, while C1 and C2 production
+remain absent. No complete-artifact execution, descriptive baseline, or
+closure evidence exists yet.
