@@ -339,6 +339,15 @@ It should not be interpreted as:
 - a commercial analytics product;
 - a complete operational-intelligence system.
 
+## Repository Lineage
+
+An earlier independent public lineage is preserved at
+`arnaldosepulveda/support-operations-intelligence` for provenance. This
+repository contains the canonical increment-based research-engineering history.
+
+The earlier lineage has independent Git history and is not part of this
+repository's commit ancestry.
+
 ## License
 
 Source code in this repository is licensed under the Apache License 2.0 unless
