@@ -376,7 +376,8 @@ The following are planned tests, not observed results:
 - memory behavior consistent with lazy streaming where practical.
 
 The unexecuted categories in this prospective list remain planned. Observed
-Slice A RED and GREEN checkpoints are recorded separately below.
+Slice A RED and GREEN checkpoints and the Slice B synthetic composition
+checkpoint are recorded separately below.
 
 ## Reproducibility Requirements
 
@@ -637,9 +638,179 @@ OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Slice B Synthetic Composition Checkpoint
+
+### Objective
+
+Establish whether the already-tested CSV parser, Calgary adapter, and Slice A
+aggregator compose directly under a synthetic CSV integration fixture without
+introducing another production composition abstraction.
+
+### Implementation Boundary
+
+```text
+PRODUCTION_CHANGE = NONE
+NEW_COMPOSITION_MODULE = NONE
+```
+
+The tested composition is directly equivalent to:
+
+```python
+aggregate_calgary_status_by_service(
+    adapt_calgary_record(record)
+    for record in iter_calgary_csv_records(path)
+)
+```
+
+`NEW_COMPOSITION_MODULE = NOT_JUSTIFIED_BY_OBSERVED_TEST`. A future full-run
+orchestration layer may still be justified by responsibilities not exercised
+in this synthetic composition checkpoint.
+
+### Synthetic Fixture Boundary
+
+The test-created CSV uses the exact required ordered header:
+
+```text
+service_request_id
+requested_date
+updated_date
+closed_date
+status_description
+source
+service_name
+agency_responsible
+address
+comm_code
+comm_name
+location_type
+longitude
+latitude
+point
+```
+
+The fixture contains five synthetic logical records: four admitted and one
+typed identity rejection. It contains no real Calgary rows and accesses no
+external artifact.
+
+Observed mixed-stream accounting:
+
+```text
+TOTAL_LOGICAL_RECORDS_SEEN = 5
+TOTAL_ADMITTED_RECORDS = 4
+TOTAL_REJECTED_IDENTITY_RECORDS = 1
+AGGREGATED_RECORD_COUNT = 4
+```
+
+The admission, rejection-reason, and aggregation accounting invariants held
+under this synthetic test. These counts describe only the retained fixture.
+
+### Evidence-Preservation Observation
+
+- the exact `Closed` by `Pothole` bucket was counted twice;
+- observed `UNKNOWN` remained observed evidence;
+- padded ` Drainage ` remained exact and untrimmed;
+- `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)` remained distinct;
+- no source-native normalization occurred through the composition.
+
+This checkpoint does not establish complete semantic correctness of all
+Calgary fields.
+
+### Identity-Rejection Observation
+
+- a synthetic empty source identity produced
+  `IdentityRejectionReason.EMPTY_SOURCE_CASE_ID`;
+- the rejection was counted exactly once;
+- the rejected row did not enter the aggregation;
+- the rejection remained a typed result rather than an exception.
+
+### Failure-Propagation Observations
+
+A later malformed-width row propagated `CalgaryCsvStructureError` at logical
+record 2. No partial aggregation summary was returned.
+
+A synthetic `RuntimeError` raised during adapter invocation propagated
+unchanged. No partial successful summary was returned. These observations do
+not establish production fault tolerance.
+
+### Slice B Focused Test Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_adapter_aggregation_composition \
+  -v
+```
+
+Observed result: `3 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Slice A Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `11 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Calgary CSV Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `17 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Full Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: `156 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Claim Boundary
+
+Slice B establishes only that the existing parser, adapter, and aggregator
+composition operated as specified under the retained synthetic integration
+tests. It does not establish:
+
+- digest-gated full-artifact execution;
+- traversal of the 1.9 GB Calgary artifact;
+- real Calgary row accounting;
+- real status/service baseline counts;
+- performance;
+- scalability;
+- memory suitability for the complete artifact;
+- production readiness;
+- persistence need;
+- PostgreSQL need;
+- operational interpretation;
+- scientific conclusion.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = COMPOSITION_TEST_AND_EVIDENCE
+PRODUCTION_CHANGE = NONE
+SLICE_B_COMPOSITION_TEST = INTERNAL_ENGINEERING_TEST_RESULT
+SLICE_B_INITIAL_TEST_STATE = PASS
+DIRECT_COMPOSITION = VERIFIED_UNDER_SYNTHETIC_TEST
+NEW_COMPOSITION_MODULE = NOT_JUSTIFIED_BY_OBSERVED_TEST
+SLICE_A_REGRESSION = PASS
+CALGARY_CSV_REGRESSION = PASS
+FULL_REGRESSION = PASS
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+DIGEST_GATED_FULL_RUN = NOT_PERFORMED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
-implementation, and observed RED and GREEN checkpoints exist. No
-complete-artifact execution, descriptive baseline, or closure evidence exists
-yet.
+implementation, observed RED and GREEN checkpoints, and Slice B synthetic
+composition checkpoint exist. No complete-artifact execution, descriptive
+baseline, or closure evidence exists yet.
