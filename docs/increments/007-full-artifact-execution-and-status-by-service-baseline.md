@@ -1,6 +1,6 @@
 # Increment 007: Full-Artifact Execution and Status-by-Service Baseline
 
-Status: Planned
+Status: In Progress
 
 ## Objective
 
@@ -23,8 +23,9 @@ boundary survives complete-artifact execution and to retain one narrowly
 defined descriptive result. This increment does not authorize operational
 diagnosis or intervention analysis.
 
-This document is a prospective plan. It records no Increment 007 execution,
-implementation, test result, or descriptive count.
+The implementation and full-artifact execution sections remain prospective.
+Observed engineering checkpoints are recorded explicitly below. No
+full-artifact execution or descriptive baseline result has yet been produced.
 
 ## Why This Increment Now
 
@@ -373,7 +374,8 @@ The following are planned tests, not observed results:
 - bounded runner behavior where practical;
 - memory behavior consistent with lazy streaming where practical.
 
-No implementation or test execution is claimed by this plan.
+This prospective list does not claim implementation or passing test results.
+The observed Slice A RED checkpoint is recorded separately below.
 
 ## Reproducibility Requirements
 
@@ -441,7 +443,98 @@ Writing this plan produces no full-artifact execution outcome, descriptive
 result, operational interpretation, scientific conclusion, persistence
 requirement, or AI-intervention requirement.
 
+## Slice A RED Checkpoint
+
+### Objective
+
+Freeze the prospective Slice A aggregation and accounting behavior in
+executable tests before production implementation exists.
+
+### Scope
+
+- test contract only;
+- no production aggregation module;
+- no Calgary artifact access;
+- no digest or parser change;
+- no persistence.
+
+### Observed Environment
+
+- repository commit before this checkpoint:
+  `38f89acc6aa2df269a022c256bccf6f6135460f0`;
+- Python: `3.12.3`;
+- interpreter:
+  `/data/repos/personal/support-operations-intelligence/.venv/bin/python`.
+
+### Test Source Syntax Check
+
+Command:
+
+```text
+.venv/bin/python -m py_compile \
+  tests/test_calgary_status_service_aggregation.py
+```
+
+Observed result: `PASS`.
+
+Meaning: the RED test source itself parses successfully.
+
+Boundary: this does not establish test or production behavior.
+
+### Focused RED Command
+
+Command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `RED / non-zero exit`.
+
+Observed category: `unittest` module-load/import error.
+
+Observed cause: `ModuleNotFoundError` for
+`support_operations_intelligence.calgary_status_service_aggregation`.
+
+### Interpretation
+
+The prospective Slice A test contract exists before its production
+implementation. The observed RED state is caused by the intentionally absent
+aggregation module.
+
+### Boundary
+
+The RED checkpoint does not establish:
+
+- correctness of future aggregation behavior;
+- correctness of the prospective tests themselves beyond syntax and import
+  intent;
+- any passing aggregation semantics;
+- full-artifact execution;
+- any Calgary baseline count;
+- accounting-invariant satisfaction;
+- reproducibility of a completed Increment 007 run;
+- PostgreSQL or persistence need;
+- operational interpretation.
+
+### Claim Classification
+
+```text
+TEST_CONTRACT = IMPLEMENTED
+PRODUCTION_IMPLEMENTATION = ABSENT
+FOCUSED_TEST_STATE = RED
+RED_CAUSE = MISSING_PRODUCTION_MODULE
+RED_CHECKPOINT = ENGINEERING_OBSERVATION
+AGGREGATION_BEHAVIOR = NOT_YET_ESTABLISHED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
-Increment 007 is planned. No implementation, complete-artifact execution,
-aggregation result, test result, or closure evidence exists yet.
+Increment 007 is in progress. The Slice A test contract and observed RED
+checkpoint exist. No production implementation, complete-artifact execution,
+aggregation result, passing test result, or closure evidence exists yet.
