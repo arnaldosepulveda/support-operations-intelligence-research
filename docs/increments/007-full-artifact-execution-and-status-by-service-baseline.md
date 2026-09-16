@@ -23,9 +23,10 @@ boundary survives complete-artifact execution and to retain one narrowly
 defined descriptive result. This increment does not authorize operational
 diagnosis or intervention analysis.
 
-The implementation and full-artifact execution sections remain prospective.
-Observed engineering checkpoints are recorded explicitly below. No
-full-artifact execution or descriptive baseline result has yet been produced.
+The full-artifact execution sections remain prospective. Observed engineering
+checkpoints, including bounded slice implementation, are recorded explicitly
+below. No full-artifact execution or descriptive baseline result has yet been
+produced.
 
 ## Why This Increment Now
 
@@ -374,8 +375,8 @@ The following are planned tests, not observed results:
 - bounded runner behavior where practical;
 - memory behavior consistent with lazy streaming where practical.
 
-This prospective list does not claim implementation or passing test results.
-The observed Slice A RED checkpoint is recorded separately below.
+The unexecuted categories in this prospective list remain planned. Observed
+Slice A RED and GREEN checkpoints are recorded separately below.
 
 ## Reproducibility Requirements
 
@@ -533,8 +534,112 @@ DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Slice A GREEN Checkpoint
+
+### Objective
+
+Implement the previously committed Slice A aggregation and accounting contract
+over already-adapted `CalgaryAdapterResult` values.
+
+### Implementation Boundary
+
+The new module
+`src/support_operations_intelligence/calgary_status_service_aggregation.py`
+implements pure in-process aggregation and accounting only. It performs:
+
+- no artifact I/O;
+- no digest verification;
+- no CSV parsing;
+- no adapter invocation;
+- no persistence;
+- no normalization;
+- no serialization.
+
+### Starting RED Checkpoint
+
+The prior committed RED checkpoint is
+`9342a7a0208e3e8fa86092893230959d9e2c8151`. At that checkpoint, the focused
+test failed because the production aggregation module was absent.
+
+### Implementation Observation
+
+- already-adapted results are consumed;
+- each admitted result contributes exactly one status/service aggregation
+  count;
+- `RejectedIdentity` results are counted by their existing rejection reason;
+- existing evidence objects remain the grouping-key semantics;
+- unexpected iterable exceptions propagate.
+
+### Focused Slice A Test Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `11 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Calgary CSV Focused Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `17 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Full Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: `153 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Accounting Behavior Observed Under Tests
+
+- seen equals admitted plus rejected;
+- rejection buckets sum to rejected;
+- aggregate counts sum to both aggregated count and admitted;
+- exact observed values remain distinct;
+- unavailable-evidence reasons remain distinct;
+- explained rejection remains accounting rather than an exception;
+- an unexpected iterable `RuntimeError` propagates.
+
+### Boundary
+
+Slice A GREEN does not establish:
+
+- full-artifact execution;
+- digest verification during Increment 007;
+- parser/adapter full-run composition;
+- Calgary row count;
+- status/service baseline values;
+- execution scalability;
+- memory suitability for 1.9 GB traversal;
+- production readiness;
+- PostgreSQL or persistence need;
+- operational interpretation;
+- scientific conclusion.
+
+### Claim Classification
+
+```text
+SLICE_A_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+SLICE_A_FOCUSED_TEST_RESULT = INTERNAL ENGINEERING TEST RESULT
+REGRESSION_RESULT = INTERNAL ENGINEERING TEST RESULT
+AGGREGATION_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
-Increment 007 is in progress. The Slice A test contract and observed RED
-checkpoint exist. No production implementation, complete-artifact execution,
-aggregation result, passing test result, or closure evidence exists yet.
+Increment 007 is in progress. The Slice A test contract, pure aggregation
+implementation, and observed RED and GREEN checkpoints exist. No
+complete-artifact execution, descriptive baseline, or closure evidence exists
+yet.
