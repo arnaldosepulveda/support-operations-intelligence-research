@@ -1,6 +1,8 @@
 # Increment 007: Full-Artifact Execution and Status-by-Service Baseline
 
-Status: In Progress
+Status: Complete
+
+Completion date: 2026-09-17
 
 ## Objective
 
@@ -3309,22 +3311,296 @@ DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 INTERPRETATION = NOT_PERFORMED
 ```
 
+## Complete-Artifact Execution Result
+
+The frozen Step 6B/6C sequence was subsequently executed with the following
+observed result:
+
+```text
+EXECUTION_BOUND_GIT_REVISION = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+ARTIFACT_PATH = /data/repos/Public Datasets/calgary_311.csv
+ARTIFACT_SIZE_BYTES = 1978541467
+EXPECTED_ARTIFACT_SHA256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+INDEPENDENTLY_OBSERVED_ARTIFACT_SHA256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+INDEPENDENT_DIGEST_VERIFICATION = MATCH
+FULL_ARTIFACT_EXECUTION = SUCCEEDED
+PROCESS_EXIT_STATUS = 0
+COMMAND_EXECUTIONS = 1
+RERUNS = 0
+COMPLETE_ARTIFACT_READS = 3
+```
+
+The three complete reads are execution accounting only: one external SHA-256
+pass, one internal C1 SHA-256 pass, and one CSV traversal. No performance or
+data interpretation is attached to this accounting.
+
+## Retained Execution Evidence
+
+The successful run retained these external evidence artifacts:
+
+| Evidence | External path | Size | SHA-256 |
+|---|---|---:|---|
+| Digest verification | `/data/repos/personal/support-operations-intelligence-results/increment-007/run-001/digest-verification.txt` | 110 bytes | `711c7a7f76a856d28fa5dfb71160bf6afc13ef378faa923d77ea097f54790f7d` |
+| Baseline result | `/data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json` | 563023 bytes | `2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c` |
+| External timing evidence | `/data/repos/personal/support-operations-intelligence-results/increment-007/run-001/usr-bin-time-v.txt` | 1074 bytes | `f2a3ceab3493a5684251bb9ddb2360d25d2df92ad674702ee278623515c2622e` |
+
+These artifacts remain external to Git. Their hashes are retained in this
+canonical Increment record. This does not establish durable independent
+archival.
+
+## Retained Baseline Binding
+
+The successful retained `BaselineResult` is bound as follows:
+
+```text
+artifact_sha256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+git_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+increment_version = 007
+contract_identifier = 007-full-artifact-execution-and-status-by-service-baseline
+run_date_utc = 2026-09-17T14:02:03.748335+00:00
+python_version = 3.12.3
+```
+
+Step 7A independently verified these retained bindings. The execution binding
+remains the execution revision, not this later documentation-closure revision.
+
+## Complete Row-Lifecycle Result
+
+```text
+rows_observed = 7474403
+rows_structurally_accepted = 7474403
+rows_structurally_rejected = 0
+rows_identity_admitted = 7474403
+rows_identity_rejected = 0
+
+7474403 = 7474403 + 0
+7474403 = 7474403 + 0
+
+ROW_LIFECYCLE_RECONCILIATION = PASSED
+```
+
+These are source-row lifecycle counts; they do not change the unit of analysis
+from source row to Case.
+
+## Exact Source-Identifier Result
+
+```text
+distinct_source_case_ids = 7474403
+source_case_ids_appearing_more_than_once = 0
+rows_involved_in_duplication = 0
+SOURCE_IDENTIFIER_UNIQUENESS_WITHIN_ARTIFACT = ESTABLISHED_UNDER_EXACT_LEXICAL_SOURCE_CASE_ID
+```
+
+All 7,474,403 identity-admitted source rows have distinct exact
+`source_case_id` values within this retained artifact under the frozen lexical
+identity semantics. This does **not** establish that one source row equals one
+independently managed real-world unit of work. It also does **not** establish
+source-identifier uniqueness across other Calgary snapshots or artifacts.
+
+## Blank-Counter Result
+
+```text
+blank_service_name = 0
+blank_agency_responsible = 0
+blank_status_description = 0
+```
+
+These are counts under the frozen adapter `VALUE_ABSENT` semantics for this
+retained artifact. The zero values do not establish mandatory fields, semantic
+completeness, data quality, or operational correctness.
+
+## Vocabulary and Cross-Tab Structural Results
+
+```text
+status_vocabulary_cardinality = 5
+status_vocabulary_count_sum = 7474403
+service_name_vocabulary_cardinality = 1169
+service_name_vocabulary_count_sum = 7474403
+identity_rejection_rows = 0
+identity_rejection_count_sum = 0
+service_name_x_status_description_row_cardinality = 1817
+cross_tab_count_sum = 7474403
+```
+
+Vocabulary uniqueness checks passed, vocabulary ordering checks passed,
+cross-tab pair uniqueness passed, deterministic cross-tab ordering passed,
+and cross-tab count reconciliation passed. No vocabulary or cross-tab content
+is reported or interpreted here.
+
+## Percentage Audit
+
+```text
+within_category_percentages_checked = 1817
+within_category_mismatches = 0
+portfolio_wide_percentages_checked = 1817
+portfolio_wide_mismatches = 0
+```
+
+Step 7A independently reproduced all retained percentage strings using
+`Decimal`, `ROUND_HALF_EVEN`, four decimal places, and the frozen denominators.
+No cell percentage is reported here.
+
+## Historical Count Comparison
+
+```text
+historical_rows_observed = 7474403
+current_rows_observed = 7474403
+difference = 0
+cause = NOT_DETERMINED
+```
+
+The historical Increment 003 count remained contextual comparison evidence
+and was not used as a success criterion. No cause is inferred from the matching
+counts.
+
+## Execution Metrics
+
+```text
+in_process_wall_clock_seconds = 71.30664593300025
+external_elapsed_wall_clock = 1:11.39
+in_process_peak_rss_bytes = 768901120
+external_maximum_rss_kbytes = 750880
+external_converted_rss_bytes = 768901120
+external_process_exit_status = 0
+RSS_VALUES_NUMERICALLY_EQUAL = YES
+```
+
+These values are recorded without performance interpretation.
+
+## Retained Baseline Reconciliation Audit
+
+```text
+STEP_7_RECONCILIATION_AUDIT = PASSED
+BASELINE_RESULT = RETAINED_AND_RECONCILED
+```
+
+Step 7A independently checked evidence-file stability and hashes; original
+artifact digest binding; UTF-8 and JSON integrity; the terminating newline;
+the binding triple; run metadata; row-accounting equations; duplicate- and
+blank-counter bounds; typed evidence shape; vocabulary sums, uniqueness, and
+deterministic ordering; rejection reconciliation; cross-tab uniqueness,
+deterministic ordering, and raw-count reconciliation; all within-category and
+portfolio percentages; the historical comparison; claim boundaries;
+real-world-unit overclaim absence; recursive JSON key ordering; timing
+evidence; and RSS conversion. No audit check failed.
+
+## Established Baseline Claim
+
+```text
+DESCRIPTIVE_BASELINE = ESTABLISHED_AS_RETAINED_SOURCE_ROW_BASELINE
+```
+
+The current tested parser and adapter traversed the complete digest-verified
+Calgary artifact and produced a reconciled source-native `service_name` x
+`status_description` source-row baseline under the predeclared identity,
+denominator, normalization, evidence, and reporting contracts.
+
+This is a **RESEARCH/ENGINEERING OBSERVATION** about this retained artifact and
+implementation. It is neither external validation nor a universal claim.
+
+## Explicit Not-Established Boundaries
+
+Increment 007 does **not** establish:
+
+- an operational finding;
+- a diagnosis;
+- a causal claim;
+- backlog interpretation;
+- duration interpretation;
+- closure finality;
+- comparability of status values across service categories;
+- semantic comparability of `service_name` labels;
+- whether one row equals one independently managed unit of work;
+- artifact representativeness;
+- source correctness;
+- production suitability;
+- portability;
+- AI suitability;
+- intervention need; or
+- a scientific conclusion.
+
+```text
+REAL_WORLD_UNIT_OF_WORK_EQUIVALENCE = NOT_ESTABLISHED
+OPERATIONAL_INTERPRETATION = NOT_PERFORMED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
+## Threats and Limitations
+
+1. The Calgary artifact still lacks an independently established immutable
+   external version identifier beyond retained bytes and SHA-256.
+2. The source-native meanings, lifecycle semantics, and cross-category
+   comparability of `status_description` remain unresolved.
+3. The semantic relationship among `service_name` values remains source-native
+   and uninterpreted.
+4. Exact `source_case_id` uniqueness within this artifact does not establish
+   real-world unit-of-work equivalence.
+5. The retained `BaselineResult` is implementation-produced evidence and the
+   Step 7A audit is internal evaluation, not independent external validation.
+6. The retained execution artifacts are stored outside Git; hashes are
+   canonicalized in this Increment document, but durable archival or
+   replication is not established by Increment 007.
+7. The C2 success write is intentionally non-atomic. This successful run
+   produced a parseable reconciled artifact, but the implementation still
+   lacks an atomic publication protocol.
+8. Runtime and RSS observations are from one execution environment and one
+   run. They do not establish portability or production performance.
+9. The successful run says nothing about how the system would behave on a
+   different artifact containing structural or identity failures beyond the
+   retained synthetic tests.
+10. No analysis of cross-tab contents was performed in Increment 007.
+
+## Final Test Checkpoint
+
+The Step 7B full regression ran as:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result:
+
+```text
+tests_run = 171
+failures = 0
+errors = 0
+result = OK
+FINAL_ENGINEERING_REGRESSION = PASSED
+```
+
+## Increment 007 Closure
+
+Increment 007 is complete because the predeclared complete-artifact execution
+contract was implemented, the frozen artifact executed successfully once, the
+retained `BaselineResult` reconciled against all frozen accounting and
+reporting requirements, and the bounded source-row baseline was retained with
+explicit claim limitations.
+
+Completion of Increment 007 does **not** authorize operational interpretation
+or begin the next analytical increment.
+
+```text
+CHANGE_TYPE = INCREMENT_007_DOCUMENTATION_CLOSURE
+INCREMENT_007_STATUS = COMPLETE
+FULL_ARTIFACT_EXECUTION = SUCCEEDED
+INDEPENDENT_DIGEST_VERIFICATION = MATCH
+BASELINE_RESULT = RETAINED_AND_RECONCILED
+STEP_7_RECONCILIATION_AUDIT = PASSED
+DESCRIPTIVE_BASELINE = ESTABLISHED_AS_RETAINED_SOURCE_ROW_BASELINE
+SOURCE_IDENTIFIER_UNIQUENESS_WITHIN_ARTIFACT = ESTABLISHED_UNDER_EXACT_LEXICAL_SOURCE_CASE_ID
+REAL_WORLD_UNIT_OF_WORK_EQUIVALENCE = NOT_ESTABLISHED
+FINAL_ENGINEERING_REGRESSION = PASSED
+OPERATIONAL_INTERPRETATION = NOT_PERFORMED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+NEXT_ANALYTICAL_INCREMENT = NOT_STARTED
+```
+
 ## Current Status
 
-Increment 007 is in progress. The Slice A test contract, pure aggregation
-implementation, observed RED and GREEN checkpoints, and Slice B synthetic
-composition checkpoint exist. The Architecture C1 RED test contract and
-observed missing-module RED evidence also exist. The prospective
-complete-artifact counter contract was frozen before C1 implementation, but no
-counter results have been observed. No percentages, vocabularies, or cross-tab
-values have been observed. The complete-artifact semantic and reporting
-policies are frozen prospectively. The C1 RED contract is extended for the
-complete-pass counter summary, and C1 is now implemented and GREEN under the
-retained synthetic tests. The raw structural-record diagnostic RED test
-contract is implemented, and its parser support is now GREEN under the
-committed synthetic single-line and multiline tests. The thin C2 scope and its
-eight-method contract are frozen, and C2 is now implemented and GREEN under
-the retained synthetic tests. No complete-artifact execution, real counter
-result, descriptive baseline, or closure evidence exists yet. The metadata-only
-preflight is complete and the Step 6B/6C manifest is frozen, but neither command
-has been executed.
+Increment 007 is complete as of 2026-09-17. The complete-artifact execution
+succeeded once at the frozen execution-bound revision, its retained evidence
+remains externally stored and hash-bound here, and the Step 7A reconciliation
+audit and final engineering regression passed. The result remains a bounded
+source-row research/engineering observation. Operational interpretation was
+not performed, scientific conclusions were not established, and the next
+analytical increment was not started.
