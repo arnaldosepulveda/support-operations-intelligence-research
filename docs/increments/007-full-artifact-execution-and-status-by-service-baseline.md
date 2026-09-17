@@ -2957,6 +2957,159 @@ REAL_CALGARY_ARTIFACT_ACCESSED = NO
 DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 ```
 
+## Architecture C2 GREEN Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Implemented Boundary
+
+The thin C2 module is now implemented at:
+
+```text
+src/support_operations_intelligence/calgary_full_artifact_run.py
+```
+
+It provides the committed `argparse` executable boundary and `main` entry
+point; captures the repository-local Git revision before C1; captures a UTC
+run date and executing Python version; measures the corrected in-process,
+pre-write wall-clock duration; converts Linux in-process peak RSS from KiB to
+bytes; invokes C1 exactly once; and transforms the verified C1 result into
+deterministic typed JSON.
+
+The successful result retains the C1-verified artifact digest, Git revision,
+Increment 007 binding, complete counters, full typed vocabularies, exact
+identity-rejection rows, deterministically ordered service/status rows,
+four-decimal percentages, historical comparison, and frozen claims. Observed
+evidence retains exact case and whitespace. Unsupported grouping evidence
+fails rather than falling back to arbitrary stringification.
+
+The monotonic timer starts immediately before C1 and stops after the complete
+JSON-ready result payload and in-process RSS evidence are constructed. The
+measured value is inserted before serialization and before the output path is
+opened. Step 6 external `/usr/bin/time -v` remains the separate end-to-end
+command observation.
+
+The output is written directly as stable-key-order UTF-8 JSON with a
+terminating newline. This implementation intentionally does not provide atomic
+publication, temporary-file rename, a structured failure artifact, a
+failure-output argument, or a detailed exit-code taxonomy. Failures produce a
+nonzero outcome and bounded terminal diagnostics. Structural failure context
+remains available in-process and is not serialized as success JSON.
+
+Git revision capture binds the run to the observed checkout but does not prove
+worktree cleanliness:
+
+```text
+GIT_REVISION_CAPTURE != WORKTREE_CLEANLINESS_PROOF
+```
+
+### Percentage Rounding
+
+The committed tests fixed four-decimal percentage strings but did not select a
+tie-breaking rule. Before real-artifact execution, C2 selects Decimal
+quantization with:
+
+```text
+PERCENTAGE_ROUNDING = ROUND_HALF_EVEN
+PERCENTAGE_ROUNDING_CLASSIFICATION = SERIALIZATION_DESIGN_CHOICE_SELECTED_BEFORE_REAL_ARTIFACT_EXECUTION
+```
+
+Raw integer counts remain authoritative; counts are not derived from displayed
+percentages.
+
+### Observed Test Evidence
+
+C2 focused command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_run \
+  -v
+```
+
+Observed result: `8 tests`, `0 failures`, `0 errors`, `OK`.
+
+C1 regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_execution \
+  -v
+```
+
+Observed result: `5 tests`, `0 failures`, `0 errors`, `OK`.
+
+CSV regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `19 tests`, `0 failures`, `0 errors`, `OK`.
+
+Slice B regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_adapter_aggregation_composition \
+  -v
+```
+
+Observed result: `3 tests`, `0 failures`, `0 errors`, `OK`.
+
+Slice A regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `11 tests`, `0 failures`, `0 errors`, `OK`.
+
+Full regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: `171 tests`, `0 failures`, `0 errors`, `OK`. The observed
+total matches the retained 163-test checkpoint plus the eight committed C2
+methods now executable after production-module implementation.
+
+### Claim Boundary
+
+C2 behavior is established only under the retained synthetic tests. This
+checkpoint does not establish successful complete Calgary execution, a real
+status/service baseline, real duplicate counts, real vocabularies, actual
+wall-clock duration, actual peak RSS, agreement with external
+`/usr/bin/time -v`, artifact representativeness, operational interpretation,
+or a scientific conclusion. No real Calgary artifact was accessed.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = C2_GREEN_IMPLEMENTATION_AND_EVIDENCE
+ARCHITECTURE_SLICE = C2_EXECUTABLE_EVIDENCE_BOUNDARY
+C2_EXECUTABLE_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+C2_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+GIT_REVISION_CAPTURE = IMPLEMENTED
+C2_WALL_CLOCK_SECONDS = IN_PROCESS_PRE_WRITE_DURATION
+IN_PROCESS_PEAK_RSS_UNIT = BYTES
+DIRECT_OUTPUT_WRITE = IMPLEMENTED
+ATOMIC_OUTPUT_PUBLICATION = DEFERRED
+STRUCTURED_FAILURE_ARTIFACT = DEFERRED
+EXIT_STATUS_TAXONOMY = DEFERRED_BEYOND_ZERO_NONZERO
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -2970,8 +3123,7 @@ policies are frozen prospectively. The C1 RED contract is extended for the
 complete-pass counter summary, and C1 is now implemented and GREEN under the
 retained synthetic tests. The raw structural-record diagnostic RED test
 contract is implemented, and its parser support is now GREEN under the
-committed synthetic single-line and multiline tests. C2 remains absent. No
-complete-artifact execution, real counter result, descriptive baseline, or
-closure evidence exists yet. The thin C2 scope and its eight-method
-prospective RED contract are now frozen; the test module remains RED solely
-because C2 has not been implemented.
+committed synthetic single-line and multiline tests. The thin C2 scope and its
+eight-method contract are frozen, and C2 is now implemented and GREEN under
+the retained synthetic tests. No complete-artifact execution, real counter
+result, descriptive baseline, or closure evidence exists yet.
