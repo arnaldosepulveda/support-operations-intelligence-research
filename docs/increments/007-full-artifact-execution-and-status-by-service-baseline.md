@@ -3110,6 +3110,205 @@ DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Complete-Artifact Execution Preflight and Frozen Run Manifest
+
+```text
+OBSERVED METADATA-ONLY PREFLIGHT / PROSPECTIVE EXECUTION MANIFEST
+```
+
+### Code and Environment Binding
+
+```text
+PRE_RUN_CODE_REVISION = 9d9f0fa698845d63ee61bbfc597dff6b35452685
+EXECUTION_BOUND_GIT_REVISION = THIS_MANIFEST_COMMIT_SHA
+```
+
+`PRE_RUN_CODE_REVISION` is the revision before this pre-run manifest commit.
+After this Step 6A commit, its new commit SHA is the execution-bound Git
+revision that Step 6C C2 must capture in a successful `BaselineResult`. The
+manifest commit cannot self-record its own SHA without changing that SHA; the
+value is therefore verified and recorded immediately after commit.
+
+Observed repository-local interpreter:
+
+```text
+python_executable = /data/repos/personal/support-operations-intelligence/.venv/bin/python
+python_version = Python 3.12.3
+in_venv = True
+```
+
+Observed required tools:
+
+```text
+sha256sum = /usr/bin/sha256sum
+usr_bin_time = /usr/bin/time
+usr_bin_time_version = time (GNU Time) UNKNOWN
+```
+
+Neither tool was executed against the Calgary artifact during this preflight.
+
+### Frozen Artifact and Evidence Paths
+
+```text
+ARTIFACT = /data/repos/Public Datasets/calgary_311.csv
+EXPECTED_SHA256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+HISTORICAL_SIZE_BYTES = 1978541467
+OBSERVED_METADATA_SIZE_BYTES = 1978541467
+ARTIFACT_IS_FILE = YES
+ARTIFACT_IS_READABLE = YES
+```
+
+Only filesystem metadata was inspected. No artifact content was opened, read,
+hashed, or parsed, and no digest observation is recorded.
+
+The external run directory and future evidence paths are:
+
+```text
+RUN_DIR = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001
+BASELINE_JSON = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json
+DIGEST_EVIDENCE = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/digest-verification.txt
+TIME_EVIDENCE = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/usr-bin-time-v.txt
+```
+
+All three future evidence files were confirmed nonexistent before the run
+directory was created. Only the directory exists. Resolved locations are:
+
+```text
+REPO_ROOT_REAL = /data/repos/personal/support-operations-intelligence
+RUN_DIR_REAL = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001
+RUN_DIR_OUTSIDE_REPOSITORY = YES
+```
+
+### Observed Resource Preflight
+
+Observed `free -b` values:
+
+```text
+MEMORY_TOTAL_BYTES = 33052442624
+MEMORY_AVAILABLE_BYTES = 10892292096
+SWAP_TOTAL_BYTES = 8589930496
+SWAP_FREE_BYTES = 5734469632
+```
+
+Corresponding `/proc/meminfo` observations:
+
+```text
+MemTotal = 32277776 kB
+MemAvailable = 10637004 kB
+SwapTotal = 8388604 kB
+SwapFree = 5600068 kB
+```
+
+This is preflight evidence, not proof that exact source-identifier tracking
+will fit in memory. No approximate hashing or replacement counting method is
+authorized.
+
+Both the artifact and result directory resolve to the `/data` filesystem. The
+observed `df -B1` values were:
+
+```text
+FILESYSTEM = /dev/mapper/data_crypt
+SIZE_BYTES = 983334674432
+USED_BYTES = 27178721280
+AVAILABLE_BYTES = 906129862656
+USE_PERCENT = 3%
+MOUNT_POINT = /data
+```
+
+No new analytical resource threshold is inferred from these observations.
+
+### Frozen Step 6B Independent Digest Command
+
+Step 6B must run exactly from the repository root:
+
+```bash
+ARTIFACT='/data/repos/Public Datasets/calgary_311.csv'
+EXPECTED_SHA256='9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f'
+RUN_DIR='/data/repos/personal/support-operations-intelligence-results/increment-007/run-001'
+DIGEST_EVIDENCE="$RUN_DIR/digest-verification.txt"
+
+sha256sum "$ARTIFACT" | tee "$DIGEST_EVIDENCE"
+```
+
+Step 6B must compare the observed digest exactly with `EXPECTED_SHA256`. A
+mismatch stops the work before C2 without changing the expected digest,
+artifact, or code. This command was not executed in Step 6A.
+
+### Frozen Step 6C Complete-Artifact Command
+
+Only after Step 6B independently confirms the digest, Step 6C must run exactly
+from the repository root:
+
+```bash
+ARTIFACT='/data/repos/Public Datasets/calgary_311.csv'
+EXPECTED_SHA256='9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f'
+RUN_DIR='/data/repos/personal/support-operations-intelligence-results/increment-007/run-001'
+BASELINE_JSON="$RUN_DIR/baseline-result.json"
+TIME_EVIDENCE="$RUN_DIR/usr-bin-time-v.txt"
+
+/usr/bin/time -v \
+  -o "$TIME_EVIDENCE" \
+  env PYTHONPATH=src \
+  .venv/bin/python -m \
+  support_operations_intelligence.calgary_full_artifact_run \
+  --artifact "$ARTIFACT" \
+  --expected-sha256 "$EXPECTED_SHA256" \
+  --output "$BASELINE_JSON"
+```
+
+This command was not executed in Step 6A.
+
+### Planned Read Cost and Non-Overwrite Policy
+
+The frozen evidence sequence entails three complete artifact reads:
+
+1. Step 6B independent `sha256sum`: one complete content pass;
+2. Step 6C C1 exact SHA-256 verification: one complete binary pass;
+3. Step 6C C1 CSV traversal: one complete text/CSV pass.
+
+```text
+PLANNED_COMPLETE_ARTIFACT_READS = 3
+PLANNED_EXECUTION_COST = ACCEPTED
+```
+
+This is planned execution cost, not a defect, and must not be optimized away
+after the contract is frozen.
+
+Before Step 6B, `digest-verification.txt` must still not exist. Before Step 6C,
+`baseline-result.json` and `usr-bin-time-v.txt` must still not exist. Retained
+evidence is never overwritten. If an interrupted direct write leaves a
+baseline file, execution stops; any retry requires a newly selected and
+prospectively recorded run directory.
+
+### Frozen Stop Policies
+
+If Step 6C returns nonzero, stop without analyzing partial output or rerunning
+immediately. Preserve terminal failure evidence, `/usr/bin/time -v` evidence
+if produced, and any partial non-atomic baseline file. A partial JSON file is
+not a `BaselineResult`. If `CalgaryCsvStructureError` occurs, preserve its
+logical record number and in-process raw logical record for diagnosis without
+copying raw Calgary source content into this Increment document.
+
+If Step 6C returns zero and produces both the baseline and time-evidence files,
+report the observed numbers and stop. Do not interpret the cross-tab, diagnose
+operations, form hypotheses, suggest interventions, discuss AI suitability,
+normalize vocabularies, or rerun because a result is surprising. Review must
+precede interpretation.
+
+### Pre-Run Classification
+
+```text
+CHANGE_TYPE = COMPLETE_ARTIFACT_EXECUTION_PREFLIGHT_AND_RUN_MANIFEST
+EXECUTION_MANIFEST = FROZEN_BEFORE_REAL_ARTIFACT_CONTENT_ACCESS
+ARTIFACT_CONTENT_ACCESSED = NO
+ARTIFACT_METADATA_ACCESSED = YES
+INDEPENDENT_DIGEST_VERIFICATION = NOT_PERFORMED
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+BASELINE_RESULT = NOT_PRODUCED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+INTERPRETATION = NOT_PERFORMED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -3126,4 +3325,6 @@ contract is implemented, and its parser support is now GREEN under the
 committed synthetic single-line and multiline tests. The thin C2 scope and its
 eight-method contract are frozen, and C2 is now implemented and GREEN under
 the retained synthetic tests. No complete-artifact execution, real counter
-result, descriptive baseline, or closure evidence exists yet.
+result, descriptive baseline, or closure evidence exists yet. The metadata-only
+preflight is complete and the Step 6B/6C manifest is frozen, but neither command
+has been executed.
