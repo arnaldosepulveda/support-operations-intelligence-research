@@ -2628,6 +2628,284 @@ REAL_CALGARY_ARTIFACT_ACCESSED = NO
 DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 ```
 
+## Prospective C2 Thin Executable Contract
+
+```text
+DESIGN REFINEMENT / PROSPECTIVE
+```
+
+### Scope Refinement
+
+The earlier broader publication design is narrowed for Increment 007. C2 now
+owns only command-line argument parsing; execution-date, current Git revision,
+and Python version capture; wall-clock timing; in-process peak RSS capture;
+deterministic `BaselineResult` JSON construction; direct success-file writing;
+and a zero/nonzero process outcome.
+
+The earlier prospective requirements below are explicitly deferred and are
+not mandatory for Increment 007 completion:
+
+```text
+ATOMIC_SUCCESS_PUBLICATION = DEFERRED
+ATOMIC_RENAME_PROTOCOL = DEFERRED
+STRUCTURED_FAILURE_ARTIFACT = DEFERRED
+FAILURE_OUTPUT_PATH = DEFERRED
+EXIT_STATUS_TAXONOMY = DEFERRED_BEYOND_ZERO_NONZERO
+```
+
+### Git Revision and CLI Contract
+
+Operator-supplied code-commit metadata is superseded for Increment 007 C2.
+C2 must capture the current repository revision itself before starting C1. The
+retained `git_revision` is the exact output of the repository-local equivalent
+of `git rev-parse HEAD` at execution time. Failure to obtain it produces a
+nonzero outcome before C1 starts. This binds the run to the observed checkout;
+it is not independent validation of code correctness.
+
+```text
+SUPPLIED_CODE_COMMIT = SUPERSEDED_FOR_INCREMENT_007_C2
+GIT_REVISION_CAPTURE = REQUIRED
+```
+
+The prospective invocation is:
+
+```text
+PYTHONPATH=src .venv/bin/python -m \
+  support_operations_intelligence.calgary_full_artifact_run \
+  --artifact <path> \
+  --expected-sha256 <sha256> \
+  --output <path>
+```
+
+All three arguments are required. There is no `--git-revision` or
+`--failure-output`. C2 uses standard-library `argparse` and exposes only
+`main(argv: Sequence[str] | None = None) -> int` as its required public
+function; package execution uses `raise SystemExit(main())`.
+
+### BaselineResult Binding and Run Metadata
+
+Every successful retained JSON binds the result through these top-level
+fields:
+
+```text
+artifact_sha256
+git_revision
+increment_version = "007"
+contract_id = "007-full-artifact-execution-and-status-by-service-baseline"
+```
+
+It also retains `run_date_utc`, `python_version`, `wall_clock_seconds`, and
+`peak_rss_bytes`. The run date is a UTC execution timestamp. The Python version
+is that of the executing interpreter. Wall-clock measurement begins
+immediately before the C1 call and ends after successful JSON file writing.
+
+On the current Linux contract, in-process peak RSS uses standard-library
+`resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024` because the source
+value is KiB:
+
+```text
+IN_PROCESS_PEAK_RSS_UNIT = BYTES
+```
+
+The later Step 6 run separately retains `/usr/bin/time -v` as external
+evidence. The two measurements are not asserted to be identical. Hostname,
+username, IP address, machine serial, precise location, and unrelated
+environment variables are excluded.
+
+### Deterministic JSON and Typed Evidence
+
+The success artifact is UTF-8 JSON with stable object-key ordering,
+deterministic list ordering, and a terminating newline. Whole-file byte
+identity across runs is not expected because run date, wall-clock duration,
+and peak RSS are run-specific. The domain and counter representation remains
+deterministic for the same C1 result.
+
+Observed evidence is encoded as:
+
+```json
+{"kind": "OBSERVED", "value": "<exact source-native value>"}
+```
+
+Unavailable evidence is encoded as:
+
+```json
+{"kind": "UNAVAILABLE", "reason": "<UnavailableReason value>"}
+```
+
+Exact observed case and whitespace are preserved. `UNKNOWN`, `N/A`,
+`MISSING`, and `(blank)` are not machine encodings for unavailable evidence;
+`(blank)` remains presentation-only.
+
+Both `status_vocabulary` and `service_name_vocabulary` are deterministic rows
+containing `evidence` and `count`, not JSON-object keys derived from Python
+representations. Rows sort by evidence kind rank (`OBSERVED = 0`,
+`UNAVAILABLE = 1`) and then exact payload. Vocabularies are not truncated,
+merged, or normalized.
+
+The existing cross-tab is serialized as deterministic `status_by_service`
+rows containing typed `service_name` evidence, typed `status_description`
+evidence, raw integer `count`, `within_category_percentage`, and
+`portfolio_wide_percentage`. Rows sort by service evidence kind rank and
+payload, then status evidence kind rank and payload. Dictionary insertion
+order is not a serialization contract.
+
+### Percentages, Counters, and Rejections
+
+For each cell:
+
+```text
+within_category_percentage =
+100 * cell_count / exact service_name group total
+
+portfolio_wide_percentage =
+100 * cell_count / rows_identity_admitted
+```
+
+Raw integer counts are authoritative. Percentages are retained as fixed-width
+four-decimal strings such as `"25.0000"`; counts are never derived from them.
+Unavailable evidence remains included under the Step 3 denominator contract.
+
+The `counter_summary` retains every C1 row-lifecycle, identity, exact-duplicate,
+blank-field, and complete vocabulary counter. Specifically, it retains
+`rows_observed`, `rows_structurally_accepted`, `rows_structurally_rejected`,
+`rows_identity_admitted`, `rows_identity_rejected`,
+`distinct_source_case_ids`, `source_case_ids_appearing_more_than_once`,
+`rows_involved_in_duplication`, `blank_service_name`,
+`blank_agency_responsible`, `blank_status_description`, and the deterministic
+status and service vocabularies. C2 does not deduplicate or reinterpret them.
+
+Identity rejection counts are deterministic `reason` and `count` rows sorted
+lexically by exact `IdentityRejectionReason.value`. C2 does not invent
+categories or remove a reason present in the C1 result.
+
+### Historical Comparison
+
+The JSON retains:
+
+```text
+historical_rows_observed = 7474403
+current_rows_observed = counter_summary.rows_observed
+difference = current_rows_observed - historical_rows_observed
+cause = "NOT_DETERMINED"
+```
+
+This is descriptive comparison evidence, not a success gate. Output is not
+altered to force equality.
+
+### Claims Contract
+
+Every success artifact contains an `ESTABLISHED` entry substantively
+equivalent to:
+
+> The current tested parser and adapter traversed the complete digest-verified
+> artifact and produced source-native service_name x status_description counts
+> under a declared denominator and declared exclusions.
+
+This appears only after successful C1 completion. `NOT ESTABLISHED` entries
+cover operational finding, diagnosis, causality, backlog interpretation,
+duration interpretation, closure finality, cross-service status
+comparability, `service_name` label comparability, whether one row is one
+independently managed unit of work, artifact representativeness, and AI
+suitability.
+
+Duplicate counters address exact source-identifier repetition only. They do
+not establish that one row equals one independently managed real-world unit of
+work. No cross-tab interpretation is included.
+
+### Direct Write and Failure Boundary
+
+After C1 success and successful serialization, C2 writes UTF-8 JSON directly
+to `--output` with a terminating newline:
+
+```text
+DIRECT_OUTPUT_WRITE = IN_SCOPE
+ATOMIC_OUTPUT_PUBLICATION = DEFERRED
+```
+
+This is intentionally not atomic. A crash during writing can leave partial
+output; that accepted engineering limitation remains explicit.
+
+If execution fails before successful output completion, the process outcome
+is nonzero, no successful `BaselineResult` is intentionally produced, and no
+structured failure artifact is written. Failure remains on the process and
+terminal boundary without a finer exit-status taxonomy. A structural CSV
+failure continues to carry `logical_data_record_number` and
+`raw_logical_record` on `CalgaryCsvStructureError`; raw record content is not
+serialized to the success path.
+
+## C2 Executable Contract RED Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+Exactly one prospective C2 test module now exists:
+
+```text
+tests/test_calgary_full_artifact_run.py
+```
+
+Its eight `unittest.TestCase` methods freeze successful CLI output and binding,
+Git-revision failure before C1, deterministic typed evidence ordering,
+four-decimal percentage denominators including unavailable evidence,
+historical comparison, static bounded claims, nonzero C1 failure without
+success output, and structural-diagnostic preservation without success
+serialization.
+
+No tests require atomic rename, temporary success files, failure JSON, a
+failure-output path, multi-code exit taxonomy, PostgreSQL, analytics, or real
+artifact behavior.
+
+Test syntax command:
+
+```text
+.venv/bin/python -m py_compile \
+  tests/test_calgary_full_artifact_run.py
+```
+
+Observed result: `PASS`.
+
+Focused RED command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_run \
+  -v
+```
+
+Observed result: `RED / nonzero`; one unittest loader error occurred before the
+eight prospective methods could execute. Exact cause:
+
+```text
+ModuleNotFoundError: No module named 'support_operations_intelligence.calgary_full_artifact_run'
+```
+
+The missing C2 production module is the sole RED cause. The full regression
+suite was not run for this RED checkpoint; the retained prior GREEN suite is
+`163 tests`, `0 failures`, `0 errors`, `OK`. No real Calgary artifact was
+accessed.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = C2_RED_TEST_CONTRACT_AND_SCOPE_REFINEMENT
+ARCHITECTURE_SLICE = C2_EXECUTABLE_EVIDENCE_BOUNDARY
+C2_SCOPE = THIN_EXECUTABLE
+C2_TEST_CONTRACT = IMPLEMENTED
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+C2_FOCUSED_TEST_STATE = RED
+C2_RED_CAUSE = MISSING_C2_PRODUCTION_MODULE
+GIT_REVISION_CAPTURE = REQUIRED
+SUPPLIED_CODE_COMMIT = SUPERSEDED_FOR_INCREMENT_007_C2
+DIRECT_OUTPUT_WRITE = IN_SCOPE
+ATOMIC_OUTPUT_PUBLICATION = DEFERRED
+STRUCTURED_FAILURE_ARTIFACT = DEFERRED
+EXIT_STATUS_TAXONOMY = DEFERRED_BEYOND_ZERO_NONZERO
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -2643,4 +2921,6 @@ retained synthetic tests. The raw structural-record diagnostic RED test
 contract is implemented, and its parser support is now GREEN under the
 committed synthetic single-line and multiline tests. C2 remains absent. No
 complete-artifact execution, real counter result, descriptive baseline, or
-closure evidence exists yet.
+closure evidence exists yet. The thin C2 scope and its eight-method
+prospective RED contract are now frozen; the test module remains RED solely
+because C2 has not been implemented.
