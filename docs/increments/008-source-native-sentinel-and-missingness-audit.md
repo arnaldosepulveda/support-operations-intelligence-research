@@ -932,12 +932,126 @@ PHASE_3 = NOT_STARTED
 INCREMENT_007_MODIFIED = NO
 ```
 
+## Phase 1 Retained-Baseline Runner GREEN Checkpoint
+
+The synthetic-tested retained-baseline runner now exists at:
+
+```text
+src/support_operations_intelligence/source_native_sentinel_audit_run.py
+```
+
+It exposes `main(argv: Sequence[str] | None = None) -> int` and the frozen CLI
+arguments `--baseline-result`, `--expected-baseline-sha256`, and `--output`.
+The module contains no hard-coded real baseline or result path.
+
+Implemented behavior verifies the supplied baseline SHA-256 by streaming binary
+read before JSON parsing; parses only after exact digest equality; validates the
+four frozen Increment 007 bindings; extracts only the two authorized vocabulary
+lists and the dynamic `rows_identity_admitted` denominator; calls
+`audit_phase1_field` exactly once for `service_name` and once for
+`status_description`; and never calls the engine for `agency_responsible`.
+
+The runner preserves the Phase 1 engine result without recalculating rules or
+materiality. It serializes exact candidate lexical values and engine-produced
+display percentages, retains an explicit not-evaluable agency field, binds the
+result to the input digest and Increment 007 revision, captures repository-local
+audit-code Git revision plus Python and timezone-aware UTC metadata, and records
+the cross-field sentinel union as not reconstructable rather than fabricating a
+numeric union.
+
+Output is deterministic UTF-8 JSON with recursively stable object-key ordering,
+engine candidate ordering, and a terminating newline. Successful output is
+opened only after digest, parsing, binding, denominator, both engine calls,
+metadata capture, result construction, and serialization succeed. Failures
+return nonzero with bounded stderr context and no intentional successful result,
+retry, source fallback, Phase 2 behavior, or Phase 3 behavior.
+
+The runner has been exercised only with synthetic temporary fixtures. The real
+Increment 007 baseline JSON was not opened or hashed, no real vocabulary was
+inspected, and the real Increment 008 result directory or file was not created.
+
+### Focused Runner Synthetic Test Evidence
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit_run \
+  -v
+```
+
+Observed result:
+
+```text
+tests_run = 8
+failures = 0
+errors = 0
+result = OK
+```
+
+### Phase 1 Engine Regression Evidence
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit \
+  -v
+```
+
+Observed result:
+
+```text
+tests_run = 13
+failures = 0
+errors = 0
+result = OK
+```
+
+### Full Regression Evidence After Runner Implementation
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result:
+
+```text
+tests_run = 192
+failures = 0
+errors = 0
+result = OK
+```
+
+The observed total is consistent with the prior 184-test suite plus the eight
+committed runner-contract methods. This remains internal engineering evidence,
+not independent validation.
+
+### Phase 1 Runner GREEN Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_RUNNER_GREEN_IMPLEMENTATION_AND_SYNTHETIC_EVIDENCE
+PHASE_1_ENGINE = IMPLEMENTED_AND_SYNTHETICALLY_GREEN
+PHASE_1_RUNNER_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+PHASE_1_RUNNER_TEST_RESULT = INTERNAL_ENGINEERING_TEST_RESULT
+PHASE_1_RUNNER_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+REAL_BASELINE_JSON_OPENED = NO
+REAL_VOCABULARY_CONTENT_INSPECTED = NO
+REAL_PHASE_1_EXECUTION = NOT_PERFORMED
+REAL_PHASE_1_FINDINGS = NOT_OBSERVED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+AGENCY_RESPONSIBLE_EVALUABILITY = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+INCREMENT_007_MODIFIED = NO
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
-Increment 008 remains in progress. The deterministic Phase 1 engine is GREEN
-under synthetic tests, and its retained-baseline execution boundary now has an
-executable RED contract. The runner implementation is absent, so the focused
-runner test state is RED for the expected missing-module cause. The real
-baseline JSON was not opened, real vocabulary contents were not inspected, and
-real Phase 1 execution and findings remain unobserved. Phase 2 and Phase 3 have
-not started.
+Increment 008 remains in progress. The deterministic Phase 1 engine and its
+retained-baseline runner are GREEN under their committed synthetic tests and
+the 192-test full regression. Real Phase 1 execution has not been performed,
+the real baseline JSON was not opened, real vocabulary contents were not
+inspected, and no real findings exist. Phase 2 and Phase 3 have not started.
