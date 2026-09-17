@@ -742,11 +742,202 @@ INCREMENT_007_MODIFIED = NO
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Phase 1 Retained-Baseline Execution RED Contract
+
+This checkpoint freezes the future retained-baseline runner and evidence
+boundary before the real Increment 007 baseline JSON is opened or parsed.
+
+### Frozen Input and Binding
+
+The only real Phase 1 input artifact is prospectively bound as:
+
+```text
+path = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json
+expected_size_bytes = 563023
+expected_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+PHASE_1_INPUT_BINDING = INCREMENT_007_BASELINE_RESULT_SHA256
+```
+
+The SHA-256 was previously established and retained by Increment 007. The
+future runner must verify it before parsing JSON. This RED-contract checkpoint
+did not open, parse, hash, or otherwise inspect that retained file.
+
+After successful digest verification and parsing, the runner must fail closed
+unless these Increment 007 bindings match exactly:
+
+```text
+artifact_sha256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+git_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+increment_version = "007"
+contract_identifier = 007-full-artifact-execution-and-status-by-service-baseline
+```
+
+The retained Increment 007 serializer names the last JSON field `contract_id`;
+its required semantic value is the frozen contract identifier above.
+
+### Allowed Real Data Boundary
+
+The future runner may semantically consume only:
+
+- `counter_summary.service_name_vocabulary`;
+- `counter_summary.status_vocabulary`; and
+- `counter_summary.rows_identity_admitted` as the row denominator.
+
+The expected retained denominator is `7474403`, but the runner must supply the
+bound BaselineResult counter to both field audits rather than hard-coding it.
+It must not analyze cross-tab contents, claims, historical comparison, timing
+metrics, percentages, or service/status combinations.
+
+```text
+REAL_PHASE_1_ALLOWED_DATA = RETAINED_SERVICE_AND_STATUS_VOCABULARIES_ONLY
+```
+
+The result must also contain this explicit third field state without invented
+counts, coverage, or materiality:
+
+```text
+field = agency_responsible
+evaluable = false
+reason = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+### Frozen Result Path and Binding
+
+The future output is external to Git:
+
+```text
+output_directory = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001
+output_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json
+PHASE_1_RESULT_STORAGE = EXTERNAL_TO_GIT
+```
+
+The directory and file must not preexist before real execution. Neither was
+created in this checkpoint. External storage does not establish durable
+independent archival.
+
+The output binding must retain:
+
+```text
+increment_008_version = "008"
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+phase = "PHASE_1"
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+input_increment_007_git_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+audit_code_git_revision = CAPTURED_AT_REAL_EXECUTION_TIME
+python_version = CAPTURED_AT_REAL_EXECUTION_TIME
+run_date_utc = CAPTURED_AT_REAL_EXECUTION_TIME
+```
+
+The audit-code Git revision is provenance, not independent validation.
+
+### Frozen Result Structure and Serialization
+
+The deterministic Phase 1 JSON contains a binding object; evaluable
+`service_name` and `status_description` field results; an explicit
+not-evaluable `agency_responsible` field result; and a summary. It contains no
+Phase 2 or Phase 3 section, cross-tab contents, or operational interpretation.
+
+Each evaluable field serializes the existing `Phase1FieldAuditResult`
+semantics: field, `evaluable = true`, denominator, vocabulary cardinality,
+candidate count and rows, aggregate sentinel counts and display percentages,
+materiality returned by the engine, normalization-drift coverage, and
+standalone control-character coverage. The runner must not independently
+recalculate thresholds from rounded strings.
+
+Each candidate retains its field, exact lexical value, phase, matched checks,
+classification, row count, row percentage, and vocabulary percentage. The
+decoded lexical string must exactly equal the audited value; only ordinary JSON
+syntax escaping is permitted.
+
+The summary retains separate `service_name`, `status_description`, and
+`agency_responsible` entries. It must not compute a numeric cross-field union:
+
+```text
+CROSS_FIELD_SENTINEL_UNION = NOT_RECONSTRUCTABLE_FROM_RETAINED_MARGINAL_VOCABULARIES
+```
+
+Output is UTF-8 JSON with stable recursive object-key ordering, deterministic
+engine candidate ordering, Decimal-derived display strings, and a terminating
+newline. Binary float percentages and `repr` serialization are prohibited.
+
+### Frozen Failure and CLI Boundary
+
+The future runner returns nonzero and does not intentionally produce a
+successful result when digest verification, JSON parsing, required binding,
+required vocabulary or denominator validation, Phase 1 audit execution, or
+result writing fails. There is no structured failure artifact, automatic
+rerun, or fallback to Calgary source data.
+
+The prospective CLI is:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m \
+  support_operations_intelligence.source_native_sentinel_audit_run \
+  --baseline-result <path> \
+  --expected-baseline-sha256 <sha256> \
+  --output <path>
+```
+
+No Calgary CSV, Phase 2, or Phase 3 argument exists.
+
+### Runner Test Source Syntax Check
+
+Command:
+
+```bash
+.venv/bin/python -m py_compile \
+  tests/test_source_native_sentinel_audit_run.py
+```
+
+Observed result: PASS. The prospective contract contains eight focused
+standard-library `unittest.TestCase` methods using synthetic temporary files.
+
+### Focused Runner RED Command
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit_run \
+  -v
+```
+
+Observed result: RED, exit status 1. The unittest loader reported one import
+error before the eight prospective methods could execute:
+
+```text
+ModuleNotFoundError: No module named
+'support_operations_intelligence.source_native_sentinel_audit_run'
+```
+
+The RED cause is exactly the absent Phase 1 retained-baseline runner. No full
+regression was run at this RED checkpoint; the retained full regression remains
+184 tests, 0 failures, 0 errors, `OK`.
+
+### Phase 1 Retained-Baseline Runner RED Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_REAL_EXECUTION_RED_CONTRACT
+PHASE_1_ENGINE = IMPLEMENTED_AND_SYNTHETICALLY_GREEN
+PHASE_1_RUNNER_TEST_CONTRACT = IMPLEMENTED
+PHASE_1_RUNNER_IMPLEMENTATION = ABSENT
+PHASE_1_RUNNER_FOCUSED_STATE = RED
+PHASE_1_RUNNER_RED_CAUSE = MISSING_PHASE_1_RUNNER_MODULE
+REAL_BASELINE_JSON_OPENED = NO
+REAL_VOCABULARY_CONTENT_INSPECTED = NO
+REAL_PHASE_1_EXECUTION = NOT_PERFORMED
+REAL_PHASE_1_FINDINGS = NOT_OBSERVED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+INCREMENT_007_MODIFIED = NO
+```
+
 ## Current Status
 
-Increment 008 remains in progress. The deterministic Phase 1 production
-implementation is GREEN under the 13 committed synthetic contract tests and
-the 184-test full regression. Real Phase 1 execution has not been performed,
-no retained vocabulary contents have been inspected, the real baseline JSON
-was not opened, the Calgary source was not accessed, and no real Phase 1
-findings were observed. Phase 2 and Phase 3 have not started.
+Increment 008 remains in progress. The deterministic Phase 1 engine is GREEN
+under synthetic tests, and its retained-baseline execution boundary now has an
+executable RED contract. The runner implementation is absent, so the focused
+runner test state is RED for the expected missing-module cause. The real
+baseline JSON was not opened, real vocabulary contents were not inspected, and
+real Phase 1 execution and findings remain unobserved. Phase 2 and Phase 3 have
+not started.
