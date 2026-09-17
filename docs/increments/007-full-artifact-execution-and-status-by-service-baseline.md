@@ -2220,6 +2220,187 @@ REAL_CALGARY_ARTIFACT_ACCESSED = NO
 COUNTER_RESULTS = NOT_OBSERVED
 ```
 
+## Architecture C1 GREEN Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Objective
+
+Implement the committed Architecture C1 library orchestration and
+complete-pass counter contract, then establish its behavior under the retained
+synthetic tests without implementing C2 or accessing the Calgary artifact.
+
+### Implementation Boundary
+
+The implemented module is:
+
+```text
+src/support_operations_intelligence/calgary_full_artifact_execution.py
+```
+
+Its public API is:
+
+```python
+execute_calgary_full_artifact(
+    path: Path,
+    expected_sha256: str,
+) -> CalgaryFullArtifactExecutionResult
+```
+
+The implemented result types are:
+
+- `CalgaryFullArtifactExecutionResult`;
+- `CalgaryFullArtifactCounterSummary`.
+
+Completed-domain accounting inconsistencies raise:
+
+```text
+CalgaryFullArtifactAccountingError
+```
+
+C1 owns:
+
+- digest-before-traversal ordering;
+- complete parser/adapter/aggregator composition;
+- complete-pass domain counters;
+- completed-domain consistency validation;
+- the successful domain result.
+
+C1 does not own:
+
+- C2 executable behavior;
+- Git or process metadata;
+- timing;
+- RSS;
+- JSON serialization;
+- output paths or file publication;
+- process exit status.
+
+### Implementation Observations
+
+- digest verification returns successfully before the CSV record stream is
+  constructed;
+- records remain lazy through parser consumption and adapter generation;
+- every structurally accepted mapping is adapted exactly once;
+- the same `CalgaryAdapterResult` updates C1 counters and enters the existing
+  Slice A aggregator;
+- successful row-lifecycle accounting records zero structural rejections;
+- admitted source identifiers are tracked exactly as strings in seen and
+  duplicate sets without normalization, hashing, or dataflow deduplication;
+- `rows_involved_in_duplication` counts every admitted row participating in a
+  repeated exact identifier;
+- blank counters use only existing typed `VALUE_ABSENT` evidence;
+- exact typed status and service evidence objects are vocabulary keys;
+- the existing aggregation remains the sole status/service cross-tab and
+  rejection-reason map;
+- all frozen completed-accounting and cross-boundary reconciliation equations
+  are validated before a successful result is returned;
+- digest, parser, adapter, and aggregator processing exceptions are not broadly
+  caught or translated into completed-accounting errors.
+
+These are implementation and synthetic-test observations, not real-artifact
+counter results.
+
+```text
+COUNTER_RESULTS_ON_REAL_ARTIFACT = NOT_OBSERVED
+```
+
+### C1 Focused Test Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_execution \
+  -v
+```
+
+Observed result: `5 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Slice A Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `11 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Slice B Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_adapter_aggregation_composition \
+  -v
+```
+
+Observed result: `3 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Calgary CSV Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `17 tests`, `0 failures`, `0 errors`, `OK`.
+
+### Full Regression Command
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: `161 tests`, `0 failures`, `0 errors`, `OK`.
+
+The observed total matches the expected 156-test checkpoint plus the five
+committed C1 test methods. No test was added or modified during C1 GREEN
+implementation.
+
+### Claim Boundary
+
+C1 behavior is established only under the retained synthetic tests. This
+checkpoint does not establish:
+
+- complete Calgary traversal;
+- real digest-gated full execution;
+- real duplicate counts;
+- real vocabularies;
+- a real status/service cross-tab baseline;
+- timing or RSS;
+- C2 behavior;
+- raw structural-record diagnostics;
+- operational interpretation;
+- a scientific conclusion.
+
+The separate pre-run implementation gap remains:
+
+```text
+RAW_STRUCTURAL_RECORD_DIAGNOSTIC = REQUIRED_BEFORE_COMPLETE_RUN
+CURRENT_RAW_STRUCTURAL_RECORD_SUPPORT = NOT_ESTABLISHED
+```
+
+No real Calgary artifact was accessed.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = C1_GREEN_IMPLEMENTATION_AND_EVIDENCE
+ARCHITECTURE_SLICE = C1_LIBRARY_ORCHESTRATION
+C1_PRODUCTION_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+C1_TEST_RESULT = INTERNAL_ENGINEERING_TEST_RESULT
+COUNTER_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+COUNTER_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+COUNTER_RESULTS_ON_REAL_ARTIFACT = NOT_OBSERVED
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -2232,6 +2413,7 @@ percentages, vocabularies, or cross-tab values have been observed. The
 complete-artifact semantic and reporting policies are frozen
 prospectively, including an unresolved raw structural-record diagnostic
 implementation requirement. The C1 RED contract is extended prospectively for
-the complete-pass counter summary, while C1 remains unimplemented and RED due
-to the missing module. No complete-artifact execution, descriptive baseline,
-or closure evidence exists yet.
+the complete-pass counter summary, and C1 is now implemented and GREEN under
+the retained synthetic tests. C2 remains absent. No complete-artifact
+execution, real counter result, descriptive baseline, or closure evidence
+exists yet.
