@@ -1,6 +1,6 @@
 # Increment 008: Source-Native Sentinel and Missingness Audit
 
-Status: Planned
+Status: In Progress
 
 Date: 2026-09-17
 
@@ -88,6 +88,35 @@ SOURCE_ARTIFACT_REREAD = PROHIBITED
 FULL_ARTIFACT_RERUN = PROHIBITED
 ADAPTER_CHANGE = OUT_OF_SCOPE
 ```
+
+### Phase 1 Evaluability and Pure Audit Boundary
+
+The Phase 1 implementation must retain these explicit field states:
+
+```text
+service_name = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+status_description = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+It must not infer agency values, synthesize an agency vocabulary, reopen the
+Calgary source, rerun Increment 007, or derive agency information from
+unrelated fields. A future retained result must represent the
+`agency_responsible` state explicitly rather than silently omitting the field.
+
+The production Phase 1 audit will operate only on retained vocabulary rows
+supplied to a pure boundary conceptually equivalent to:
+
+```text
+audit_phase1_field(
+    field_name,
+    vocabulary_rows,
+    row_denominator,
+) -> Phase1FieldAuditResult
+```
+
+The audit does not own Calgary CSV access, C1 or C2 execution, baseline-result
+file discovery, or repository traversal.
 
 ## Phase 1 - Deterministic Predeclared Lexical Checks
 
@@ -265,6 +294,21 @@ Phase 3 = LOW_INFORMATION_CANDIDATE
 Increment 008 classifies no candidate as `MISSING_DATA`.
 
 ## Percentage and Denominator Contract
+
+The Phase 1 percentage arithmetic is frozen before implementation:
+
+```text
+PERCENTAGE_ARITHMETIC = DECIMAL_FROM_INTEGER_COUNTS
+PERCENTAGE_DISPLAY_DECIMAL_PLACES = 6
+PERCENTAGE_ROUNDING = ROUND_HALF_EVEN
+MATERIALITY_THRESHOLD_COMPARISON = UNROUNDED_DECIMAL_VALUE
+```
+
+Row percentages are derived from integer row counts, and vocabulary
+percentages are derived from integer distinct-value counts. Threshold decisions
+must use the unrounded `Decimal` percentage. Displayed six-decimal values are
+presentation only; displayed rounding must never alter materiality
+classification. This refinement is frozen before any vocabulary inspection.
 
 For an individual exact lexical candidate in an evaluable field:
 
@@ -490,9 +534,120 @@ AUDIT_EXECUTED = NO
 FINDINGS = NOT_OBSERVED
 ```
 
+## Phase 1 Executable RED Contract
+
+The deterministic Phase 1 rules now have a prospective executable contract in
+`tests/test_source_native_sentinel_audit.py`. The test module contains 13
+focused `unittest.TestCase` methods and uses only the Python standard library.
+It imports these prospective public objects from the intentionally absent
+`support_operations_intelligence.source_native_sentinel_audit` module:
+
+```text
+PHASE1_SENTINEL_VALUES
+Phase1Candidate
+Phase1FieldAuditResult
+audit_phase1_field
+```
+
+The executable boundary freezes a pure retained-vocabulary audit:
+
+```text
+audit_phase1_field(
+    field_name,
+    vocabulary_rows,
+    row_denominator,
+) -> Phase1FieldAuditResult
+```
+
+The tests freeze the exact immutable Phase 1C sentinel collection; Phase
+1A-1E matching behavior; observed versus unavailable evidence; exact candidate
+identity; deterministic matched-check and candidate ordering; overlap without
+row-count duplication; separate normalization-drift and standalone-control
+coverage; fail-closed malformed-input behavior; and vocabulary-count
+reconciliation against the row denominator.
+
+The prospective result boundary retains candidate field and exact lexical
+value, `PHASE_1`, matched checks, deterministic reporting classification, row
+count, exact and six-decimal row percentage, and exact and six-decimal
+vocabulary percentage. The field result retains evaluability, denominator,
+distinct vocabulary count, deterministic candidates, aggregate sentinel
+counts and coverage, materiality classification, and separate Phase 1D and
+standalone Phase 1E counts and coverage. No candidate is labeled
+`MISSING_DATA`.
+
+Percentage calculations are `Decimal` values derived from integer counts.
+Display uses six decimal places and `ROUND_HALF_EVEN`; materiality decisions
+use the unrounded `Decimal` percentage. Synthetic tests freeze the boundaries
+just below 0.1%, exactly 0.1%, exactly 2.0%, and just above 2.0%.
+
+The evaluability boundary remains:
+
+```text
+service_name = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+status_description = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+No agency denominator or candidate coverage is invented.
+
+### Test Source Syntax Check
+
+Command:
+
+```bash
+.venv/bin/python -m py_compile \
+  tests/test_source_native_sentinel_audit.py
+```
+
+Observed result: PASS.
+
+### Focused RED Command
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit \
+  -v
+```
+
+Observed result: RED, exit status 1. The unittest loader reported one import
+error before the 13 prospective test methods could execute:
+
+```text
+ModuleNotFoundError: No module named
+'support_operations_intelligence.source_native_sentinel_audit'
+```
+
+The RED is attributable exactly to the missing Phase 1 production module. The
+module was not implemented, and the full regression was not run at this RED
+checkpoint.
+
+### Phase 1 RED Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_RED_TEST_CONTRACT_AND_EXECUTABLE_BOUNDARY
+PHASE_1_TEST_CONTRACT = IMPLEMENTED
+PHASE_1_PRODUCTION_IMPLEMENTATION = ABSENT
+PHASE_1_FOCUSED_TEST_STATE = RED
+PHASE_1_RED_CAUSE = MISSING_PHASE_1_PRODUCTION_MODULE
+VOCABULARY_CONTENT_INSPECTED = NO
+REAL_BASELINE_JSON_OPENED = NO
+CALGARY_SOURCE_ACCESSED = NO
+INCREMENT_007_MODIFIED = NO
+SERVICE_NAME_EVALUABILITY = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+STATUS_DESCRIPTION_EVALUABILITY = EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARY
+AGENCY_RESPONSIBLE_EVALUABILITY = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+PHASE_1_RESULTS = NOT_OBSERVED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+```
+
 ## Current Status
 
-Increment 008 is planned. Its deterministic and exploratory boundaries are
-frozen prospectively. No vocabulary contents have been inspected, no audit
-code or tests have been written, no audit has been executed, and no findings
-have been observed.
+Increment 008 is in progress. The deterministic Phase 1 rules and executable
+RED test contract are frozen prospectively. The Phase 1 production module is
+absent, so the focused test state is RED for the expected missing-module cause.
+No retained vocabulary contents were inspected, the real baseline JSON was not
+opened, the Calgary source was not accessed, and no Phase 1 findings were
+observed. Phase 2 and Phase 3 have not started.
