@@ -643,11 +643,110 @@ PHASE_2 = NOT_STARTED
 PHASE_3 = NOT_STARTED
 ```
 
+## Phase 1 Executable GREEN Checkpoint
+
+The pure deterministic Phase 1 implementation now exists at:
+
+```text
+src/support_operations_intelligence/source_native_sentinel_audit.py
+```
+
+Its public boundary is:
+
+```text
+PHASE1_SENTINEL_VALUES
+Phase1Candidate
+Phase1FieldAuditResult
+audit_phase1_field(
+    field_name,
+    vocabulary_rows,
+    row_denominator,
+) -> Phase1FieldAuditResult
+```
+
+The module uses only Python standard-library facilities and performs no file
+I/O, JSON loading, repository traversal, subprocess execution, Calgary source
+access, or retained-baseline discovery. It receives retained vocabulary rows
+as arguments.
+
+Implemented behavior includes strict fail-closed retained-vocabulary
+validation; typed `UNAVAILABLE` exclusion from lexical matching while retaining
+its counts for reconciliation; exact Phase 1A-1E checks; deterministic
+matched-check, primary-classification, overlap, and candidate-order behavior;
+unique candidate row accounting; `Decimal` percentages derived from integer
+counts; six-decimal `ROUND_HALF_EVEN` presentation; unrounded `Decimal`
+materiality classification; separate normalization-drift and standalone
+control-character coverage; and vocabulary-count reconciliation against the
+declared row denominator.
+
+No real vocabulary has yet been inspected. The implementation has not been
+executed against retained Increment 007 evidence.
+
+### Focused Synthetic Test Evidence
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit \
+  -v
+```
+
+Observed result:
+
+```text
+tests_run = 13
+failures = 0
+errors = 0
+result = OK
+```
+
+### Full Regression Evidence
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result:
+
+```text
+tests_run = 184
+failures = 0
+errors = 0
+result = OK
+```
+
+The 184-test result is consistent with the prior 171-test closure suite plus
+the 13 committed Phase 1 contract methods. This is internal engineering
+evidence, not independent validation.
+
+### Phase 1 GREEN Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_GREEN_IMPLEMENTATION_AND_SYNTHETIC_EVIDENCE
+PHASE_1_PRODUCTION_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+PHASE_1_TEST_RESULT = INTERNAL_ENGINEERING_TEST_RESULT
+PHASE_1_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+REAL_PHASE_1_EXECUTION = NOT_PERFORMED
+REAL_PHASE_1_FINDINGS = NOT_OBSERVED
+VOCABULARY_CONTENT_INSPECTED = NO
+REAL_BASELINE_JSON_OPENED = NO
+CALGARY_SOURCE_ACCESSED = NO
+PHASE_1_RESULTS = NOT_OBSERVED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+AGENCY_RESPONSIBLE_EVALUABILITY = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+INCREMENT_007_MODIFIED = NO
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
-Increment 008 is in progress. The deterministic Phase 1 rules and executable
-RED test contract are frozen prospectively. The Phase 1 production module is
-absent, so the focused test state is RED for the expected missing-module cause.
-No retained vocabulary contents were inspected, the real baseline JSON was not
-opened, the Calgary source was not accessed, and no Phase 1 findings were
-observed. Phase 2 and Phase 3 have not started.
+Increment 008 remains in progress. The deterministic Phase 1 production
+implementation is GREEN under the 13 committed synthetic contract tests and
+the 184-test full regression. Real Phase 1 execution has not been performed,
+no retained vocabulary contents have been inspected, the real baseline JSON
+was not opened, the Calgary source was not accessed, and no real Phase 1
+findings were observed. Phase 2 and Phase 3 have not started.
