@@ -1048,10 +1048,181 @@ INCREMENT_007_MODIFIED = NO
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Phase 1 Real Execution Manifest
+
+This manifest freezes the one authorized future real Phase 1 execution before
+the retained Increment 007 BaselineResult is opened, hashed, parsed, or
+inspected for Increment 008. The runner implementation revision before this
+manifest is:
+
+```text
+pre_manifest_runner_implementation_revision = f5a1bf3b7d6c7e0223dc621eba3f4588fac9bc4e
+```
+
+The manifest itself is documentation only. The real audit has not been
+executed and the real result JSON has not been created.
+
+### Frozen Input and Metadata-Only Observation
+
+```text
+baseline_result_path = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json
+baseline_regular_file = YES
+baseline_readable = YES
+baseline_size_bytes = 563023
+expected_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+```
+
+Only file existence, readability, and size metadata were checked. The baseline
+contents were not opened or parsed, its SHA-256 was not recomputed, and no real
+vocabulary content was inspected. The expected digest above is the value
+independently retained by Increment 007; the future runner must verify that
+exact digest before parsing.
+
+### Frozen Output and Non-Overwrite Policy
+
+```text
+run_directory = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001
+run_directory_manifest_state = CREATED_EMPTY_FOR_FUTURE_EXECUTION
+result_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json
+result_preexistence = ABSENT
+```
+
+If `phase1-sentinel-audit.json` exists before execution, execution must stop.
+The result must not be overwritten, `run-002` must not be selected
+automatically, and a different run directory requires a new prospective
+execution record. No repository file may be placed in the external run
+directory.
+
+### Frozen Execution Bindings
+
+A successful result must bind to exactly:
+
+```text
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+phase = PHASE_1
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+input_increment_007_git_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+input_increment_007_artifact_sha256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+audit_code_git_revision = POST_MANIFEST_COMMIT_HEAD_AT_REAL_EXECUTION
+```
+
+The future `audit_code_git_revision` is the Git HEAD produced by committing
+this manifest, provided no repository changes occur before execution. It is
+not the pre-manifest runner implementation revision
+`f5a1bf3b7d6c7e0223dc621eba3f4588fac9bc4e`.
+
+### Frozen Real Data-Access Boundary
+
+The future execution may consume only:
+
+- `counter_summary.service_name_vocabulary`;
+- `counter_summary.status_vocabulary`;
+- `counter_summary.rows_identity_admitted`; and
+- the Increment 007 binding fields required for validation.
+
+The agency boundary remains:
+
+```text
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+This manifest does not authorize service/status cross-tab inspection or
+interpretation, Phase 2 inspection, Phase 3 semantic review, or Calgary source
+access.
+
+### Frozen Exact Future Command
+
+The future real command is exactly:
+
+```bash
+BASELINE='/data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json'
+EXPECTED_BASELINE_SHA256='2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c'
+RUN_DIR='/data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001'
+PHASE1_RESULT="$RUN_DIR/phase1-sentinel-audit.json"
+
+PYTHONPATH=src \
+.venv/bin/python -m \
+support_operations_intelligence.source_native_sentinel_audit_run \
+  --baseline-result "$BASELINE" \
+  --expected-baseline-sha256 "$EXPECTED_BASELINE_SHA256" \
+  --output "$PHASE1_RESULT"
+```
+
+This command was not executed during the manifest step.
+
+### Frozen Attempt and Failure Accounting
+
+```text
+REAL_PHASE_1_EXECUTION_ATTEMPTS = 1
+```
+
+The future command must be executed exactly once. If it returns nonzero, any
+produced evidence must be preserved, the command must not be rerun, execution
+must stop, and the failure must be recorded in Increment 008 before any
+remediation. If it succeeds, the result must be preserved and Phase 2 must not
+begin until the retained result has been reconciled.
+
+### First Authorized Inspection Boundary
+
+The future real Phase 1 command is the first authorized opening and parsing of
+the retained Increment 007 BaselineResult for Increment 008. It is also the
+first authorized inspection of `service_name_vocabulary` and
+`status_vocabulary` under the committed Phase 1 rules. No vocabulary contents
+were inspected before this manifest.
+
+### Frozen Successful Result Scope
+
+A successful result may report only deterministic Phase 1 evidence:
+
+- `service_name` sentinel candidates;
+- `status_description` sentinel candidates;
+- normalization-drift candidates;
+- standalone control-character candidates;
+- exact lexical values;
+- row counts;
+- six-decimal display percentages;
+- vocabulary percentages;
+- field-level materiality classifications;
+- the explicit agency not-evaluable result; and
+- the non-reconstructable cross-field union state.
+
+It may contain no Phase 2 finding, Phase 3 finding, or operational
+interpretation.
+
+### Frozen Post-Success Sequence
+
+```text
+NEXT_STEP = RETAINED_PHASE_1_RESULT_RECONCILIATION
+```
+
+After success, the retained result must first be independently checked against
+the frozen Phase 1 reporting and arithmetic contract. Before that
+reconciliation, no lexical candidate may be interpreted, the sentinel list
+may not be extended, Phase 2 or Phase 3 may not start, public wording may not
+change, and Increment 007 may not be edited.
+
+### Phase 1 Real Execution Manifest Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_REAL_EXECUTION_MANIFEST
+PHASE_1_ENGINE = IMPLEMENTED_AND_SYNTHETICALLY_GREEN
+PHASE_1_RUNNER = IMPLEMENTED_AND_SYNTHETICALLY_GREEN
+REAL_BASELINE_JSON_OPENED = NO
+REAL_BASELINE_SHA_RECOMPUTED = NO
+REAL_VOCABULARY_CONTENT_INSPECTED = NO
+REAL_PHASE_1_EXECUTION = NOT_PERFORMED
+REAL_PHASE_1_FINDINGS = NOT_OBSERVED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+INCREMENT_007_MODIFIED = NO
+```
+
 ## Current Status
 
 Increment 008 remains in progress. The deterministic Phase 1 engine and its
 retained-baseline runner are GREEN under their committed synthetic tests and
-the 192-test full regression. Real Phase 1 execution has not been performed,
-the real baseline JSON was not opened, real vocabulary contents were not
-inspected, and no real findings exist. Phase 2 and Phase 3 have not started.
+the 192-test full regression; the focused pre-manifest verification also passed
+all 21 engine and runner tests. The exact future execution manifest is now
+frozen. Real Phase 1 execution has not been performed, the real baseline JSON
+was not opened or rehashed, real vocabulary contents were not inspected, and
+no real findings exist. Phase 2 and Phase 3 have not started.
