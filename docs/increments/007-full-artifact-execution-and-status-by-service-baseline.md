@@ -969,14 +969,11 @@ unrelated environment data.
 
 ### Timing Semantics
 
-For success, timing starts immediately before digest verification and stops
-only after the success artifact has been atomically promoted to the supplied
-success-output path.
-
-For failure, timing starts immediately before digest verification and the
-processing timer stops when the underlying execution failure is caught. The
-subsequent serialization and writing of the failure evidence record is not
-included in the failed-processing duration.
+The earlier prospective write-inclusive success timing and failure-artifact
+timing described at this design stage are superseded for Increment 007 by the
+thin C2 scope and the prospective C2 timing correction recorded below. C2 does
+not retain a structured failure artifact, and its in-file
+`wall_clock_seconds` ends before output writing begins.
 
 Timing is engineering execution evidence, not a benchmark claim.
 
@@ -2697,7 +2694,8 @@ contract_id = "007-full-artifact-execution-and-status-by-service-baseline"
 It also retains `run_date_utc`, `python_version`, `wall_clock_seconds`, and
 `peak_rss_bytes`. The run date is a UTC execution timestamp. The Python version
 is that of the executing interpreter. Wall-clock measurement begins
-immediately before the C1 call and ends after successful JSON file writing.
+immediately before the C1 call and ends after the complete successful
+`BaselineResult` payload has been constructed, before output writing begins.
 
 On the current Linux contract, in-process peak RSS uses standard-library
 `resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * 1024` because the source
@@ -2711,6 +2709,59 @@ The later Step 6 run separately retains `/usr/bin/time -v` as external
 evidence. The two measurements are not asserted to be identical. Hostname,
 username, IP address, machine serial, precise location, and unrelated
 environment variables are excluded.
+
+### C2 Timing Contract Correction
+
+```text
+DESIGN CORRECTION / PROSPECTIVE
+```
+
+The earlier write-inclusive definition for the wall-clock value stored inside
+the directly written JSON was self-referential: completion of writing a value
+cannot determine that same value in a single-write payload. Before C2
+implementation and before any real-artifact execution, the boundaries are
+corrected to:
+
+```text
+C2_WALL_CLOCK_SECONDS = IN_PROCESS_PRE_WRITE_DURATION
+STEP_6_EXTERNAL_WALL_CLOCK = END_TO_END_COMMAND_DURATION
+```
+
+`wall_clock_seconds` is elapsed monotonic time beginning immediately before C1
+is invoked and ending after the complete successful JSON-ready
+`BaselineResult` payload has been constructed, but before the output file is
+opened or written. It includes C1 digest verification, complete CSV traversal,
+adaptation, aggregation, counter validation, and C2 construction of
+vocabularies, cross-tab rows, percentages, comparison evidence, claims, and
+the deterministic result payload.
+
+It excludes opening the output file, writing JSON bytes, flushing or closing
+the output, and process shutdown. It is in-process processing and result-
+construction evidence, not end-to-end command duration.
+
+Step 6 will execute C2 under `/usr/bin/time -v`. That independent external
+elapsed observation is the end-to-end command measurement and includes C1
+processing, C2 result construction, output-file writing, interpreter and
+process overhead, and process termination. Equality with
+`wall_clock_seconds` is not required.
+
+The peak-RSS plan is unchanged. In-process Linux `ru_maxrss` is converted from
+KiB to bytes, while `/usr/bin/time -v` Maximum resident set size remains
+independent external Step 6 evidence. These are different measurement
+boundaries and need not match exactly.
+
+No observed runtime result is changed because C2 has not been implemented and
+no complete-artifact execution has occurred.
+
+```text
+CHANGE_TYPE = C2_PROSPECTIVE_TIMING_CONTRACT_CORRECTION
+C2_WALL_CLOCK_CONTRACT_SELF_REFERENCE = NOT_ENCODED_IN_TESTS_BUT_DOCUMENTATION_CORRECTED
+C2_WALL_CLOCK_SECONDS = IN_PROCESS_PRE_WRITE_DURATION
+STEP_6_EXTERNAL_WALL_CLOCK = END_TO_END_COMMAND_DURATION
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+```
 
 ### Deterministic JSON and Typed Evidence
 
