@@ -263,6 +263,80 @@ class CalgaryCsvRecordStreamTests(unittest.TestCase):
             self.assertEqual(captured.exception.expected_column_count, 15)
             self.assertEqual(captured.exception.actual_column_count, 16)
 
+    def test_row_width_failure_retains_exact_raw_logical_record(self):
+        header_source = ",".join(EXPECTED_HEADER) + "\r\n"
+        valid_record_source = ",".join(
+            f"synthetic-valid-{index}" for index in range(15)
+        ) + "\r\n"
+        malformed_record_source = (
+            'synthetic-bad-001,"  quoted, value  ",third,four,five,six,'
+            "seven,eight,nine,ten,eleven,twelve,thirteen,fourteen,fifteen,"
+            "sixteen\r\n"
+        )
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "raw-logical-record.csv"
+            path.write_bytes(
+                (
+                    header_source
+                    + valid_record_source
+                    + malformed_record_source
+                ).encode("utf-8")
+            )
+
+            iterator = iter_calgary_csv_records(path)
+            next(iterator)
+            with self.assertRaises(CalgaryCsvStructureError) as captured:
+                next(iterator)
+
+            self.assertIs(
+                captured.exception.reason,
+                CalgaryCsvStructureErrorReason.ROW_WIDTH_MISMATCH,
+            )
+            self.assertEqual(captured.exception.logical_data_record_number, 2)
+            self.assertEqual(
+                captured.exception.raw_logical_record,
+                malformed_record_source,
+            )
+
+    def test_multiline_row_width_failure_retains_complete_raw_logical_record(
+        self,
+    ):
+        header_source = ",".join(EXPECTED_HEADER) + "\r\n"
+        valid_record_source = ",".join(
+            f"synthetic-valid-{index}" for index in range(15)
+        ) + "\r\n"
+        malformed_record_source = (
+            'synthetic-multiline-001,one,two,"synthetic first line\r\n'
+            'synthetic second line",four,five,six,seven,eight,nine,ten,'
+            "eleven,twelve,thirteen\r\n"
+        )
+
+        with TemporaryDirectory() as temporary_directory:
+            path = Path(temporary_directory) / "raw-multiline-record.csv"
+            path.write_bytes(
+                (
+                    header_source
+                    + valid_record_source
+                    + malformed_record_source
+                ).encode("utf-8")
+            )
+
+            iterator = iter_calgary_csv_records(path)
+            next(iterator)
+            with self.assertRaises(CalgaryCsvStructureError) as captured:
+                next(iterator)
+
+            self.assertIs(
+                captured.exception.reason,
+                CalgaryCsvStructureErrorReason.ROW_WIDTH_MISMATCH,
+            )
+            self.assertEqual(captured.exception.logical_data_record_number, 2)
+            self.assertEqual(
+                captured.exception.raw_logical_record,
+                malformed_record_source,
+            )
+
     def test_embedded_newline_does_not_redefine_logical_record_number(self):
         row_a = (
             "synthetic-001",

@@ -2401,6 +2401,109 @@ DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Raw Structural Record Diagnostic RED Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Objective
+
+Freeze exact offending logical-record retention before parser implementation.
+The prospective exception field is:
+
+```text
+raw_logical_record: str | None
+```
+
+For `ROW_WIDTH_MISMATCH`, the field must contain the exact source text consumed
+for the malformed logical CSV record, including source quoting, delimiters,
+whitespace, embedded newline characters, and the fixture's exact line
+terminator. It must not be reconstructed from parsed field values. For a
+structural state where no logical record exists, such as an empty file, the
+field may be `None`.
+
+A physical line is one line returned by the text stream. A logical CSV record
+is the complete source text consumed by CSV parsing for one record and may span
+multiple physical lines because quoted fields may contain newlines. The
+diagnostic contract requires the latter.
+
+### Prospective Test Contract
+
+Two synthetic tests now require `CalgaryCsvStructureError` to retain both the
+existing correct `logical_data_record_number` and the exact malformed source
+record:
+
+- a single-line wrong-width record with exact quoting, delimiters, whitespace,
+  and `CRLF` line terminator;
+- a wrong-width logical record containing a properly quoted embedded `CRLF`,
+  with the complete two-physical-line source unit required.
+
+The second test is load-bearing: retaining only the final physical line cannot
+satisfy it. Neither test places raw source content in successful parsed
+mappings, adapted cases, aggregation, C1 results, or counter summaries. No C2
+failure-artifact behavior is tested.
+
+### Observed RED Evidence
+
+Syntax command:
+
+```text
+.venv/bin/python -m py_compile \
+  tests/test_calgary_csv_record_stream.py
+```
+
+Observed result: `PASS`.
+
+Focused command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `19 tests`; the 17 existing tests passed, and the two new
+diagnostic tests ended in errors. Both errors were exactly:
+
+```text
+AttributeError: 'CalgaryCsvStructureError' object has no attribute 'raw_logical_record'
+```
+
+The existing reason, fail-fast behavior, column counts, and logical
+data-record numbering remain passing. Parser implementation was not changed,
+and the full regression suite was not run for this RED checkpoint.
+
+```text
+CURRENT_RAW_STRUCTURAL_RECORD_SUPPORT = RED_CONTRACT_IMPLEMENTED_IMPLEMENTATION_ABSENT
+```
+
+### Security and Retention Boundary
+
+```text
+RAW_RECORD_IN_PROCESS_EXCEPTION = REQUIRED
+RAW_RECORD_IN_RETAINED_C2_FAILURE_JSON = PROHIBITED_BY_DEFAULT
+```
+
+Raw structural content is bounded in-process diagnostic source context, not a
+canonical retained baseline field. Retained C2 failure JSON must not include
+it by default. No real Calgary row or artifact content is included in this RED
+checkpoint.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = RAW_STRUCTURAL_DIAGNOSTIC_RED_TEST_AND_EVIDENCE
+PARSER_DIAGNOSTIC_TEST_CONTRACT = IMPLEMENTED
+RAW_STRUCTURAL_RECORD_DIAGNOSTIC_IMPLEMENTATION = ABSENT
+SINGLE_LINE_RAW_LOGICAL_RECORD_BEHAVIOR = NOT_YET_ESTABLISHED
+MULTILINE_RAW_LOGICAL_RECORD_BEHAVIOR = NOT_YET_ESTABLISHED
+C1_PRODUCTION_IMPLEMENTATION = ESTABLISHED_UNDER_SYNTHETIC_TESTS
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -2414,6 +2517,7 @@ complete-artifact semantic and reporting policies are frozen
 prospectively, including an unresolved raw structural-record diagnostic
 implementation requirement. The C1 RED contract is extended prospectively for
 the complete-pass counter summary, and C1 is now implemented and GREEN under
-the retained synthetic tests. C2 remains absent. No complete-artifact
-execution, real counter result, descriptive baseline, or closure evidence
-exists yet.
+the retained synthetic tests. The raw structural-record diagnostic RED test
+contract is implemented while its parser support remains absent. C2 remains
+absent. No complete-artifact execution, real counter result, descriptive
+baseline, or closure evidence exists yet.
