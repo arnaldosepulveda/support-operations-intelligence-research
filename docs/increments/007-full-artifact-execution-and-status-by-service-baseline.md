@@ -2504,20 +2504,143 @@ FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
 REAL_CALGARY_ARTIFACT_ACCESSED = NO
 ```
 
+## Raw Structural Record Diagnostic GREEN Checkpoint
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Objective
+
+Implement the committed raw structural-record diagnostic contract in the
+existing Calgary CSV parser and establish the tested behavior without changing
+the committed tests, implementing C2, or accessing the real Calgary artifact.
+
+### Implemented Diagnostic Behavior
+
+`CalgaryCsvStructureError` now exposes the backward-compatible field:
+
+```text
+raw_logical_record: str | None
+```
+
+For the tested `ROW_WIDTH_MISMATCH` cases, the parser retains the exact
+malformed logical-record source text while preserving the existing logical
+data-record number, reason, expected column count, and actual column count.
+The retained text preserves source quoting, delimiters, whitespace, line
+terminators, and every physical line consumed for a multiline logical CSV
+record.
+
+The parser supplies `csv.reader` through a bounded internal iterator that
+tracks only the physical source lines consumed for the current logical record.
+Header and successful-record buffers are cleared before parsing continues or a
+successful mapping is yielded. No successful mapping carries raw source text,
+and no growing collection of prior source records is retained.
+
+### Observed Test Evidence
+
+CSV focused command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_record_stream \
+  -v
+```
+
+Observed result: `19 tests`, `0 failures`, `0 errors`, `OK`. The committed
+single-line exact-source diagnostic test and multiline complete-logical-record
+diagnostic test both pass, with logical data-record numbering preserved.
+
+Slice B composition command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_csv_adapter_aggregation_composition \
+  -v
+```
+
+Observed result: `3 tests`, `0 failures`, `0 errors`, `OK`.
+
+C1 regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_execution \
+  -v
+```
+
+Observed result: `5 tests`, `0 failures`, `0 errors`, `OK`.
+
+Slice A regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_status_service_aggregation \
+  -v
+```
+
+Observed result: `11 tests`, `0 failures`, `0 errors`, `OK`.
+
+Full regression command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: `163 tests`, `0 failures`, `0 errors`, `OK`. The observed
+total matches the prior 161-test checkpoint plus the two committed structural
+diagnostic tests.
+
+### Failure and Retention Boundary
+
+```text
+RAW_RECORD_IN_PROCESS_EXCEPTION = IMPLEMENTED
+RAW_RECORD_IN_RETAINED_C2_FAILURE_JSON = PROHIBITED_BY_DEFAULT
+```
+
+The raw logical record exists only as in-process structural-exception context.
+It is not serialized, logged, written to disk, placed in successful mappings,
+or added to C1 results. No C2 behavior has been implemented, and no real
+Calgary structural failure has been observed.
+
+### Claim Boundary
+
+This checkpoint establishes only that the parser retained exact offending
+logical-record source text for the tested synthetic single-line and multiline
+`ROW_WIDTH_MISMATCH` cases. It does not establish that the real Calgary
+artifact contains a structural error, complete-artifact traversal, real
+failure diagnostics, C2 failure-record behavior, performance, memory
+suitability, or a descriptive baseline.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = RAW_STRUCTURAL_DIAGNOSTIC_GREEN_IMPLEMENTATION_AND_EVIDENCE
+PARSER_DIAGNOSTIC_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+SINGLE_LINE_RAW_LOGICAL_RECORD_BEHAVIOR = ESTABLISHED_UNDER_SYNTHETIC_TEST
+MULTILINE_RAW_LOGICAL_RECORD_BEHAVIOR = ESTABLISHED_UNDER_SYNTHETIC_TEST
+RAW_RECORD_IN_PROCESS_EXCEPTION = IMPLEMENTED
+RAW_RECORD_IN_RETAINED_C2_FAILURE_JSON = PROHIBITED_BY_DEFAULT
+C1_PRODUCTION_IMPLEMENTATION = ESTABLISHED_UNDER_SYNTHETIC_TESTS
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+DESCRIPTIVE_BASELINE = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
 implementation, observed RED and GREEN checkpoints, and Slice B synthetic
 composition checkpoint exist. The Architecture C1 RED test contract and
-observed missing-module RED evidence also exist, while C1 and C2 production
-remain absent. The prospective complete-artifact counter contract is frozen
-before C1 implementation, but no counter results have been observed. No
-percentages, vocabularies, or cross-tab values have been observed. The
-complete-artifact semantic and reporting policies are frozen
-prospectively, including an unresolved raw structural-record diagnostic
-implementation requirement. The C1 RED contract is extended prospectively for
-the complete-pass counter summary, and C1 is now implemented and GREEN under
-the retained synthetic tests. The raw structural-record diagnostic RED test
-contract is implemented while its parser support remains absent. C2 remains
-absent. No complete-artifact execution, real counter result, descriptive
-baseline, or closure evidence exists yet.
+observed missing-module RED evidence also exist. The prospective
+complete-artifact counter contract was frozen before C1 implementation, but no
+counter results have been observed. No percentages, vocabularies, or cross-tab
+values have been observed. The complete-artifact semantic and reporting
+policies are frozen prospectively. The C1 RED contract is extended for the
+complete-pass counter summary, and C1 is now implemented and GREEN under the
+retained synthetic tests. The raw structural-record diagnostic RED test
+contract is implemented, and its parser support is now GREEN under the
+committed synthetic single-line and multiline tests. C2 remains absent. No
+complete-artifact execution, real counter result, descriptive baseline, or
+closure evidence exists yet.
