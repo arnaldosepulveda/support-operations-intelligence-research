@@ -2075,6 +2075,151 @@ OPERATIONAL_INTERPRETATION = NOT_ESTABLISHED
 FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
 ```
 
+## Architecture C1 Counter-Contract RED Extension
+
+```text
+OBSERVED ENGINEERING EVIDENCE
+```
+
+### Objective
+
+Extend the committed C1 RED test contract so the Step 2 complete-pass counter
+semantics are frozen in executable prospective tests before any C1 production
+implementation exists.
+
+### Result-Boundary Design Refinement
+
+The earlier prospective C1 result boundary of verified digest plus existing
+`CalgaryStatusServiceAggregation` is superseded by the later Step 2 counter
+contract. The prospective C1 result must also carry a frozen complete-pass
+counter summary containing the row-lifecycle, exact-duplicate, blank-field,
+and typed-vocabulary evidence required by Step 2.
+
+The extended test contract names this nested prospective boundary
+`CalgaryFullArtifactCounterSummary` and exposes it as
+`CalgaryFullArtifactExecutionResult.counter_summary`. The existing
+`aggregation` result remains the single status/service cross-tab and existing
+identity-rejection accounting boundary; no redundant cross-tab or rejection
+map is introduced.
+
+This is a `DESIGN REFINEMENT` made before implementation. C1 still does not own
+`wall_clock_seconds` or `peak_rss_bytes`; those remain C2 execution metadata.
+
+### Prospective Test Contract Extension
+
+The original four C1 test methods remain:
+
+1. successful synthetic artifact returns verified digest and aggregation;
+2. digest mismatch prevents CSV traversal;
+3. successful digest verification completes before stream construction;
+4. completed aggregation inconsistency raises
+   `CalgaryFullArtifactAccountingError`.
+
+The successful synthetic fixture is extended to five logical records: four
+identity-admitted records and one typed identity rejection. It prospectively
+requires:
+
+- 5 observed and structurally accepted rows;
+- 0 structurally rejected rows;
+- 4 identity-admitted rows;
+- 1 identity-rejected row;
+- both row-lifecycle reconciliation equations;
+- 2 distinct admitted source identifiers;
+- 1 source identifier appearing more than once;
+- 3 rows involved in duplication for an exact identifier appearing three
+  times;
+- exactly one blank `service_name`, `agency_responsible`, and
+  `status_description` under existing `VALUE_ABSENT` semantics;
+- exact typed status and service vocabularies whose counts each sum to admitted
+  rows;
+- distinct `ObservedEvidence("Drainage")`,
+  `ObservedEvidence(" Drainage ")`, and
+  `UnavailableEvidence(UnavailableReason.VALUE_ABSENT)` service evidence;
+- existing aggregate counts summing to identity-admitted rows;
+- existing rejection-reason counts summing to identity-rejected rows.
+
+One additional prospective public counter-summary validation test samples two
+completed-domain inconsistencies:
+
+- row-lifecycle reconciliation failure;
+- `rows_involved_in_duplication > rows_identity_admitted`.
+
+Both require `CalgaryFullArtifactAccountingError`. The future implementation
+must validate every frozen Step 2 equation even though this extension samples
+representative failures rather than adding one test per equation.
+
+The source now contains five prospective C1 test methods in total. It adds no
+C2 tests, timing/RSS fields, percentages, JSON, output publication, process
+behavior, or raw structural-record parser behavior.
+
+### Test Source Syntax Check
+
+Command:
+
+```text
+.venv/bin/python -m py_compile \
+  tests/test_calgary_full_artifact_execution.py
+```
+
+Observed result: `PASS`.
+
+This establishes only that the extended test source parses.
+
+### Focused RED Command
+
+Command:
+
+```text
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_calgary_full_artifact_execution \
+  -v
+```
+
+Observed result: `RED / non-zero exit`.
+
+Observed category: `unittest` module-load/import failure.
+
+Observed cause: `ModuleNotFoundError` for
+`support_operations_intelligence.calgary_full_artifact_execution`.
+
+The focused command fails during import before any prospective test method or
+synthetic fixture executes. The RED cause remains the intentionally absent C1
+production module.
+
+### Boundary
+
+This extension does not establish:
+
+- C1 behavior;
+- counter correctness;
+- any passing orchestration behavior;
+- any observed counter value from the Calgary artifact;
+- C2 behavior;
+- raw structural-record diagnostic support;
+- full-artifact execution;
+- a descriptive baseline;
+- operational interpretation;
+- a scientific conclusion.
+
+No real Calgary artifact was accessed.
+
+### Claim Classification
+
+```text
+CHANGE_TYPE = C1_RED_COUNTER_CONTRACT_EXTENSION
+ARCHITECTURE_SLICE = C1_LIBRARY_ORCHESTRATION
+C1_TEST_CONTRACT = IMPLEMENTED_AND_EXTENDED
+C1_RESULT_BOUNDARY = REFINED_BEFORE_IMPLEMENTATION
+COUNTER_CONTRACT_EXECUTABLE_TESTS = IMPLEMENTED
+C1_PRODUCTION_IMPLEMENTATION = ABSENT
+C2_EXECUTABLE_IMPLEMENTATION = ABSENT
+FOCUSED_TEST_STATE = RED
+RED_CAUSE = MISSING_C1_PRODUCTION_MODULE
+FULL_ARTIFACT_EXECUTION = NOT_PERFORMED
+REAL_CALGARY_ARTIFACT_ACCESSED = NO
+COUNTER_RESULTS = NOT_OBSERVED
+```
+
 ## Current Status
 
 Increment 007 is in progress. The Slice A test contract, pure aggregation
@@ -2086,5 +2231,7 @@ before C1 implementation, but no counter results have been observed. No
 percentages, vocabularies, or cross-tab values have been observed. The
 complete-artifact semantic and reporting policies are frozen
 prospectively, including an unresolved raw structural-record diagnostic
-implementation requirement. No complete-artifact execution, descriptive
-baseline, or closure evidence exists yet.
+implementation requirement. The C1 RED contract is extended prospectively for
+the complete-pass counter summary, while C1 remains unimplemented and RED due
+to the missing module. No complete-artifact execution, descriptive baseline,
+or closure evidence exists yet.

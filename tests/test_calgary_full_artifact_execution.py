@@ -12,11 +12,17 @@ from support_operations_intelligence.calgary_csv import (
 )
 from support_operations_intelligence.calgary_full_artifact_execution import (
     CalgaryFullArtifactAccountingError,
+    CalgaryFullArtifactCounterSummary,
     CalgaryFullArtifactExecutionResult,
     execute_calgary_full_artifact,
 )
 from support_operations_intelligence.calgary_status_service_aggregation import (
     aggregate_calgary_status_by_service,
+)
+from support_operations_intelligence.evidence import (
+    ObservedEvidence,
+    UnavailableEvidence,
+    UnavailableReason,
 )
 from support_operations_intelligence.identity import IdentityRejectionReason
 
@@ -31,6 +37,7 @@ def _synthetic_row(
     *,
     status_description: str = "Closed",
     service_name: str = "Pothole",
+    agency_responsible: str = "Synthetic Agency",
 ) -> tuple[str, ...]:
     return (
         service_request_id,
@@ -40,7 +47,7 @@ def _synthetic_row(
         status_description,
         "Synthetic Source",
         service_name,
-        "Synthetic Agency",
+        agency_responsible,
         "123 Synthetic Street",
         "SYN",
         "Synthetic Community",
@@ -55,6 +62,26 @@ def _artifact_sha256(path: Path) -> str:
     return sha256(path.read_bytes()).hexdigest()
 
 
+def _counter_summary(**overrides) -> CalgaryFullArtifactCounterSummary:
+    values = {
+        "rows_observed": 0,
+        "rows_structurally_accepted": 0,
+        "rows_structurally_rejected": 0,
+        "rows_identity_admitted": 0,
+        "rows_identity_rejected": 0,
+        "distinct_source_case_ids": 0,
+        "source_case_ids_appearing_more_than_once": 0,
+        "rows_involved_in_duplication": 0,
+        "blank_service_name": 0,
+        "blank_agency_responsible": 0,
+        "blank_status_description": 0,
+        "status_vocabulary": {},
+        "service_name_vocabulary": {},
+    }
+    values.update(overrides)
+    return CalgaryFullArtifactCounterSummary(**values)
+
+
 class CalgaryFullArtifactExecutionTests(unittest.TestCase):
     def test_successful_synthetic_artifact_returns_verified_digest_and_aggregation(
         self,
@@ -62,9 +89,19 @@ class CalgaryFullArtifactExecutionTests(unittest.TestCase):
         rows = [
             _synthetic_row("synthetic-001"),
             _synthetic_row(
+                "synthetic-001",
+                service_name="",
+            ),
+            _synthetic_row(
+                "synthetic-001",
+                status_description="",
+                service_name="Drainage",
+                agency_responsible="",
+            ),
+            _synthetic_row(
                 "synthetic-002",
                 status_description="Open",
-                service_name="Drainage",
+                service_name=" Drainage ",
             ),
             _synthetic_row(""),
         ]
@@ -80,10 +117,10 @@ class CalgaryFullArtifactExecutionTests(unittest.TestCase):
         self.assertEqual(result.verified_sha256, expected_sha256)
 
         aggregation = result.aggregation
-        self.assertEqual(aggregation.total_logical_records_seen, 3)
-        self.assertEqual(aggregation.total_admitted_records, 2)
+        self.assertEqual(aggregation.total_logical_records_seen, 5)
+        self.assertEqual(aggregation.total_admitted_records, 4)
         self.assertEqual(aggregation.total_rejected_identity_records, 1)
-        self.assertEqual(aggregation.aggregated_record_count, 2)
+        self.assertEqual(aggregation.aggregated_record_count, 4)
         self.assertEqual(
             aggregation.rejection_counts_by_reason,
             {IdentityRejectionReason.EMPTY_SOURCE_CASE_ID: 1},
@@ -104,6 +141,77 @@ class CalgaryFullArtifactExecutionTests(unittest.TestCase):
         self.assertEqual(
             aggregation.aggregated_record_count,
             aggregation.total_admitted_records,
+        )
+
+        counter_summary = result.counter_summary
+        self.assertIsInstance(
+            counter_summary,
+            CalgaryFullArtifactCounterSummary,
+        )
+        self.assertEqual(counter_summary.rows_observed, 5)
+        self.assertEqual(counter_summary.rows_structurally_accepted, 5)
+        self.assertEqual(counter_summary.rows_structurally_rejected, 0)
+        self.assertEqual(counter_summary.rows_identity_admitted, 4)
+        self.assertEqual(counter_summary.rows_identity_rejected, 1)
+        self.assertEqual(
+            counter_summary.rows_observed,
+            counter_summary.rows_structurally_accepted
+            + counter_summary.rows_structurally_rejected,
+        )
+        self.assertEqual(
+            counter_summary.rows_structurally_accepted,
+            counter_summary.rows_identity_admitted
+            + counter_summary.rows_identity_rejected,
+        )
+        self.assertEqual(
+            counter_summary.rows_observed,
+            counter_summary.rows_structurally_accepted,
+        )
+
+        self.assertEqual(counter_summary.distinct_source_case_ids, 2)
+        self.assertEqual(
+            counter_summary.source_case_ids_appearing_more_than_once,
+            1,
+        )
+        self.assertEqual(counter_summary.rows_involved_in_duplication, 3)
+
+        self.assertEqual(counter_summary.blank_service_name, 1)
+        self.assertEqual(counter_summary.blank_agency_responsible, 1)
+        self.assertEqual(counter_summary.blank_status_description, 1)
+
+        unavailable = UnavailableEvidence(UnavailableReason.VALUE_ABSENT)
+        self.assertEqual(
+            counter_summary.status_vocabulary,
+            {
+                ObservedEvidence("Closed"): 2,
+                unavailable: 1,
+                ObservedEvidence("Open"): 1,
+            },
+        )
+        self.assertEqual(
+            counter_summary.service_name_vocabulary,
+            {
+                ObservedEvidence("Pothole"): 1,
+                unavailable: 1,
+                ObservedEvidence("Drainage"): 1,
+                ObservedEvidence(" Drainage "): 1,
+            },
+        )
+        self.assertEqual(
+            sum(counter_summary.status_vocabulary.values()),
+            counter_summary.rows_identity_admitted,
+        )
+        self.assertEqual(
+            sum(counter_summary.service_name_vocabulary.values()),
+            counter_summary.rows_identity_admitted,
+        )
+        self.assertEqual(
+            sum(aggregation.aggregated_counts.values()),
+            counter_summary.rows_identity_admitted,
+        )
+        self.assertEqual(
+            sum(aggregation.rejection_counts_by_reason.values()),
+            counter_summary.rows_identity_rejected,
         )
 
     def test_digest_mismatch_prevents_csv_traversal(self):
@@ -184,6 +292,30 @@ class CalgaryFullArtifactExecutionTests(unittest.TestCase):
                     Path("synthetic-not-opened.csv"),
                     "expected synthetic digest",
                 )
+
+    def test_counter_summary_rejects_reconciliation_inconsistencies(self):
+        admitted_status = {ObservedEvidence("Closed"): 1}
+        admitted_service = {ObservedEvidence("Pothole"): 1}
+        inconsistent_summaries = {
+            "row lifecycle": {
+                "rows_observed": 1,
+            },
+            "duplicate rows exceed admitted rows": {
+                "rows_observed": 1,
+                "rows_structurally_accepted": 1,
+                "rows_identity_admitted": 1,
+                "distinct_source_case_ids": 1,
+                "source_case_ids_appearing_more_than_once": 1,
+                "rows_involved_in_duplication": 2,
+                "status_vocabulary": admitted_status,
+                "service_name_vocabulary": admitted_service,
+            },
+        }
+
+        for name, overrides in inconsistent_summaries.items():
+            with self.subTest(name=name):
+                with self.assertRaises(CalgaryFullArtifactAccountingError):
+                    _counter_summary(**overrides)
 
 
 if __name__ == "__main__":
