@@ -1404,11 +1404,338 @@ INCREMENT_008_STATUS = IN_PROGRESS
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Phase 2 Exploratory Review Contract
+
+Phase 2 asks whether the retained `service_name` and `status_description`
+vocabularies contain source-specific lexical forms that plausibly encode
+missing, unknown, unavailable, not-provided, or placeholder states but were
+not captured by the predeclared deterministic Phase 1 rules.
+
+```text
+PHASE_2_CLASSIFICATION = EXPLORATORY_POST_HOC
+PHASE_2_CONFIRMATORY_STATUS = NOT_CONFIRMATORY
+```
+
+Phase 2 findings are hypotheses for possible future confirmatory work. They do
+not amend the frozen Phase 1 sentinel list, automatically become missing-data
+classifications, or establish source semantics.
+
+### Phase 2 Evaluability and Review Universe
+
+```text
+service_name = EVALUABLE
+status_description = EVALUABLE
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+No agency Phase 2 review, denominator, or candidate evidence may be invented.
+The authorized review universe consists only of exact `OBSERVED` lexical values
+from `service_name_vocabulary` and `status_vocabulary`. A value already
+classified as a Phase 1 candidate is excluded from new Phase 2 candidate
+classification.
+
+The already-established Phase 1 `service_name` candidate `"N/A"` remains
+Phase 1 evidence and must not be relabeled as a Phase 2 candidate. Based only
+on already-established cardinalities, the expected Phase 2 universe is:
+
+```text
+service_name_vocabulary_values = 1169
+known_phase_1_service_values_excluded = 1
+service_values_expected = 1168
+status_description_vocabulary_values = 5
+known_phase_1_status_values_excluded = 0
+status_values_expected = 5
+total_phase_2_values_expected = 1173
+```
+
+These expected counts must be reconciled when the review artifact is created.
+No remaining lexical value was inspected while defining this contract.
+
+### Two-Stage Count-Blinded Review
+
+Phase 2 review must occur in two distinct stages to reduce prevalence bias.
+
+#### Stage A - Lexical Screening
+
+During initial classification the reviewer sees only:
+
+- field; and
+- exact lexical value.
+
+The reviewer must not see:
+
+- row count;
+- row percentage;
+- vocabulary percentage;
+- frequency rank; or
+- cross-tab context.
+
+```text
+COUNTS_VISIBLE_DURING_INITIAL_PHASE_2_SCREEN = NO
+```
+
+All Stage A decisions must be completed and frozen before quantitative values
+are attached.
+
+#### Stage B - Quantitative Attachment
+
+Only after the complete Stage A decision set is retained may Stage B join the
+retained row counts to flagged candidates. Each Phase 2 candidate then retains:
+
+- `row_count`;
+- row percentage of `7474403`; and
+- vocabulary percentage for its field.
+
+Arithmetic must use `Decimal` directly from integer counts, six decimal places
+for display, and `ROUND_HALF_EVEN`. Binary-float-first calculation is not
+permitted.
+
+### Deterministic Ordering and Exact Representation
+
+Review entries must be presented in deterministic order by field and then by
+exact Python lexical string order. Field order is:
+
+1. `service_name`;
+2. `status_description`.
+
+Entries must not be ordered by count, frequency, Phase 1 similarity, perceived
+importance, or semantic category.
+
+The decoded exact lexical value is authoritative. Human-visible presentation
+uses an unambiguous escaped form equivalent to
+`json.dumps(value, ensure_ascii=False)`. This display operation must not trim,
+case-normalize, replace whitespace, canonicalize, or rename a value.
+
+### Stage A Decision Contract
+
+Every reviewed value receives exactly one decision:
+
+```text
+NO_PHASE_2_FLAG
+EXPLORATORY_SENTINEL_CANDIDATE
+```
+
+No undecided entry may remain in a completed artifact. Phase 2 must not emit
+`MISSING_DATA`, `CONFIRMED_SENTINEL`, `INVALID_VALUE`, `BAD_DATA`, or
+`LOW_INFORMATION`.
+
+A value may receive `EXPLORATORY_SENTINEL_CANDIDATE` only when its exact
+lexical form plausibly denotes absence, an unknown state, an unavailable
+state, a not-provided state, or a placeholder state. The reviewer must retain
+a concise rationale referring to the lexical form itself.
+
+Operational frequency, cross-tab behavior, service context, external source
+meaning, and assumed workflow semantics must not determine the Stage A
+decision.
+
+### Phase 2 Exclusions and Phase 3 Boundary
+
+A value must not be flagged merely because it is broad, generic,
+low-information, catch-all, unusual, operationally ambiguous, an acronym, a
+workflow category, a lifecycle category, rare, common, or inconvenient for
+analysis. Those properties belong to the separately declared Phase 3 question
+unless the exact lexical form independently denotes absence, unavailability,
+or placeholder semantics.
+
+Phase 3 remains separate and has not started. This contract does not inspect
+whether any conceptual Phase 3 example occurs in the retained vocabularies.
+
+### Frozen Phase 1 Boundary
+
+If Phase 2 encounters a form that appears suitable for a deterministic rule,
+it must not be added to `PHASE1_SENTINEL_VALUES`, used to rerun Phase 1, or
+relabeled as a deterministic Phase 1 finding. It may be recorded only as:
+
+```text
+EXPLORATORY_SENTINEL_CANDIDATE
+```
+
+Any deterministic rule expansion requires a future prospectively defined
+increment.
+
+### Exhaustive Review Accounting
+
+The retained review artifact must contain a decision for every value in the
+authorized universe and retain:
+
+```text
+service_values_expected
+service_values_reviewed
+status_values_expected
+status_values_reviewed
+phase1_values_excluded
+phase2_candidates
+no_flag_values
+```
+
+Successful completion requires:
+
+```text
+service_values_reviewed = service_values_expected
+status_values_reviewed = status_values_expected
+phase2_candidates + no_flag_values = total_reviewed_values
+```
+
+No silent omission is permitted.
+
+### Reviewer and Judgment Record
+
+The retained review process must record at minimum:
+
+- review date and time;
+- review procedure version, bound to the Increment 008 Phase 2 contract
+  revision; and
+- `reviewer_role = PROJECT_RESEARCHER`.
+
+The record must not claim independent review, external validation, or
+inter-rater agreement unless those events later occur. Software assistance for
+presentation or recording does not create independent validation.
+
+```text
+PHASE_2_CLASSIFICATION_TYPE = EXPLORATORY_REVIEWER_JUDGMENT
+```
+
+Phase 2 results may be affected by reviewer subjectivity, omission, prior
+knowledge, and lexical interpretation. This is an explicit validity boundary.
+
+Every `EXPLORATORY_SENTINEL_CANDIDATE` must retain:
+
+- field;
+- exact lexical value;
+- decision; and
+- concise lexical rationale.
+
+No flagged candidate may omit its rationale. `NO_PHASE_2_FLAG` entries need
+not include a substantive rationale beyond the decision.
+
+### Stage A Artifact Concept
+
+A future externally retained Stage A review artifact will contain all 1,173
+expected review entries, subject to reconciliation. Each row or object contains
+only:
+
+- field;
+- exact lexical value;
+- review decision; and
+- candidate rationale when flagged.
+
+It contains no row counts, percentages, cross-tab data, or Phase 3
+classification. Its exact external path and schema must be frozen before Phase
+2 execution. The artifact is not created by this contract checkpoint.
+
+### Phase 2 Coverage Semantics
+
+After Stage B, coverage must be retained separately for `service_name` and
+`status_description`:
+
+- candidate lexical-value count;
+- candidate row count;
+- candidate row percentage; and
+- candidate vocabulary percentage.
+
+No numeric cross-field union may be computed:
+
+```text
+CROSS_FIELD_PHASE_2_UNION = NOT_RECONSTRUCTABLE_FROM_RETAINED_MARGINAL_VOCABULARIES
+```
+
+Phase 1 and Phase 2 remain distinct result classes:
+
+```text
+PHASE_1_CONFIRMED_DETERMINISTIC_CANDIDATES
+PHASE_2_EXPLORATORY_CANDIDATES
+```
+
+Phase 2 candidate rows must not be added to the Phase 1 8,721-row result and
+reported as confirmed sentinel coverage or as a combined missing-row count.
+Any later combined descriptive presentation must preserve the different
+evidence classes explicitly.
+
+### Phase 2 Materiality and Publication Boundary
+
+The deterministic Phase 1 materiality results remain:
+
+```text
+service_name = EXPLICIT_COMPLETENESS_QUALIFICATION
+status_description = FOOTNOTE_ONLY_NO_COMPLETENESS_WORDING_CHANGE
+```
+
+Exploratory Phase 2 findings do not independently change those classifications
+and must not receive Phase 1 materiality labels as if they were confirmatory.
+Phase 2 quantitative coverage may be reported descriptively, but:
+
+```text
+PHASE_2_PUBLIC_MATERIALITY_DECISION = DEFERRED_PENDING_CONFIRMATORY_DECISION
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+```
+
+No public wording decision is made in Phase 2.
+
+### Phase 2 Stop Conditions
+
+Phase 2 must stop and preserve evidence if:
+
+- retained vocabularies no longer reconcile to Increment 007;
+- review-universe cardinalities do not reconcile;
+- Phase 1 candidate exclusions do not reconcile;
+- counts become visible before Stage A decisions are frozen;
+- exact lexical values cannot be retained;
+- the reviewer cannot distinguish placeholder judgment from the Phase 3
+  low-information question;
+- additional source data would be required;
+- `agency_responsible` evidence would be required; or
+- answering the question would require expansion of the deterministic Phase 1
+  rule list.
+
+The procedure must not change silently.
+
+### Phase 2 Success Conditions
+
+Phase 2 is complete only when:
+
+- every authorized `service_name` lexical value has a retained decision;
+- every authorized `status_description` lexical value has a retained decision;
+- known Phase 1 candidates are excluded from Phase 2 relabeling;
+- every Phase 2 candidate has a lexical rationale;
+- Stage A decisions are frozen before counts are attached;
+- quantitative attachments reconcile;
+- agency remains explicitly not evaluable;
+- no Phase 3 judgment is mixed into Phase 2; and
+- no missing-data reclassification occurs.
+
+### Phase 2-Specific Threats to Validity
+
+The prospective review retains these unresolved threats:
+
+1. single-reviewer subjectivity;
+2. lexical-interpretation ambiguity;
+3. omission risk across a large vocabulary;
+4. prior knowledge of the Phase 1 `"N/A"` finding;
+5. post-hoc exploratory status;
+6. absence of independent second-rater evidence;
+7. marginal vocabularies lack row-level cross-field overlap;
+8. `agency_responsible` remains unavailable; and
+9. lexical appearance does not establish source semantics.
+
+### Phase 2 Contract Classifications
+
+```text
+PHASE_2 = PROSPECTIVE_REVIEW_CONTRACT_DEFINED
+PHASE_2_CLASSIFICATION_TYPE = EXPLORATORY_REVIEWER_JUDGMENT
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_2_STAGE_A = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_PUBLIC_MATERIALITY_DECISION = DEFERRED_PENDING_CONFIRMATORY_DECISION
+PHASE_3 = NOT_STARTED
+MISSING_DATA_RECLASSIFICATION = NOT_PERFORMED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Real Phase 1 execution succeeded once, and
 the retained result passed independent reconciliation with zero candidate or
-field-aggregate mismatches. Phase 1 established the bounded lexical findings
-recorded above without reclassifying any value as missing data. Phase 2
-exploratory review and Phase 3 low-information review remain part of the
-predeclared sequence and have not started.
+field-aggregate mismatches. The prospective Phase 2 exploratory review
+contract is now defined, but Stage A and Stage B have not started and no Phase
+2 finding exists. Phase 3 has not started.
