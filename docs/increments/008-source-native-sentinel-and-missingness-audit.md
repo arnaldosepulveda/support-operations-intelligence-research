@@ -3196,6 +3196,115 @@ NEXT_STEP = STAGE_A_DECISION_ARTIFACT_VALIDATION_GREEN_IMPLEMENTATION
 INCREMENT_008_STATUS = IN_PROGRESS
 ```
 
+## Phase 2 Stage A Decision-Artifact Validator GREEN Checkpoint
+
+The Stage A decision-artifact validator is now implemented at:
+
+```text
+src/support_operations_intelligence/source_native_sentinel_stage_a_decision_validation.py
+```
+
+It exposes `main(argv: Sequence[str] | None = None) -> int` and accepts only
+the frozen `--stage-a-universe`, `--expected-stage-a-universe-sha256`,
+`--decisions`, and `--expected-review-contract-git-revision` arguments. The
+implementation uses only the Python standard library and remains a read-only
+evidence validator; it neither creates nor modifies reviewer decisions.
+
+Implemented validation behavior includes universe SHA-before-parse
+verification; universe contract validation; decision-artifact binding
+validation; generic batch-boundary derivation from actual universe size;
+completed-batch-only validation; contiguous-prefix enforcement; exact
+positional identity validation; two-label decision validation; candidate
+rationale-presence validation; amendment identity, transition, and retained
+order validation; effective-decision reconstruction without rewriting
+original evidence; summary and review-status reconciliation; source-prevalence
+field rejection; Phase 3 schema and label rejection; sanitized diagnostics
+that do not reveal lexical values, rationale text, or amendment reason text;
+safe aggregate success output; and fail-closed, non-mutating behavior.
+
+### Synthetic Engineering Test Evidence
+
+Focused decision-validator command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_stage_a_decision_validation \
+  -v
+```
+
+Observed result: 16 tests, 0 failures, 0 errors, `OK`.
+
+Stage A exporter regression command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_stage_a_run \
+  -q
+```
+
+Observed result: 10 tests, 0 failures, 0 errors, `OK`.
+
+Phase 1 regression command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit \
+  tests.test_source_native_sentinel_audit_run \
+  -q
+```
+
+Observed result: 21 tests, 0 failures, 0 errors, `OK`.
+
+Full repository regression command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: 218 tests, 0 failures, 0 errors, `OK`. This matches the
+plausible expected total of the retained 202-test suite plus the 16 committed
+decision-validator contract methods.
+
+All validation fixtures were synthetic. These results are internal engineering
+evidence, not independent validation.
+
+```text
+STAGE_A_DECISION_VALIDATOR_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+```
+
+### No-Real-Data and Claim Boundaries
+
+The real Stage A universe was not opened, parsed, hashed, printed, sampled, or
+semantically inspected during this GREEN implementation. No real lexical value
+was exposed or reviewed, and the reserved real decision artifact was neither
+opened nor created. Human Stage A review, Stage B, and Phase 3 remain
+unstarted.
+
+```text
+REAL_STAGE_A_UNIVERSE_OPENED_DURING_GREEN_IMPLEMENTATION = NO
+REAL_STAGE_A_LEXICAL_VALUES_EXPOSED = NO
+REAL_STAGE_A_LEXICAL_VALUES_REVIEWED = NO
+STAGE_A_DECISION_ARTIFACT = NOT_CREATED
+STAGE_A_DECISIONS_OBSERVED = NO
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+```
+
+### Decision-Validator GREEN Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_DECISION_VALIDATOR_GREEN_IMPLEMENTATION
+STAGE_A_DECISION_VALIDATOR_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+STAGE_A_DECISION_VALIDATOR_TEST_RESULT = INTERNAL_ENGINEERING_TEST_RESULT
+STAGE_A_DECISION_VALIDATOR_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+NEXT_STEP = PROSPECTIVE_REAL_STAGE_A_REVIEW_SESSION_MANIFEST
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
@@ -3204,7 +3313,8 @@ contract, and Stage A exporter GREEN implementation are established under
 synthetic engineering tests. The real Stage A review universe was generated
 once and independently reconciled with no mismatch. The prospective human
 decision-evidence procedure is frozen before first reviewer exposure, and its
-synthetic executable validation contract is committed in RED state. Human
-Stage A review, Stage B, and Phase 3 have not started; no Phase 2 finding or
-decision artifact exists. The next boundary is the decision-artifact validator
-GREEN implementation.
+synthetic executable validation contract and GREEN validator implementation
+are established under synthetic engineering tests. Human Stage A review,
+Stage B, and Phase 3 have not started; no Phase 2 finding or decision artifact
+exists. The next boundary is the prospective real Stage A review-session
+manifest.
