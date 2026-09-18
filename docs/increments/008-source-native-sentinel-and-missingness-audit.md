@@ -1217,12 +1217,198 @@ PHASE_3 = NOT_STARTED
 INCREMENT_007_MODIFIED = NO
 ```
 
+## Phase 1 Real Execution Result
+
+The frozen Phase 1 command executed exactly once against the retained
+Increment 007 `BaselineResult` and succeeded. The committed runner performed
+the first authorized opening and parsing of that retained result for Increment
+008.
+
+```text
+execution_bound_git_revision = 426b09bb528c2af09fb60590c8e3ec4ed56fc3fb
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+phase1_result_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json
+phase1_result_size_bytes = 3039
+phase1_result_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+run_date_utc = 2026-09-18T14:22:45.999555+00:00
+python_version = 3.12.3
+execution_attempts = 1
+execution_result = SUCCEEDED
+reruns = 0
+```
+
+### Increment 007 Input Reconciliation
+
+The retained Increment 007 bindings and the two authorized marginal
+vocabularies reconciled exactly:
+
+```text
+INCREMENT_007_BINDING_RECONCILIATION = PASS
+artifact_sha256 = 9f12fa4324430a87096551bd11ac292dcbd13e6045e84e87ef54118448aa878f
+git_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+increment_version = 007
+contract_id = 007-full-artifact-execution-and-status-by-service-baseline
+rows_identity_admitted = 7474403
+service_name_vocabulary_cardinality = 1169
+service_name_vocabulary_row_count_sum = 7474403
+status_description_vocabulary_cardinality = 5
+status_description_vocabulary_row_count_sum = 7474403
+VOCABULARY_RECONCILIATION = PASSED
+```
+
+### `service_name` Phase 1 Result
+
+Exactly one Phase 1 candidate was observed:
+
+| Field | Exact lexical value | Matched check | Classification | Row count | Row percentage | Vocabulary percentage |
+| --- | --- | --- | --- | ---: | ---: | ---: |
+| `service_name` | `"N/A"` | `PHASE_1C_CASE_INSENSITIVE_EXACT_SENTINEL` | `SENTINEL_CANDIDATE` | 8,721 | 0.116678% | 0.085543% |
+
+Increment 008 identifies `"N/A"` only as a deterministic lexical sentinel
+candidate under the predeclared Phase 1C rule. It does not classify these rows
+as missing data and does not establish what `"N/A"` means operationally.
+
+The field-level result is:
+
+```text
+PHASE_1_CANDIDATE_COUNT = 1
+AGGREGATE_SENTINEL_CANDIDATE_COUNT = 1
+AGGREGATE_SENTINEL_ROW_COUNT = 8721
+AGGREGATE_SENTINEL_ROW_PERCENTAGE = 0.116678
+AGGREGATE_SENTINEL_VOCABULARY_COUNT = 1
+AGGREGATE_SENTINEL_VOCABULARY_PERCENTAGE = 0.085543
+MATERIALITY_CLASSIFICATION = EXPLICIT_COMPLETENESS_QUALIFICATION
+NORMALIZATION_DRIFT_CANDIDATES = 0
+NORMALIZATION_DRIFT_ROWS = 0
+NORMALIZATION_DRIFT_ROW_PERCENTAGE = 0.000000
+STANDALONE_CONTROL_CHARACTER_CANDIDATES = 0
+STANDALONE_CONTROL_CHARACTER_ROWS = 0
+STANDALONE_CONTROL_CHARACTER_ROW_PERCENTAGE = 0.000000
+```
+
+The materiality classification follows mechanically from the predeclared
+threshold because `0.1% <= 0.116678% <= 2.0%`. The classification itself was
+calculated from the unrounded `Decimal` value; the six-decimal value is display
+evidence and was not used as a substitute threshold input.
+
+### `status_description` Phase 1 Result
+
+```text
+NO_PHASE_1_CANDIDATES
+PHASE_1_CANDIDATE_COUNT = 0
+AGGREGATE_SENTINEL_ROW_COUNT = 0
+AGGREGATE_SENTINEL_ROW_PERCENTAGE = 0.000000
+AGGREGATE_SENTINEL_VOCABULARY_COUNT = 0
+AGGREGATE_SENTINEL_VOCABULARY_PERCENTAGE = 0.000000
+MATERIALITY_CLASSIFICATION = FOOTNOTE_ONLY_NO_COMPLETENESS_WORDING_CHANGE
+NORMALIZATION_DRIFT_CANDIDATES = 0
+STANDALONE_CONTROL_CHARACTER_CANDIDATES = 0
+```
+
+Zero Phase 1 candidates does not establish universal semantic completeness for
+`status_description`.
+
+### `agency_responsible` and Cross-Field Boundaries
+
+```text
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+CROSS_FIELD_SENTINEL_UNION = NOT_RECONSTRUCTABLE_FROM_RETAINED_MARGINAL_VOCABULARIES
+```
+
+No agency candidate count, vocabulary denominator, row coverage, or
+materiality classification was invented. Phase 1 therefore does not establish
+whether `agency_responsible` contains source-native lexical sentinel values.
+
+The 8,721 rows are a `service_name` field result only. They must not be divided
+by the common row denominator and reported as a cross-field missingness or
+sentinel-union rate.
+
+## Phase 1 Retained Result Reconciliation
+
+```text
+PHASE_1_RETAINED_RESULT_RECONCILIATION = PASSED
+SERVICE_CANDIDATE_MISMATCHES = 0
+STATUS_CANDIDATE_MISMATCHES = 0
+FIELD_AGGREGATE_MISMATCHES = 0
+AGENCY_RESULT_RECONCILIATION = PASS
+SUMMARY_RECONCILIATION = PASS
+PHASE1_RESULT_REPRESENTATION_AUDIT = PASS
+```
+
+Independent standard-library reconciliation verified the retained result
+size and hash; Increment 007 bindings; row denominator; service and status
+vocabulary cardinalities and row-count sums; exact frozen sentinel set;
+independent Phase 1A-1E matching; candidate identity; matched checks;
+classification precedence; exact candidate row counts; `Decimal` percentage
+calculations; materiality classifications; normalization-drift and standalone
+control-character coverage; explicit agency non-evaluability; summary;
+cross-field-union boundary; and deterministic representation.
+
+### Established Phase 1 Evidence
+
+For the retained Increment 007 artifact, under the predeclared deterministic
+Phase 1 lexical rules, `service_name` contains one lexical sentinel candidate,
+`"N/A"`, covering 8,721 source rows, or 0.116678% of the 7,474,403-row
+denominator. `status_description` contains no Phase 1 lexical candidates.
+`agency_responsible` was not evaluable from the retained Increment 007
+vocabularies.
+
+```text
+RESULT_CLASSIFICATION = INTERNAL_EVALUATION_RESULT
+PHASE_1_CANDIDATE = LEXICAL_CANDIDATE_ONLY
+MISSING_DATA_RECLASSIFICATION = NOT_PERFORMED
+SEMANTIC_MEANING_OF_N_A = NOT_ESTABLISHED
+AGENCY_SENTINEL_STATE = NOT_ESTABLISHED
+CROSS_FIELD_SENTINEL_UNION = NOT_RECONSTRUCTABLE_FROM_RETAINED_MARGINAL_VOCABULARIES
+OPERATIONAL_INTERPRETATION = NOT_PERFORMED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
+This is internal evaluation evidence, not external validation.
+
+### Contractual Publication Consequence
+
+```text
+service_name_materiality_obligation = EXPLICIT_COMPLETENESS_QUALIFICATION
+status_description_materiality_obligation = FOOTNOTE_ONLY_NO_COMPLETENESS_WORDING_CHANGE
+```
+
+These are predeclared contract consequences, not the final wording of any
+public statement. The actual public-description decision remains deferred
+until Increment 008 completes; no public wording is drafted here.
+
+```text
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+```
+
+### Phase 1 Documentation Classifications
+
+```text
+CHANGE_TYPE = PHASE_1_REAL_FINDINGS_DOCUMENTATION
+REAL_PHASE_1_EXECUTION = SUCCEEDED
+PHASE_1_RETAINED_RESULT_RECONCILIATION = PASSED
+SERVICE_NAME_PHASE_1_CANDIDATES = 1
+SERVICE_NAME_SENTINEL_ROW_COUNT = 8721
+SERVICE_NAME_SENTINEL_ROW_PERCENTAGE = 0.116678
+SERVICE_NAME_MATERIALITY = EXPLICIT_COMPLETENESS_QUALIFICATION
+STATUS_DESCRIPTION_PHASE_1_CANDIDATES = 0
+STATUS_DESCRIPTION_MATERIALITY = FOOTNOTE_ONLY_NO_COMPLETENESS_WORDING_CHANGE
+AGENCY_RESPONSIBLE = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+MISSING_DATA_RECLASSIFICATION = NOT_PERFORMED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+PHASE_2 = NOT_STARTED
+PHASE_3 = NOT_STARTED
+INCREMENT_008_STATUS = IN_PROGRESS
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
-Increment 008 remains in progress. The deterministic Phase 1 engine and its
-retained-baseline runner are GREEN under their committed synthetic tests and
-the 192-test full regression; the focused pre-manifest verification also passed
-all 21 engine and runner tests. The exact future execution manifest is now
-frozen. Real Phase 1 execution has not been performed, the real baseline JSON
-was not opened or rehashed, real vocabulary contents were not inspected, and
-no real findings exist. Phase 2 and Phase 3 have not started.
+Increment 008 remains in progress. Real Phase 1 execution succeeded once, and
+the retained result passed independent reconciliation with zero candidate or
+field-aggregate mismatches. Phase 1 established the bounded lexical findings
+recorded above without reclassifying any value as missing data. Phase 2
+exploratory review and Phase 3 low-information review remain part of the
+predeclared sequence and have not started.
