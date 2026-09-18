@@ -2899,6 +2899,303 @@ NEXT_STEP = STAGE_A_DECISION_ARTIFACT_VALIDATION_RED_CONTRACT
 INCREMENT_008_STATUS = IN_PROGRESS
 ```
 
+## Phase 2 Stage A Decision-Artifact Validation RED Contract
+
+This prospective executable contract freezes validation of future Stage A
+human decision evidence before any reviewer lexical exposure. The validator
+will validate evidence, derive effective decisions, reconcile review
+accounting, and return success or failure. It will not make or alter reviewer
+decisions, generate rationales, attach source prevalence, or perform Phase 3
+classification.
+
+The prospective production module is intentionally absent:
+
+```text
+src/support_operations_intelligence/source_native_sentinel_stage_a_decision_validation.py
+```
+
+It must expose:
+
+```text
+main(argv: Sequence[str] | None = None) -> int
+```
+
+The prospective invocation is:
+
+```bash
+python -m \
+support_operations_intelligence.source_native_sentinel_stage_a_decision_validation \
+  --stage-a-universe <path> \
+  --expected-stage-a-universe-sha256 <sha256> \
+  --decisions <path> \
+  --expected-review-contract-git-revision <revision>
+```
+
+No baseline, Calgary CSV, counts, Phase 3, agency, auto-classification, model,
+LLM, or repair argument is permitted.
+
+### Universe Identity and Hash-Before-Parse Boundary
+
+The validator must stream-hash the supplied universe, compare it with the CLI
+expected SHA-256, and only then parse it. On mismatch it returns nonzero,
+performs no decision validation, and emits no lexical value in diagnostics.
+
+After digest equality, require universe bindings equivalent to:
+
+```text
+increment_008_version = 008
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+phase = PHASE_2
+stage = STAGE_A_REVIEW_UNIVERSE
+```
+
+The actual supplied universe entries are the authoritative ordered identity
+sequence. Production validation must not hard-code lexical values. The real
+artifact has 1,173 entries, but batch construction derives from actual entry
+count and batch size.
+
+### Decision Artifact Schema and Binding
+
+The exact conceptual top-level sections are:
+
+```text
+binding
+review
+batches
+amendments
+summary
+```
+
+No source-row analysis or Phase 3 section is permitted.
+
+The binding contains:
+
+```text
+increment_008_version
+increment_008_contract
+phase
+stage
+input_stage_a_universe_sha256
+input_stage_a_universe_entry_count
+review_contract_git_revision
+reviewer_role
+```
+
+For the real artifact, the expected values remain the frozen Increment 008
+contract, `PHASE_2`, `STAGE_A_HUMAN_REVIEW`, universe SHA-256
+`d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66`,
+1,173 entries, review-contract revision
+`17b6aba0425b9a56d21799319deb88651ec81a66`, and reviewer role
+`PROJECT_RESEARCHER`. The review-contract revision must be compared with the
+CLI expected value rather than trusted from the artifact.
+
+The review section contains `review_status` and `batch_size`. Allowed status
+values are `IN_PROGRESS` and `COMPLETE_PENDING_RECONCILIATION`; batch size is
+100. Source-row prevalence metadata is prohibited.
+
+### Batch Derivation, Prefix, and Completeness
+
+Each completed batch contains:
+
+```text
+batch_number
+start_position
+end_position
+expected_entry_count
+reviewed_entry_count
+reviewer_role
+reviewed_at_utc
+decisions
+```
+
+Batch and positions are one-based, reviewer role is `PROJECT_RESEARCHER`, and
+the timestamp is timezone-aware UTC.
+
+Expected boundaries derive from universe entry count and `BATCH_SIZE = 100`;
+the validator must not hard-code 12 as generic construction logic. For 1,173
+entries, the derived intervals are 1-100, 101-200, 201-300, 301-400, 401-500,
+501-600, 601-700, 701-800, 801-900, 901-1000, 1001-1100, and 1101-1173.
+
+The canonical artifact retains completed batches only. Each retained batch
+must have `reviewed_entry_count = expected_entry_count` and exactly that many
+decisions. Retained batches form a contiguous prefix beginning at batch 1,
+with no gaps or future-batch evidence.
+
+### Decision Identity, Labels, and Rationale
+
+Each decision contains `field`, `value`, and `decision`. Only these labels are
+allowed:
+
+```text
+NO_PHASE_2_FLAG
+EXPLORATORY_SENTINEL_CANDIDATE
+```
+
+An exploratory candidate additionally requires a present, string, non-empty
+rationale. Rationale presence is evidence validation, not semantic validation.
+
+At every one-based universe position, decision field and value must equal the
+exact universe identity. Trimming, case folding, normalization, renaming, and
+reordering are prohibited. Completed batches may contain no missing,
+duplicate, extra, repeated, or out-of-batch identity.
+
+### Amendments and Effective Decisions
+
+Every amendment contains:
+
+```text
+field
+value
+previous_decision
+new_decision
+reason
+amended_at_utc
+reviewer_role
+```
+
+An amendment to `EXPLORATORY_SENTINEL_CANDIDATE` also requires a rationale.
+Its identity must already have an original decision in a completed batch.
+For each retained amendment, `previous_decision` must equal the current
+effective decision immediately before the transition; `new_decision` must be
+allowed and different; reason must be non-empty; role must be
+`PROJECT_RESEARCHER`; and timestamp must be timezone-aware UTC.
+
+Amendments remain in retained chronological order with nondecreasing
+timestamps. The validator must not sort them. Multiple amendments are valid
+only as an ordered transition chain. Effective decisions are reconstructed
+from immutable original decisions plus amendment history; originals are never
+rewritten or deleted.
+
+### Summary and Status Reconciliation
+
+The summary contains only review accounting:
+
+```text
+total_universe_entries
+entries_reviewed
+no_phase_2_flag_count
+exploratory_sentinel_candidate_count
+batches_completed
+review_status
+```
+
+`total_universe_entries` equals the supplied universe count;
+`entries_reviewed` equals original decisions across completed batches;
+`batches_completed` equals retained completed batches; and the two decision
+counts are calculated from effective decisions. Their sum must equal
+`entries_reviewed`.
+
+If reviewed entries are fewer than the universe, both review and summary
+status must be `IN_PROGRESS`. If every entry is reviewed, every derived batch
+must be complete and both statuses must be
+`COMPLETE_PENDING_RECONCILIATION`. Cross-section status disagreement, partial
+completion claims, and full artifacts claiming progress fail validation.
+
+### Count Blinding and Phase 3 Prohibition
+
+Decision entries, amendments, review metadata, and summary must reject
+source-prevalence keys including row count, row percentage, vocabulary
+percentage, frequency or rank, materiality, cross-tab data, source row count,
+and source percentage. Batch expected/reviewed counts and aggregate decision
+counts are allowed because they count review evidence, not source rows.
+
+Phase 3 structures, prohibited decision labels, low-information labels,
+catch-all classification, and generic-category classification are rejected by
+schema and label. Validation must not inspect lexical semantics to infer a
+Phase 3-like value.
+
+### Lexical-Safe Diagnostics and CLI Output
+
+```text
+VALIDATOR_LEXICAL_VALUE_LEAKAGE = PROHIBITED
+```
+
+Failure diagnostics must never echo universe or decision values, rationale
+text, or amendment reason text. Safe diagnostics may identify error category,
+batch number, one-based position, decision or amendment index, safe field
+name, and expected or observed counts.
+
+Success output may report only `VALIDATION=PASS`, review status, completed
+batches, entries reviewed, effective decision counts, and amendment count. It
+contains no lexical value, rationale, amendment reason, or source prevalence.
+
+On failure, the validator returns nonzero, modifies neither input, performs no
+repair or replacement inference, does not continue to a later batch, and does
+not leak lexical values. No retry or fallback is part of validator behavior.
+
+### Prospective Synthetic Test Contract
+
+The new standard-library test module is:
+
+```text
+tests/test_source_native_sentinel_stage_a_decision_validation.py
+```
+
+Its 16 focused `unittest.TestCase` methods use only temporary synthetic
+artifacts. They freeze hash-before-parse; required bindings; valid partial and
+complete review; derived final-batch behavior; completed contiguous prefixes;
+batch boundary, count, identity, duplication, and rationale failures; valid
+and invalid amendment reconstruction and chronological ordering; effective
+summary and review-status reconciliation; count-blinding and Phase 3
+rejection; and lexical-safe failure and success output.
+
+Distinctive synthetic strings verify leakage protection. No retained Calgary
+lexical value or real Stage A artifact content is used.
+
+### Test Syntax and Focused RED Evidence
+
+Syntax command:
+
+```bash
+.venv/bin/python -m py_compile \
+  tests/test_source_native_sentinel_stage_a_decision_validation.py
+```
+
+Observed result: PASS.
+
+Focused command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_stage_a_decision_validation \
+  -v
+```
+
+Observed result: RED, exit status 1. The unittest loader failed before the 16
+prospective methods executed:
+
+```text
+ModuleNotFoundError: No module named
+'support_operations_intelligence.source_native_sentinel_stage_a_decision_validation'
+```
+
+The RED cause is exactly the absent production validation module. It was not
+implemented. The full regression was not run; the retained current full-suite
+evidence remains 202 tests, 0 failures, 0 errors, `OK` and is not relabeled as
+the suite count after adding this unimplemented RED test module.
+
+### Decision Validation RED Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_DECISION_VALIDATION_RED_CONTRACT
+STAGE_A_UNIVERSE = RECONCILED
+STAGE_A_REVIEW_CONTRACT_GIT_REVISION = 17b6aba0425b9a56d21799319deb88651ec81a66
+STAGE_A_DECISION_VALIDATION_TEST_CONTRACT = IMPLEMENTED
+STAGE_A_DECISION_VALIDATOR_IMPLEMENTATION = ABSENT
+STAGE_A_DECISION_VALIDATOR_FOCUSED_STATE = RED
+STAGE_A_DECISION_VALIDATOR_RED_CAUSE = MISSING_DECISION_VALIDATION_MODULE
+REAL_STAGE_A_LEXICAL_VALUES_EXPOSED = NO
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+STAGE_A_DECISION_ARTIFACT = NOT_CREATED
+STAGE_A_DECISIONS_OBSERVED = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+NEXT_STEP = STAGE_A_DECISION_ARTIFACT_VALIDATION_GREEN_IMPLEMENTATION
+INCREMENT_008_STATUS = IN_PROGRESS
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
@@ -2906,7 +3203,8 @@ documented. The Phase 2 exploratory review contract, Stage A export test
 contract, and Stage A exporter GREEN implementation are established under
 synthetic engineering tests. The real Stage A review universe was generated
 once and independently reconciled with no mismatch. The prospective human
-decision-evidence procedure is frozen before first reviewer exposure. Human
+decision-evidence procedure is frozen before first reviewer exposure, and its
+synthetic executable validation contract is committed in RED state. Human
 Stage A review, Stage B, and Phase 3 have not started; no Phase 2 finding or
-decision artifact exists. The next boundary is an executable decision-artifact
-validation RED contract.
+decision artifact exists. The next boundary is the decision-artifact validator
+GREEN implementation.
