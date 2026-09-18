@@ -2523,12 +2523,390 @@ result = OK
 
 This is internal engineering evidence, not independent external validation.
 
+## Phase 2 Stage A Human Decision-Evidence Procedure
+
+This prospective procedure freezes how the project researcher's count-blinded
+exploratory lexical judgments will be recorded for every entry in the
+reconciled Stage A review universe. The future decision artifact is evidence
+of the review process. It is not deterministic Phase 1 evidence, independent
+or external validation, source-authoritative semantic interpretation, or
+missing-data ground truth.
+
+```text
+STAGE_A_DECISION_CLASSIFICATION = EXPLORATORY_REVIEWER_JUDGMENT
+```
+
+No lexical value was exposed or reviewed while defining this procedure.
+
+### Separate Decision Artifact and Binding
+
+The future decision artifact is reserved at:
+
+```text
+/data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-decisions.json
+```
+
+It does not exist at this checkpoint and must not be created until the later
+review workflow is prospectively executable.
+
+```text
+STAGE_A_REVIEW_UNIVERSE != STAGE_A_DECISIONS
+```
+
+The generated universe remains immutable input evidence. The decisions
+artifact is separate reviewer-produced evidence and must bind to:
+
+```text
+increment_008_version = 008
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+phase = PHASE_2
+stage = STAGE_A_HUMAN_REVIEW
+input_stage_a_universe_sha256 = d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66
+input_stage_a_universe_entry_count = 1173
+review_contract_git_revision = POST_PROCEDURE_COMMIT_HEAD_BEFORE_REVIEW
+reviewer_role = PROJECT_RESEARCHER
+```
+
+The commit produced by this prospective procedure becomes the review-contract
+revision unless another prospective procedure change is committed before
+review begins.
+
+No personal identifier beyond `PROJECT_RESEARCHER` is required. The artifact
+must not claim `INDEPENDENT_REVIEWER`, `SECOND_RATER`, `EXTERNAL_VALIDATOR`, or
+`INTER_RATER_AGREEMENT` unless that evidence is separately produced later.
+
+### Allowed Decisions and Lexical Criterion
+
+Every Stage A entry must receive exactly one of:
+
+```text
+NO_PHASE_2_FLAG
+EXPLORATORY_SENTINEL_CANDIDATE
+```
+
+No third state is allowed in a completed review. In particular, Stage A must
+not emit `MISSING_DATA`, `CONFIRMED_SENTINEL`, `INVALID_VALUE`, `BAD_DATA`,
+`LOW_INFORMATION`, `PHASE_3_CANDIDATE`, or `UNKNOWN_DECISION`.
+
+`EXPLORATORY_SENTINEL_CANDIDATE` is permitted only when the presented exact
+lexical form plausibly denotes absence, an unknown state, an unavailable
+state, a not-provided state, or a placeholder state. Judgment must be based
+only on the lexical form. Row prevalence, frequency rank, cross-tab context,
+operational service context, external semantic assumptions, and Phase 3
+low-information reasoning must not determine the decision.
+
+### Decision Identity and Rationale
+
+Every decision entry retains:
+
+```text
+field
+value
+decision
+```
+
+The authoritative identity is `(field, exact value)`. The value must be copied
+unchanged from the reconciled Stage A universe, with no trimming,
+normalization, case folding, canonicalization, or renaming.
+
+For `EXPLORATORY_SENTINEL_CANDIDATE`, a concise lexical rationale is required.
+It must explain only why the lexical form plausibly represents absence,
+unknown, unavailable, not-provided, or placeholder semantics. Frequency and
+operational context are prohibited as rationale. A rationale is not required
+for `NO_PHASE_2_FLAG`.
+
+### Review Order and Deterministic Batching
+
+Review follows the reconciled Stage A universe order exactly: all
+`service_name` entries first, then all `status_description` entries, with the
+retained deterministic lexical order within each field. The review must not
+re-sort, shuffle, prioritize, search likely candidates first, or omit entries.
+
+```text
+STAGE_A_BATCH_SIZE = 100
+STAGE_A_EXPECTED_BATCHES = 12
+STAGE_A_TOTAL_REVIEW_ENTRIES = 1173
+```
+
+The one-based positional batch boundaries are:
+
+| Batch | Start position | End position | Expected entries |
+| ---: | ---: | ---: | ---: |
+| 1 | 1 | 100 | 100 |
+| 2 | 101 | 200 | 100 |
+| 3 | 201 | 300 | 100 |
+| 4 | 301 | 400 | 100 |
+| 5 | 401 | 500 | 100 |
+| 6 | 501 | 600 | 100 |
+| 7 | 601 | 700 | 100 |
+| 8 | 701 | 800 | 100 |
+| 9 | 801 | 900 | 100 |
+| 10 | 901 | 1000 | 100 |
+| 11 | 1001 | 1100 | 100 |
+| 12 | 1101 | 1173 | 73 |
+
+Position is review bookkeeping only and conveys no source-row prevalence.
+
+Only one batch may be presented at a time. A later batch must not be exposed
+until the current batch decisions have been retained. Future-batch lexical
+values must not be inspected while the current batch is under review. This
+reduces omission risk, preserves order and intermediate evidence, and avoids
+an unstructured 1,173-value session.
+
+### Batch Evidence and Completeness
+
+Each completed batch retains:
+
+```text
+batch_number
+start_position
+end_position
+expected_entry_count
+reviewed_entry_count
+reviewer_role
+reviewed_at_utc
+decisions
+```
+
+Each decision contains `field`, `value`, and `decision`, plus `rationale` only
+when flagged. It contains no source counts or percentages.
+
+For every completed batch, `reviewed_entry_count` must equal
+`expected_entry_count`; every universe identity in the positional interval
+must appear exactly once. Missing, duplicate, extra, or out-of-batch identities
+make the batch incomplete.
+
+Across completed batches, retain:
+
+```text
+batches_completed
+entries_reviewed
+no_phase_2_flag_count
+exploratory_sentinel_candidate_count
+```
+
+These are review-decision counts, not source-row prevalence. Final completion
+requires:
+
+```text
+entries_reviewed = 1173
+no_phase_2_flag_count + exploratory_sentinel_candidate_count = 1173
+```
+
+### Partial Review, Interruption, and Amendments
+
+Before all 12 batches complete:
+
+```text
+review_status = IN_PROGRESS
+```
+
+After all 1,173 decisions reconcile:
+
+```text
+review_status = COMPLETE_PENDING_RECONCILIATION
+```
+
+Stage A is not fully retained until the completed artifact independently
+reconciles.
+
+If review stops between batches, preserve completed-batch evidence and resume
+from the next unreviewed position. Do not restart completed batches unless an
+explicit amendment is required. If review stops inside a batch, that batch
+remains incomplete; partial work must remain distinguishable from completed
+batch evidence.
+
+A completed-batch decision must never be silently rewritten. Before Stage B,
+an incorrect recorded decision may be changed only through an amendment that
+retains:
+
+```text
+field
+value
+previous_decision
+new_decision
+reason
+amended_at_utc
+reviewer_role
+```
+
+An amendment to `EXPLORATORY_SENTINEL_CANDIDATE` must include the required
+lexical rationale. The effective decision is reconstructed from the original
+decision plus ordered amendment history; the original is never deleted.
+
+### Stage A Freeze and Count-Blinding Boundary
+
+Stage A decisions become frozen only after all of the following:
+
+- all 1,173 entries have a decision;
+- all 12 batches reconcile;
+- amendment history is retained;
+- final effective decisions reconcile;
+- the completed decisions artifact receives a retained SHA-256; and
+- independent decision-artifact reconciliation passes.
+
+Only after that freeze may Stage B expose source row counts.
+
+```text
+COUNTS_VISIBLE_TO_REVIEWER = NO
+COUNTS_MAY_BE_ATTACHED_BEFORE_STAGE_A_FREEZE = NO
+```
+
+Until the freeze, the reviewer must not be shown row count, row percentage,
+vocabulary percentage, frequency rank, cross-tab counts, service or status
+prevalence, or Phase 1 materiality calculations associated with a reviewed
+value. The reviewer may know the total universe size, batch position, field,
+lexical value, and cumulative decision count because these do not reveal
+source-row prevalence.
+
+### Phase 3 and Phase 1 Boundaries
+
+During Stage A, do not classify a value as broad, generic, catch-all,
+low-information, miscellaneous, general-inquiry-like, or other-like unless its
+exact lexical form independently satisfies the Phase 2 sentinel criterion.
+
+```text
+PHASE_3_JUDGMENT_DURING_STAGE_A = PROHIBITED
+```
+
+If Stage A identifies a plausible placeholder not captured by Phase 1, record
+only `EXPLORATORY_SENTINEL_CANDIDATE`. Do not extend
+`PHASE1_SENTINEL_VALUES`, rerun Phase 1, rewrite Phase 1 findings, or call the
+judgment deterministic evidence. Any deterministic rule expansion requires
+separate prospective work.
+
+### Failure and Success Conditions
+
+Stop Stage A review if the universe SHA changes; review order cannot be
+reconstructed; a lexical identity is altered; source-row counts become visible
+beside values; an entry is missing or duplicated; decisions cannot be
+retained; Phase 2 and Phase 3 judgments become conflated; a required candidate
+rationale is absent; a completed decision would require silent replacement;
+or the decision artifact loses its universe binding. A changed procedure
+requires a new prospective record before review continues.
+
+Stage A human review succeeds only when all 1,173 entries are reviewed; all 12
+batches reconcile; every entry has exactly one effective decision; every
+exploratory candidate has a lexical rationale; no entry was exposed with
+source-row prevalence; no Phase 3 classification was mixed in; amendments are
+preserved; the final decision artifact is retained and hashed; and independent
+decision-artifact reconciliation passes.
+
+### Future Artifact Representation and Summary
+
+The future decision artifact must use UTF-8 JSON, a terminating newline,
+deterministic object-key ordering, decisions in Stage A universe order,
+deterministic batch metadata, and amendment history in chronological order.
+It is not created in this checkpoint.
+
+Its top-level concepts are prospectively equivalent to:
+
+```text
+binding
+review
+batches
+amendments
+summary
+```
+
+This procedure freezes evidence requirements, not the final executable schema.
+A later RED contract may freeze the exact representation.
+
+The summary may report only:
+
+```text
+total_universe_entries
+entries_reviewed
+no_phase_2_flag_count
+exploratory_sentinel_candidate_count
+batches_completed
+review_status
+```
+
+These are reviewer-decision counts. Source row counts and percentages remain
+prohibited from Stage A decision evidence.
+
+### Claim Boundary
+
+A completed Stage A artifact would establish what the project researcher
+classified under the frozen exploratory lexical criterion. It would not
+establish source semantic truth, missingness ground truth, independent
+validation, operational impact, row-level materiality, a cross-field union, or
+a scientific conclusion.
+
+```text
+EVENTUAL_STAGE_A_DECISION_RESULT_CLASSIFICATION = INTERNAL_EXPLORATORY_REVIEW_RESULT
+```
+
+### Decision-Procedure Threats and Limitations
+
+The procedure remains vulnerable to reviewer fatigue across 1,173 values,
+single-reviewer subjectivity, ordering and context effects, lexical ambiguity,
+inconsistency across batches, prior knowledge of the Phase 1 result, later
+decision amendments, absence of independent second-rater evidence, and biases
+that count blinding cannot remove. Lexical judgment does not establish source
+semantics. Fixed batching, completeness checks, and retained amendments reduce
+some procedural risk but do not eliminate these threats.
+
+### Next Implementation Boundary and Current States
+
+```text
+NEXT_STEP = STAGE_A_DECISION_ARTIFACT_VALIDATION_RED_CONTRACT
+
+PHASE_2_STAGE_A_UNIVERSE = RECONCILED
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+STAGE_A_DECISION_ARTIFACT = NOT_CREATED
+STAGE_A_DECISIONS_OBSERVED = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
+Before any lexical value is exposed, the next work is an executable validation
+RED contract for decision evidence. The recommended sequence is:
+
+```text
+decision-evidence procedure
+-> validator RED contract
+-> validator GREEN implementation
+-> real review-session manifest
+-> Batch 1 exposure and decisions
+```
+
+### Human Decision-Procedure Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_HUMAN_DECISION_PROCEDURE
+STAGE_A_UNIVERSE = RECONCILED
+STAGE_A_DECISION_PROCEDURE = PROSPECTIVELY_DEFINED
+STAGE_A_DECISION_ARTIFACT = NOT_CREATED
+STAGE_A_DECISIONS_OBSERVED = NO
+STAGE_A_BATCH_SIZE = 100
+STAGE_A_EXPECTED_BATCHES = 12
+STAGE_A_TOTAL_REVIEW_ENTRIES = 1173
+COUNTS_VISIBLE_TO_REVIEWER = NO
+COUNTS_MAY_BE_ATTACHED_BEFORE_STAGE_A_FREEZE = NO
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+NEXT_STEP = STAGE_A_DECISION_ARTIFACT_VALIDATION_RED_CONTRACT
+INCREMENT_008_STATUS = IN_PROGRESS
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
 documented. The Phase 2 exploratory review contract, Stage A export test
 contract, and Stage A exporter GREEN implementation are established under
 synthetic engineering tests. The real Stage A review universe was generated
-once and independently reconciled with no mismatch. Human Stage A review,
-Stage B, and Phase 3 have not started; no Phase 2 finding exists. The next
-boundary is a prospective Stage A decision-evidence procedure.
+once and independently reconciled with no mismatch. The prospective human
+decision-evidence procedure is frozen before first reviewer exposure. Human
+Stage A review, Stage B, and Phase 3 have not started; no Phase 2 finding or
+decision artifact exists. The next boundary is an executable decision-artifact
+validation RED contract.
