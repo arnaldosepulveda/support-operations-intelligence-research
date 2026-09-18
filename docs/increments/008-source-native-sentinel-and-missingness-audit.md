@@ -2092,11 +2092,191 @@ PUBLIC_DESCRIPTION_DECISION = DEFERRED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Phase 2 Stage A Real Generation Manifest
+
+This prospective manifest freezes one future real Stage A review-universe
+generation attempt. It does not execute the exporter or authorize human
+review. The Stage A exporter implementation commit is:
+
+```text
+0cbaf75cd2e4665143d2072ddd0654022c173405
+```
+
+### Retained Inputs and Metadata-Only Verification
+
+```text
+baseline_result_path = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json
+baseline_size_bytes = 563023
+expected_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+
+phase1_result_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json
+phase1_result_size_bytes = 3039
+expected_phase1_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+
+increment_007_execution_revision = f16c19fef3b3e6bae1c5653568b5e76cfece2f14
+increment_008_phase1_execution_revision = 426b09bb528c2af09fb60590c8e3ec4ed56fc3fb
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+
+REAL_INPUT_ARTIFACTS_OPENED_DURING_MANIFEST = NO
+REAL_INPUT_ARTIFACT_HASHES_RECOMPUTED_DURING_MANIFEST = NO
+```
+
+Existence, readability, and byte sizes were checked through filesystem
+metadata only. Neither retained input was opened, parsed, or rehashed. The
+expected digests above are already-retained evidence identities. The future
+exporter must verify both exact digests before parsing either artifact.
+
+### Output and Non-Overwrite Boundary
+
+```text
+run_directory = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001
+run_directory_state = CREATED_EMPTY_DURING_MANIFEST
+stage_a_review_universe_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-review-universe.json
+output_preexistence = ABSENT
+```
+
+The run directory was created empty during this manifest step. The output
+artifact was not created. If the frozen output exists before future real
+generation, execution must stop: do not overwrite or delete it, and do not
+automatically select `run-002`. A different run requires a new prospective
+execution record.
+
+The exporter implementation commit is provenance for the implemented
+boundary, but it is not the future artifact's `generator_git_revision`. The
+manifest commit produced by this step becomes the execution-bound revision,
+provided no repository change occurs before generation.
+
+### Expected Real Accounting Invariants
+
+These already-established invariants are prospective reconciliation targets,
+not hard-coded production construction logic:
+
+```text
+service_source_vocabulary_count = 1169
+service_phase1_excluded_count = 1
+service_stage_a_review_count = 1168
+1169 = 1 + 1168
+
+status_source_vocabulary_count = 5
+status_phase1_excluded_count = 0
+status_stage_a_review_count = 5
+5 = 0 + 5
+
+total_stage_a_review_count = 1173
+```
+
+Each reviewer-facing entry may contain only `field` and `value`. Entries must
+not expose counts, percentages, frequency, rank, materiality, cross-tab
+context, decisions, rationales, or Phase 3 classifications. Artifact-level
+cardinality accounting remains permitted.
+
+```text
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_1_EXCLUSION_SOURCE = RETAINED_PHASE_1_RESULT
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+```
+
+The exporter must derive exclusions from retained Phase 1 candidate identities
+and must not hard-code any lexical value. No retained Phase 1 candidate may
+appear in reviewer entries; only aggregate exclusion accounting may appear.
+No agency entry or synthesized agency vocabulary is permitted.
+
+### Exact Frozen Real Generation Command
+
+```bash
+BASELINE='/data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json'
+EXPECTED_BASELINE_SHA256='2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c'
+
+PHASE1_RESULT='/data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json'
+EXPECTED_PHASE1_SHA256='f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82'
+
+RUN_DIR='/data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001'
+STAGE_A_UNIVERSE="$RUN_DIR/phase2-stage-a-review-universe.json"
+
+PYTHONPATH=src \
+.venv/bin/python -m \
+support_operations_intelligence.source_native_sentinel_stage_a_run \
+  --baseline-result "$BASELINE" \
+  --expected-baseline-sha256 "$EXPECTED_BASELINE_SHA256" \
+  --phase1-result "$PHASE1_RESULT" \
+  --expected-phase1-sha256 "$EXPECTED_PHASE1_SHA256" \
+  --output "$STAGE_A_UNIVERSE"
+```
+
+The command was frozen but not executed in this manifest step.
+
+### One-Attempt and Access Boundaries
+
+The frozen command will be executed exactly once in the future real-generation
+step.
+
+```text
+REAL_STAGE_A_GENERATION_ATTEMPTS_PROSPECTIVE_LIMIT = 1
+```
+
+If the command returns nonzero, preserve any produced evidence, do not rerun,
+do not repair within that execution step, and record the failure before any
+remediation. If it returns zero, preserve the generated universe and reconcile
+it before human review.
+
+That future command is the first authorized post-Phase-1 machine access to the
+remaining real `service_name` and `status_description` lexical vocabulary for
+Phase 2. Exporter access is distinct from operator or reviewer inspection. The
+expected state immediately after successful generation is:
+
+```text
+ADDITIONAL_REAL_VOCABULARY_ACCESSED_BY_COMMITTED_EXPORTER = YES
+ADDITIONAL_REAL_VOCABULARY_INSPECTED_BY_REVIEWER = NO
+```
+
+The operator or reviewer must not display or inspect the lexical values during
+generation.
+
+### Required Post-Generation Sequence
+
+```text
+NEXT_STEP = RETAINED_STAGE_A_UNIVERSE_RECONCILIATION
+
+generation
+-> retained artifact reconciliation
+-> freeze reviewer-decision artifact procedure if still needed
+-> human count-blinded Stage A review
+-> retain decisions
+-> Stage B quantitative attachment
+```
+
+Reconciliation must precede review. It must verify artifact identity and JSON
+integrity, bindings and generator revision, cardinality equations and exact
+entry totals, field boundaries, Phase 1 exclusion, count blinding, absence of
+decisions and Phase 3 fields, deterministic ordering, and lexical preservation
+relative to the retained vocabularies. These checks are not performed during
+this manifest step.
+
+### Real Generation Manifest Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_REAL_GENERATION_MANIFEST
+PHASE_2_STAGE_A_EXPORT_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+PHASE_2_STAGE_A_EXPORT_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+REAL_INPUT_ARTIFACTS_OPENED_DURING_MANIFEST = NO
+REAL_INPUT_ARTIFACT_HASHES_RECOMPUTED_DURING_MANIFEST = NO
+REAL_STAGE_A_UNIVERSE_GENERATED = NO
+REAL_STAGE_A_GENERATION_ATTEMPTS = 0
+ADDITIONAL_REAL_VOCABULARY_ACCESSED_BY_COMMITTED_EXPORTER = NO
+ADDITIONAL_REAL_VOCABULARY_INSPECTED_BY_REVIEWER = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_A = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
 documented. The Phase 2 exploratory review contract, Stage A export test
 contract, and Stage A exporter GREEN implementation are established under
-synthetic engineering tests. No real Stage A review universe has been
-generated. Stage A review, Stage B, and Phase 3 have not started; no Phase 2
-finding exists.
+synthetic engineering tests. The real Stage A generation manifest is frozen,
+but the command has not been executed and no real Stage A review universe has
+been generated. Stage A review, Stage B, and Phase 3 have not started; no
+Phase 2 finding exists.
