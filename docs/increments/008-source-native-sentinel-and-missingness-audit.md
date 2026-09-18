@@ -2004,9 +2004,99 @@ PHASE_3 = NOT_STARTED
 PUBLIC_DESCRIPTION_DECISION = DEFERRED
 ```
 
+## Phase 2 Stage A Review-Universe Export GREEN Checkpoint
+
+The Stage A review-universe exporter is implemented as an engineering
+boundary. It verifies the retained baseline and Phase 1 result SHA-256 values
+before parsing either document, validates the Increment 007 and Phase 1
+bindings, and consumes only the authorized retained vocabularies and
+denominator required for reconciliation.
+
+The exporter strictly validates typed vocabulary evidence, positive counts,
+exact observed strings, uniqueness, and denominator reconciliation. It derives
+Phase 1 exclusions from retained `(field, exact lexical value)` candidate
+identities and constructs the Stage A universe by exact set difference. No
+production exclusion value is hard-coded.
+
+Reviewer-facing entries contain only `field` and `value`. They preserve decoded
+lexical strings exactly and are ordered by `service_name`, then
+`status_description`, with exact Python string ordering within each field.
+Artifact-level accounting reconciles source, excluded, and review counts.
+`agency_responsible` remains explicitly not evaluable and cannot become a
+review entry.
+
+The output is deterministic UTF-8 JSON with recursively sorted object keys and
+a terminating newline. Output creation occurs only after both hashes, both
+documents, all bindings, vocabulary reconciliation, exclusions, cardinality,
+metadata, and serialization succeed. Failures return nonzero without a
+success artifact, retry, or fallback. The exporter contains no review
+decisions, rationales, Phase 3 heuristics, or hard-coded real artifact paths.
+
+```text
+ADDITIONAL_REAL_VOCABULARY_CONTENT_INSPECTED = NO
+REAL_STAGE_A_UNIVERSE_GENERATED = NO
+```
+
+### Synthetic Engineering Test Evidence
+
+Focused Stage A export command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_stage_a_run \
+  -v
+```
+
+Observed result: 10 tests, 0 failures, 0 errors, `OK`.
+
+Phase 1 regression command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_audit \
+  tests.test_source_native_sentinel_audit_run \
+  -q
+```
+
+Observed result: 21 tests, 0 failures, 0 errors, `OK`.
+
+Full repository regression command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result: 202 tests, 0 failures, 0 errors, `OK`. This matches the
+plausible expected total of 192 previously committed tests plus 10 committed
+Stage A prospective tests.
+
+These results are internal engineering evidence under synthetic tests, not
+independent validation. No real retained artifact was opened, parsed, or
+hashed, and no real Stage A review universe was generated.
+
+### Phase 2 Stage A Export GREEN Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_EXPORT_GREEN_IMPLEMENTATION
+PHASE_2_STAGE_A_EXPORT_IMPLEMENTATION = ENGINEERING_IMPLEMENTATION
+PHASE_2_STAGE_A_EXPORT_TEST_RESULT = INTERNAL_ENGINEERING_TEST_RESULT
+PHASE_2_STAGE_A_EXPORT_BEHAVIOR_UNDER_SYNTHETIC_TESTS = ESTABLISHED
+ADDITIONAL_REAL_VOCABULARY_CONTENT_INSPECTED = NO
+REAL_STAGE_A_UNIVERSE_GENERATED = NO
+PHASE_2_STAGE_A = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
-documented. The Phase 2 exploratory review contract and Stage A export RED
-test contract are defined, but the Stage A exporter is absent and RED. Stage A
-review, Stage B, and Phase 3 have not started; no Phase 2 finding exists.
+documented. The Phase 2 exploratory review contract, Stage A export test
+contract, and Stage A exporter GREEN implementation are established under
+synthetic engineering tests. No real Stage A review universe has been
+generated. Stage A review, Stage B, and Phase 3 have not started; no Phase 2
+finding exists.
