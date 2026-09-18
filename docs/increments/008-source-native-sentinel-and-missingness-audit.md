@@ -3305,6 +3305,303 @@ PUBLIC_DESCRIPTION_DECISION = DEFERRED
 NEXT_STEP = PROSPECTIVE_REAL_STAGE_A_REVIEW_SESSION_MANIFEST
 ```
 
+## Phase 2 Stage A Batch 1 Real Review-Session Manifest
+
+This prospective manifest freezes the first real count-blinded human Stage A
+review session before any Stage A lexical value is exposed. It authorizes no
+review activity in this checkpoint. The real universe was verified only by
+filesystem metadata: it is a readable regular file of 89,666 bytes. It was not
+opened, parsed, rehashed, printed, sampled, summarized, or semantically
+inspected. The reserved decisions artifact remains absent.
+
+```text
+REAL_STAGE_A_UNIVERSE_OPENED_DURING_MANIFEST = NO
+REAL_STAGE_A_LEXICAL_VALUES_EXPOSED = NO
+```
+
+### Frozen Review-Session Identity
+
+```text
+stage_a_review_universe_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-review-universe.json
+stage_a_review_universe_size_bytes = 89666
+stage_a_review_universe_sha256 = d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66
+stage_a_review_universe_entry_count = 1173
+stage_a_review_contract_revision = 17b6aba0425b9a56d21799319deb88651ec81a66
+decision_validator_implementation_revision = 0b3c50175ccee5ab6877e32bba082127379b9a0e
+reviewer_role = PROJECT_RESEARCHER
+review_batch = 1
+batch_start_position = 1
+batch_end_position = 100
+expected_batch_decisions = 100
+```
+
+The retained universe is already reconciled. The digest above is retained
+identity evidence and was not recomputed during this manifest checkpoint.
+
+### Batch 1 Exposure Boundary
+
+The first review session may expose only one-based universe positions 1
+through 100 inclusive. Positions 101 through 1,173 must remain unseen. Batch 1
+is not exposed by this manifest.
+
+```text
+BATCH_1_EXPECTED_ENTRY_COUNT = 100
+FUTURE_BATCH_VALUES_VISIBLE = NO
+```
+
+When the future session presents Batch 1, each reviewer-visible entry may
+contain only:
+
+- one-based position;
+- field; and
+- exact lexical value.
+
+The lexical value must be rendered using
+`json.dumps(value, ensure_ascii=False)` or an equivalent unambiguous JSON
+string representation. Rendering must preserve the exact decoded lexical
+value without trimming, normalization, case folding, canonicalization, or
+renaming.
+
+The presentation must not display row count, row percentage, vocabulary
+percentage, frequency, frequency rank, materiality, cross-tab context, Phase
+1 row coverage, semantic annotation, suggested classification, automated
+recommendation, or candidate-oriented highlighting.
+
+Presentation must follow exact retained universe order. The presenter must not
+bold suspected values, reorder entries, group suspicious values, annotate
+likely placeholders, suggest decisions, provide semantic explanations,
+compare values against sentinel dictionaries, or call attention to unusual
+strings. The project researcher performs the exploratory judgment.
+
+```text
+COUNTS_VISIBLE_TO_REVIEWER = NO
+AUTOMATED_CANDIDATE_SUGGESTION_DURING_HUMAN_REVIEW = PROHIBITED
+```
+
+### Position and Identity Semantics
+
+Human-facing positions are one-based positions in the reconciled Stage A
+universe. Position is review bookkeeping only and is not part of authoritative
+lexical identity. Authoritative decision identity remains:
+
+```text
+(field, exact lexical value)
+```
+
+### Reviewer Response Protocol
+
+For Batch 1, the reviewer identifies every position judged
+`EXPLORATORY_SENTINEL_CANDIDATE` and supplies for each:
+
+- position;
+- `decision = EXPLORATORY_SENTINEL_CANDIDATE`; and
+- a concise lexical rationale.
+
+The reviewer must also explicitly affirm:
+
+```text
+All unlisted Batch 1 positions are NO_PHASE_2_FLAG.
+```
+
+Only that explicit batch-level affirmation permits the later recording step to
+expand every unlisted Batch 1 identity into an explicit retained
+`NO_PHASE_2_FLAG` decision. The interaction shorthand does not change the
+canonical artifact requirement: all 100 identities must ultimately have
+explicit retained decisions.
+
+If the reviewer does not explicitly affirm the classification of all unlisted
+positions, Batch 1 is incomplete. Unlisted decisions must not be inferred and
+a completed Batch 1 decision record must not be created.
+
+```text
+UNLISTED_POSITION_DEFAULT_WITHOUT_REVIEWER_AFFIRMATION = PROHIBITED
+```
+
+If the reviewer identifies no exploratory candidate in Batch 1, the reviewer
+must still explicitly state that all Batch 1 positions 1 through 100 are
+`NO_PHASE_2_FLAG`. A blank response is not evidence of 100 no-flag decisions.
+
+For every flagged position, the rationale must rely only on the lexical form
+as plausibly denoting absence, unknown, unavailable, not provided, or
+placeholder semantics. Source prevalence, operational context, cross-tab
+context, Phase 3 low-information reasoning, and external source assumptions
+are prohibited rationale bases.
+
+### Frozen Future Decision-Recording Sequence
+
+The real Batch 1 sequence is:
+
+1. verify that repository HEAD equals the committed review-session manifest;
+2. verify the Stage A universe byte identity;
+3. expose only positions 1 through 100;
+4. receive reviewer-flagged positions and lexical rationales;
+5. receive explicit affirmation that all unlisted positions are
+   `NO_PHASE_2_FLAG`;
+6. preserve the reviewer response;
+7. construct a decisions artifact containing 100 explicit Batch 1 decisions;
+8. run the committed decision validator;
+9. hash the validated decisions artifact;
+10. independently reconcile Batch 1 decision evidence;
+11. document Batch 1; and
+12. only then authorize Batch 2 exposure.
+
+This manifest checkpoint performs none of those real review actions.
+
+The first canonical decisions artifact after Batch 1 must contain Batch 1
+only and retain:
+
+```text
+review_status = IN_PROGRESS
+batch_size = 100
+batches_completed = 1
+entries_reviewed = 100
+```
+
+It must contain no Batch 2 evidence and no future-batch lexical identity. Its
+effective decision accounting must satisfy:
+
+```text
+no_phase_2_flag_count
++ exploratory_sentinel_candidate_count
+= 100
+```
+
+These are review-decision counts only, not Calgary source-row counts.
+
+Initial Batch 1 creation should normally retain:
+
+```text
+amendments = []
+```
+
+Where possible, corrections identified before final recording should be
+resolved before canonical Batch 1 evidence is written. A later correction to
+retained evidence must use the already-frozen append-preserving amendment
+process. Completed evidence must never be silently rewritten.
+
+### Decisions Artifact Non-Overwrite Boundary
+
+The reserved artifact is:
+
+```text
+/data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-decisions.json
+```
+
+It is absent before initial Batch 1 recording. Initial recording creates it
+once. Later batches must extend retained decision evidence under a separately
+frozen incremental-update procedure. The artifact must not be overwritten or
+recreated from scratch without preserved lineage. This manifest does not
+implement the update mechanism and does not create the artifact.
+
+### Frozen Validator Binding
+
+After the future Batch 1 decisions artifact exists, validation must use:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m \
+  support_operations_intelligence.source_native_sentinel_stage_a_decision_validation \
+  --stage-a-universe \
+  "/data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-review-universe.json" \
+  --expected-stage-a-universe-sha256 \
+  "d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66" \
+  --decisions \
+  "/data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-decisions.json" \
+  --expected-review-contract-git-revision \
+  "17b6aba0425b9a56d21799319deb88651ec81a66"
+```
+
+This command is not run during the manifest because the decisions artifact
+does not exist. During real validation, output may expose only safe aggregate
+review evidence. It must not echo lexical values, rationales, amendment
+reasons, or source-row prevalence.
+
+### Failure and Interruption Boundaries
+
+The future real Batch 1 session must stop without a silent workaround if:
+
+- repository HEAD differs from the committed review-session manifest before
+  exposure;
+- the Stage A universe SHA-256 mismatches;
+- the decisions artifact unexpectedly exists before first recording;
+- any lexical value outside positions 1 through 100 is exposed;
+- source prevalence becomes visible;
+- presentation order differs from retained order;
+- the presenter suggests a classification;
+- a flagged position lacks its required lexical rationale;
+- the reviewer does not explicitly classify all unlisted positions;
+- a submitted position is outside 1 through 100;
+- a submitted position cannot be reconciled to the presented batch;
+- the validator fails; or
+- decision evidence cannot be retained without changing the frozen procedure.
+
+If the reviewer stops before affirming the entire Batch 1 decision set, Batch
+1 remains incomplete. No canonical completed Batch 1 artifact may be created
+from partial feedback. Temporary session notes are not canonical
+completed-batch evidence. Any resumed session must use an explicitly preserved
+procedure.
+
+### Batch 1 Success and Post-Review Boundary
+
+Batch 1 is complete only when exactly positions 1 through 100 were exposed;
+reviewer judgments were count-blind; every flagged position has a lexical
+rationale; the reviewer explicitly affirmed every unlisted position as
+`NO_PHASE_2_FLAG`; 100 explicit decisions are retained; identities match
+universe positions 1 through 100; no future identity appears; the validator
+passes; the decisions artifact is hashed; and independent Batch 1
+reconciliation passes.
+
+Only after successful validation, hashing, independent reconciliation, and
+documentation may the project retain:
+
+```text
+PHASE_2_STAGE_A_HUMAN_REVIEW = IN_PROGRESS
+STAGE_A_BATCHES_COMPLETED = 1
+STAGE_A_ENTRIES_REVIEWED = 100
+NEXT_REVIEW_BATCH = 2
+```
+
+Batch 2 remains prohibited until Batch 1 evidence is documented and its next
+review boundary is prospectively authorized.
+
+### Decision-Schema and Manifest-Revision Boundaries
+
+This manifest does not modify the decision-artifact schema frozen by revision
+`17b6aba0425b9a56d21799319deb88651ec81a66` and enforced by the committed
+validator. In particular, it does not add a
+`review_session_manifest_git_revision` field. The Batch 1 manifest is process
+evidence in Increment 008, not a new decision-artifact binding.
+
+The commit produced by this checkpoint becomes:
+
+```text
+STAGE_A_BATCH_1_REVIEW_SESSION_MANIFEST_GIT_REVISION = THIS_MANIFEST_COMMIT
+```
+
+Before Batch 1 exposure, repository HEAD must still equal that commit. If HEAD
+changes first, review must stop and the project must decide prospectively
+whether a new review-session manifest is required.
+
+### Manifest Classifications and Current States
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_BATCH_1_REVIEW_SESSION_MANIFEST
+STAGE_A_UNIVERSE = RECONCILED
+STAGE_A_DECISION_VALIDATOR = IMPLEMENTED_AND_SYNTHETICALLY_GREEN
+REAL_STAGE_A_LEXICAL_VALUES_EXPOSED = NO
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+STAGE_A_BATCHES_COMPLETED = 0
+STAGE_A_ENTRIES_REVIEWED = 0
+STAGE_A_DECISION_ARTIFACT = NOT_CREATED
+STAGE_A_DECISIONS_OBSERVED = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+NEXT_STEP = REAL_STAGE_A_BATCH_1_EXPOSURE_AND_REVIEW
+```
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
@@ -3316,5 +3613,6 @@ decision-evidence procedure is frozen before first reviewer exposure, and its
 synthetic executable validation contract and GREEN validator implementation
 are established under synthetic engineering tests. Human Stage A review,
 Stage B, and Phase 3 have not started; no Phase 2 finding or decision artifact
-exists. The next boundary is the prospective real Stage A review-session
-manifest.
+exists. The prospective Batch 1 real review-session manifest is frozen before
+first reviewer exposure. The next boundary is real Stage A Batch 1 exposure
+and review under this manifest.
