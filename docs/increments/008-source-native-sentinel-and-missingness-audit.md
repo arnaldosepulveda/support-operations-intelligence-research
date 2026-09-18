@@ -1732,10 +1732,281 @@ PUBLIC_DESCRIPTION_DECISION = DEFERRED
 SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
 ```
 
+## Phase 2 Stage A Review-Universe Export RED Contract
+
+This checkpoint freezes the executable contract for generating the future
+count-blinded Stage A lexical review universe before any additional real
+`service_name` or `status_description` lexical value is inspected. The
+exporter is not an auditor and makes no Phase 2 review decision.
+
+Conceptually, the future boundary is:
+
+```text
+build_phase2_stage_a_review_universe(
+    baseline_result,
+    phase1_result,
+) -> StageAReviewUniverse
+```
+
+### Frozen Retained-Artifact Bindings
+
+The future exporter is bound to both retained inputs:
+
+```text
+baseline_result_path = /data/repos/personal/support-operations-intelligence-results/increment-007/run-001/baseline-result.json
+expected_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+phase1_result_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-1/run-001/phase1-sentinel-audit.json
+expected_phase1_result_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+```
+
+The exporter must verify both SHA-256 values before parsing either artifact.
+Neither real file was opened, parsed, or hashed during this RED checkpoint.
+
+### Frozen Output and Artifact Separation
+
+```text
+run_directory = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001
+stage_a_review_universe_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-review-universe.json
+future_stage_a_decisions_artifact = phase2-stage-a-decisions.json
+STAGE_A_REVIEW_UNIVERSE != STAGE_A_DECISIONS
+```
+
+The run directory and artifacts are not created in this checkpoint. If the
+review-universe artifact exists before real generation, generation must stop;
+it must not overwrite the artifact or automatically select `run-002`.
+
+The review-universe artifact is machine-generated input to later human review.
+The decision artifact is separate reviewer-produced evidence. Review judgments
+must not rewrite the generated input artifact.
+
+### Authorized Population and Data-Driven Exclusion
+
+Only `service_name` and `status_description` are authorized Stage A fields.
+`agency_responsible` remains not evaluable from the retained Increment 007
+vocabularies.
+
+The implementation must derive excluded candidate identities from the
+retained Phase 1 result using `(field, exact lexical value)`. It must not
+hard-code `"N/A"` or any other value as production exclusion logic, reinterpret
+the candidate semantics, or include excluded lexical values in the reviewer
+entry list.
+
+Expected real accounting invariants are:
+
+```text
+service_source_vocabulary_count = 1169
+service_phase1_excluded_count = 1
+service_stage_a_review_count = 1168
+status_source_vocabulary_count = 5
+status_phase1_excluded_count = 0
+status_stage_a_review_count = 5
+total_stage_a_review_count = 1173
+
+1169 = 1 + 1168
+5 = 0 + 5
+```
+
+The implementation must calculate these values from retained inputs rather
+than hard-code `1168` or `1173` as construction logic. The real values are
+frozen expected invariants only.
+
+### Count-Blinded Entry Contract
+
+Each reviewer-facing entry contains exactly:
+
+```json
+{
+  "field": "...",
+  "value": "..."
+}
+```
+
+```text
+COUNTS_VISIBLE_IN_STAGE_A_REVIEW_UNIVERSE = NO
+```
+
+Entries contain no row count, row percentage, vocabulary percentage,
+frequency rank, cross-tab count, materiality classification, Phase 1 row
+coverage, Phase 2 decision, rationale, or Phase 3 classification. The exporter
+may internally read counts only to reconcile vocabularies and the denominator.
+Only aggregate Phase 1 exclusion counts may be retained; no excluded-values
+list is permitted in the reviewer artifact.
+
+The decoded `value` must equal the retained lexical string exactly. The
+exporter must not trim, casefold, normalize Unicode, replace whitespace or
+control characters, canonicalize, or rename a value. JSON escaping is
+serialization syntax only.
+
+Entries are ordered first by field in this order:
+
+1. `service_name`;
+2. `status_description`.
+
+Within each field, entries use exact Python string ordering. They are never
+ordered by count, percentage, frequency, Phase 1 similarity, candidate
+likelihood, or semantic category.
+
+### Frozen Result Binding and Representation
+
+A successful generated artifact must retain:
+
+```text
+increment_008_version = "008"
+increment_008_contract = "008-source-native-sentinel-and-missingness-audit"
+phase = "PHASE_2"
+stage = "STAGE_A_REVIEW_UNIVERSE"
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+input_phase1_result_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+generator_git_revision = CAPTURED_AT_REAL_GENERATION_TIME
+python_version = CAPTURED_AT_REAL_GENERATION_TIME
+generated_at_utc = CAPTURED_AT_REAL_GENERATION_TIME
+```
+
+These bindings provide provenance, not independent validation. Output must be
+UTF-8 JSON with deterministic recursive object-key ordering, deterministic
+entry ordering, and a terminating newline. It contains no binary floats,
+row-level counts, decisions, or Phase 3 fields.
+
+Successful summary accounting retains:
+
+```text
+service_source_vocabulary_count
+service_phase1_excluded_count
+service_stage_a_review_count
+status_source_vocabulary_count
+status_phase1_excluded_count
+status_stage_a_review_count
+total_stage_a_review_count
+```
+
+For each field, source count must equal excluded count plus review count, and
+the total must equal the number of combined review entries.
+
+### Fail-Closed Input Boundary
+
+Generation must fail without a partial success artifact if:
+
+- either expected file hash mismatches;
+- either JSON artifact is malformed;
+- Increment 007 or Phase 1 bindings mismatch;
+- the retained denominator mismatches;
+- a vocabulary structure is malformed or row counts do not reconcile;
+- duplicate exact observed values exist;
+- a Phase 1 candidate identity does not reconcile to a baseline vocabulary;
+- review-universe cardinalities do not reconcile; or
+- agency appears as an evaluable Stage A field.
+
+There is no automatic retry or source fallback.
+
+### Prospective CLI and Public Entry Point
+
+The future production module is intentionally absent:
+
+```text
+src/support_operations_intelligence/source_native_sentinel_stage_a_run.py
+```
+
+It must expose:
+
+```text
+main(argv: Sequence[str] | None = None) -> int
+```
+
+The prospective CLI is:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m \
+  support_operations_intelligence.source_native_sentinel_stage_a_run \
+  --baseline-result <path> \
+  --expected-baseline-sha256 <sha256> \
+  --phase1-result <path> \
+  --expected-phase1-sha256 <sha256> \
+  --output <path>
+```
+
+There is no Calgary CSV, counts-output, Phase 3, or agency argument.
+
+### Prospective Synthetic Test Contract
+
+The new standard-library test module is:
+
+```text
+tests/test_source_native_sentinel_stage_a_run.py
+```
+
+Its 10 prospective `unittest.TestCase` methods use synthetic temporary files
+to freeze:
+
+- verification of both hashes before either JSON parse;
+- fail-closed baseline and Phase 1 bindings;
+- data-driven Phase 1 candidate exclusions, including a second synthetic
+  candidate identity;
+- two-field entry schema and count blinding;
+- absence of decisions, rationales, Phase 2 labels, and Phase 3 labels;
+- exact lexical preservation;
+- field-first and exact-string deterministic ordering;
+- cardinality accounting and malformed-input failure;
+- explicit agency non-evaluability and absence from review entries;
+- deterministic result bindings and serialization; and
+- nonzero failure without output, retry, or fallback.
+
+Only synthetic values and previously documented Phase 1 evidence appear in
+the tests. No real retained artifact was opened.
+
+### Test Source Syntax Check
+
+Command:
+
+```bash
+.venv/bin/python -m py_compile \
+  tests/test_source_native_sentinel_stage_a_run.py
+```
+
+Observed result: PASS.
+
+### Focused Stage A Export RED Command
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest \
+  tests.test_source_native_sentinel_stage_a_run \
+  -v
+```
+
+Observed result: RED, exit status 1. The unittest loader reported one import
+error before the 10 prospective test methods could execute:
+
+```text
+ModuleNotFoundError: No module named
+'support_operations_intelligence.source_native_sentinel_stage_a_run'
+```
+
+The RED cause is exactly the absent Stage A export module. The exporter was not
+implemented. The full regression was not run; the retained current regression
+remains 192 tests, 0 failures, 0 errors, `OK`.
+
+### Phase 2 Stage A Export RED Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_EXPORT_RED_CONTRACT
+PHASE_2 = PROSPECTIVE_REVIEW_CONTRACT_DEFINED
+PHASE_2_STAGE_A_EXPORT_TEST_CONTRACT = IMPLEMENTED
+PHASE_2_STAGE_A_EXPORT_IMPLEMENTATION = ABSENT
+PHASE_2_STAGE_A_EXPORT_FOCUSED_STATE = RED
+PHASE_2_STAGE_A_EXPORT_RED_CAUSE = MISSING_STAGE_A_EXPORT_MODULE
+PHASE_2_STAGE_A = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+ADDITIONAL_REAL_VOCABULARY_CONTENT_INSPECTED = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+```
+
 ## Current Status
 
-Increment 008 remains in progress. Real Phase 1 execution succeeded once, and
-the retained result passed independent reconciliation with zero candidate or
-field-aggregate mismatches. The prospective Phase 2 exploratory review
-contract is now defined, but Stage A and Stage B have not started and no Phase
-2 finding exists. Phase 3 has not started.
+Increment 008 remains in progress. Phase 1 is executed, reconciled, and
+documented. The Phase 2 exploratory review contract and Stage A export RED
+test contract are defined, but the Stage A exporter is absent and RED. Stage A
+review, Stage B, and Phase 3 have not started; no Phase 2 finding exists.
