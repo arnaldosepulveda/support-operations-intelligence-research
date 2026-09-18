@@ -2271,12 +2271,264 @@ PHASE_3 = NOT_STARTED
 PUBLIC_DESCRIPTION_DECISION = DEFERRED
 ```
 
+## Phase 2 Stage A Real Review-Universe Generation
+
+The frozen Stage A exporter command executed exactly once and succeeded. The
+generated count-blinded universe was preserved externally exactly as written.
+
+```text
+execution_bound_git_revision = dc9dbce97027fdf71ec09ddb67fea920463fb4bf
+exporter_implementation_commit = 0cbaf75cd2e4665143d2072ddd0654022c173405
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+input_phase1_result_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+stage_a_review_universe_path = /data/repos/personal/support-operations-intelligence-results/increment-008/phase-2/stage-a/run-001/phase2-stage-a-review-universe.json
+stage_a_review_universe_size_bytes = 89666
+stage_a_review_universe_sha256 = d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66
+generated_at_utc = 2026-09-18T16:56:27.572323+00:00
+python_version = 3.12.3
+generation_attempts = 1
+generation_result = SUCCESS
+reruns = 0
+```
+
+### Generated Artifact Bindings
+
+The retained Stage A bindings reconciled as:
+
+```text
+increment_008_version = 008
+increment_008_contract = 008-source-native-sentinel-and-missingness-audit
+phase = PHASE_2
+stage = STAGE_A_REVIEW_UNIVERSE
+input_baseline_sha256 = 2401375602b5a5ab5cc6d4f90aa198518589959eb079b691db0b0c1657e4e56c
+input_phase1_result_sha256 = f59282688deed67cf589c612d219144773de97dfca718a8e11f72291dda5be82
+generator_git_revision = dc9dbce97027fdf71ec09ddb67fea920463fb4bf
+python_version = 3.12.3
+binding_reconciliation = PASS
+```
+
+The generator revision remains the execution-bound manifest revision. It is
+not replaced by the later documentation revision.
+
+### Real Stage A Accounting and Count Blinding
+
+```text
+service_source_vocabulary_count = 1169
+service_phase1_excluded_count = 1
+service_stage_a_review_count = 1168
+1169 = 1 + 1168
+
+status_source_vocabulary_count = 5
+status_phase1_excluded_count = 0
+status_stage_a_review_count = 5
+5 = 0 + 5
+
+total_stage_a_review_count = 1173
+retained_reviewer_entry_count = 1173
+agency_reviewer_entry_count = 0
+
+reviewer_entry_schema = field + value only
+entry_schema_mismatches = 0
+quantitative_entry_field_violations = 0
+decision_field_violations = 0
+COUNTS_VISIBLE_TO_REVIEWER = NO
+```
+
+No reviewer-facing entry contains row count, row percentage, vocabulary
+percentage, frequency, rank, materiality, decision, rationale, or Phase 3
+classification.
+
+### Machine Access and Human Inspection Boundary
+
+```text
+ADDITIONAL_REAL_VOCABULARY_ACCESSED_BY_COMMITTED_EXPORTER = YES
+LEXICAL_VALUES_PROGRAMMATICALLY_PROCESSED_FOR_RECONCILIATION = YES
+ADDITIONAL_REAL_VOCABULARY_INSPECTED_BY_REVIEWER = NO
+LEXICAL_VALUES_PRINTED_TO_REVIEWER = NO
+LEXICAL_VALUES_SEMANTICALLY_REVIEWED = NO
+COUNTS_PAIRED_WITH_LEXICAL_VALUES_FOR_REVIEWER = NO
+```
+
+Machine processing required exact lexical identities to build and
+independently reconcile the count-blinded review universe. That processing is
+not the exploratory reviewer judgment defined for Phase 2 Stage A.
+
+## Phase 2 Stage A Retained Review-Universe Reconciliation
+
+```text
+STAGE_A_UNIVERSE_RECONCILIATION = PASSED
+RECONCILIATION_CLASSIFICATION = INTERNAL_ENGINEERING_EVALUATION_RESULT
+```
+
+Independent standard-library logic reconstructed the expected review universe
+from the retained Increment 007 marginal vocabularies and retained Phase 1
+candidate identities. It did not import or use the production Stage A exporter
+as the reconciliation oracle. This is internal engineering evidence, not
+independent external validation.
+
+### Input and Binding Reconciliation
+
+```text
+baseline_result_size_bytes = 563023
+baseline_result_sha_reconciliation = PASS
+phase1_result_size_bytes = 3039
+phase1_result_sha_reconciliation = PASS
+stage_a_universe_size_bytes = 89666
+stage_a_universe_sha_reconciliation = PASS
+increment_007_binding_reconciliation = PASS
+phase1_binding_reconciliation = PASS
+stage_a_binding_reconciliation = PASS
+rows_identity_admitted = 7474403
+```
+
+### Vocabulary and Phase 1 Exclusion Reconciliation
+
+```text
+service_vocabulary_cardinality = 1169
+service_vocabulary_count_sum = 7474403
+service_duplicate_exact_observed_values = 0
+status_vocabulary_cardinality = 5
+status_vocabulary_count_sum = 7474403
+status_duplicate_exact_observed_values = 0
+
+service_phase1_exclusion_count = 1
+status_phase1_exclusion_count = 0
+unreconciled_phase1_exclusions = 0
+phase1_exclusions_leaked_into_stage_a = 0
+```
+
+Exclusions were independently reconstructed from retained Phase 1 candidate
+identities rather than from hard-coded lexical values. No excluded lexical
+identity is repeated in this Stage A evidence section.
+
+### Exact Universe Reconciliation
+
+```text
+independent_expected_service_stage_a_entries = 1168
+independent_expected_status_stage_a_entries = 5
+independent_expected_total_stage_a_entries = 1173
+retained_total_stage_a_entries = 1173
+exact_ordered_list_mismatches = 0
+expected_but_not_retained = 0
+retained_but_not_expected = 0
+duplicate_retained_identities = 0
+entry_schema_mismatches = 0
+accounting_mismatches = 0
+```
+
+This establishes exact transformation fidelity relative to the retained
+marginal vocabularies and retained Phase 1 exclusions. It does not establish
+the semantic meaning of any lexical value.
+
+### Agency, Phase 3, and Representation Boundaries
+
+```text
+agency_responsible = NOT_EVALUABLE_FROM_RETAINED_INCREMENT_007_VOCABULARIES
+agency_stage_a_entries = 0
+agency_boundary_reconciliation = PASS
+PHASE_3_STRUCTURE_PRESENT_IN_STAGE_A_UNIVERSE = NO
+PHASE_3 = NOT_STARTED
+STAGE_A_UNIVERSE_REPRESENTATION_AUDIT = PASS
+```
+
+No agency vocabulary, candidate set, or denominator was invented. No
+low-information classification occurred. The representation audit verified
+UTF-8, valid JSON, a terminating newline, recursively sorted object keys, and
+deterministic review-entry ordering. Serialization integrity is not evidence
+of semantic correctness.
+
+### Established Engineering Observation and Remaining Boundaries
+
+The retained Phase 2 Stage A artifact is a reconciled, deterministic,
+count-blinded review universe containing 1,173 exact lexical entries derived
+from the retained Increment 007 service and status vocabularies after exclusion
+of the retained Phase 1 candidate identities.
+
+```text
+RESULT_CLASSIFICATION = ENGINEERING_OBSERVATION
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+EXPLORATORY_SENTINEL_CANDIDATES = NOT_OBSERVED
+MISSING_DATA_RECLASSIFICATION = NOT_PERFORMED
+SEMANTIC_INTERPRETATION = NOT_PERFORMED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_3 = NOT_STARTED
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+```
+
+### Next Boundary
+
+```text
+NEXT_STEP = PROSPECTIVE_STAGE_A_DECISION_EVIDENCE_PROCEDURE
+```
+
+Before the first reviewer exposure to the 1,173 lexical values, the project
+will freeze how reviewer decisions and rationales are recorded and retained.
+That procedure is not defined in this checkpoint.
+
+### Stage A Generation and Reconciliation Classifications
+
+```text
+CHANGE_TYPE = PHASE_2_STAGE_A_REAL_GENERATION_AND_RECONCILIATION_DOCUMENTATION
+REAL_STAGE_A_UNIVERSE_GENERATED = YES
+REAL_STAGE_A_GENERATION_ATTEMPTS = 1
+STAGE_A_UNIVERSE_RECONCILIATION = PASSED
+STAGE_A_UNIVERSE_SHA256 = d31e3f2ee129e9f71f799d2f702b1c35dbbb4163b655c955844ee782c1330a66
+STAGE_A_UNIVERSE_ENTRY_COUNT = 1173
+SERVICE_STAGE_A_REVIEW_COUNT = 1168
+STATUS_STAGE_A_REVIEW_COUNT = 5
+AGENCY_STAGE_A_REVIEW_COUNT = 0
+STAGE_A_UNIVERSE_ENTRY_MISMATCHES = 0
+STAGE_A_UNIVERSE_SET_EXPECTED_NOT_RETAINED = 0
+STAGE_A_UNIVERSE_SET_RETAINED_NOT_EXPECTED = 0
+STAGE_A_UNIVERSE_DUPLICATE_IDENTITIES = 0
+PHASE1_EXCLUSIONS_LEAKED_INTO_STAGE_A = 0
+ENTRY_SCHEMA_MISMATCHES = 0
+QUANTITATIVE_ENTRY_FIELD_VIOLATIONS = 0
+DECISION_FIELD_VIOLATIONS = 0
+ADDITIONAL_REAL_VOCABULARY_ACCESSED_BY_COMMITTED_EXPORTER = YES
+LEXICAL_VALUES_PROGRAMMATICALLY_PROCESSED_FOR_RECONCILIATION = YES
+ADDITIONAL_REAL_VOCABULARY_INSPECTED_BY_REVIEWER = NO
+LEXICAL_VALUES_PRINTED_TO_REVIEWER = NO
+LEXICAL_VALUES_SEMANTICALLY_REVIEWED = NO
+COUNTS_VISIBLE_TO_REVIEWER = NO
+PHASE_2_STAGE_A = UNIVERSE_RECONCILED_HUMAN_REVIEW_NOT_STARTED
+PHASE_2_STAGE_A_HUMAN_REVIEW = NOT_STARTED
+PHASE_2_STAGE_B = NOT_STARTED
+PHASE_2_FINDINGS = NOT_OBSERVED
+PHASE_3 = NOT_STARTED
+NEXT_STEP = PROSPECTIVE_STAGE_A_DECISION_EVIDENCE_PROCEDURE
+PUBLIC_DESCRIPTION_DECISION = DEFERRED
+SCIENTIFIC_CONCLUSION = NOT_ESTABLISHED
+INCREMENT_008_STATUS = IN_PROGRESS
+```
+
+### Full Regression Evidence
+
+Command:
+
+```bash
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
+```
+
+Observed result:
+
+```text
+tests_run = 202
+failures = 0
+errors = 0
+result = OK
+```
+
+This is internal engineering evidence, not independent external validation.
+
 ## Current Status
 
 Increment 008 remains in progress. Phase 1 is executed, reconciled, and
 documented. The Phase 2 exploratory review contract, Stage A export test
 contract, and Stage A exporter GREEN implementation are established under
-synthetic engineering tests. The real Stage A generation manifest is frozen,
-but the command has not been executed and no real Stage A review universe has
-been generated. Stage A review, Stage B, and Phase 3 have not started; no
-Phase 2 finding exists.
+synthetic engineering tests. The real Stage A review universe was generated
+once and independently reconciled with no mismatch. Human Stage A review,
+Stage B, and Phase 3 have not started; no Phase 2 finding exists. The next
+boundary is a prospective Stage A decision-evidence procedure.
