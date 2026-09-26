@@ -166,11 +166,11 @@ PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -q
 
 ## Repository lineage and licenses
 
-The earlier independent public lineage is preserved at
-[`arnaldosepulveda/support-operations-intelligence`](https://github.com/arnaldosepulveda/support-operations-intelligence)
-for provenance. This repository contains the canonical active
-increment-based research history; the earlier lineage has independent Git
-history and is not part of this repository's ancestry.
+The earlier independent lineage is preserved privately at
+`arnaldosepulveda/support-operations-intelligence-legacy` for provenance. It
+has independent Git history and is not part of this repository's ancestry.
+This repository contains the canonical active increment-based research
+history.
 
 Source code is licensed under the [Apache License 2.0](LICENSE) unless noted
 otherwise. Documentation under `docs/` is licensed under
